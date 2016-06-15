@@ -40,12 +40,12 @@ class PengWindow(pyglet.window.Window):
         self.cameras = {}
         self.cam = None
         self.exclusive = False
-        self.layers = []
+        self.menus = {}
+        self.activeMenu = None
         self.started = False
         self.cfg = {}
-        self.thread = threading.Thread(name="Peng3d window thread",target=self.run)
-        self.thread.daemon = True
     def setup(self):
+        # This method should be called once after the config has been created and before the main loop is started
         self.cleanConfig()
         
         glClearColor(*self.cfg["clearColor"])
@@ -62,8 +62,11 @@ class PengWindow(pyglet.window.Window):
     
     def run(self):
         self.setup()
-        pyglet.app.run()
+        pyglet.app.run() # This currently just calls the basic pyglet main loop, maybe implement custom main loop for more control
     def cleanConfig(self):
+        # Various default values are set in this method, this should really be replaced with something more easy to use and robust
+        # A possible replacement could be a defaultdict or similiar
+        
         # OpenGL configs
         self.cfg["clearColor"] = self.cfg.get("clearColor",(0.,0.,0.,1.))
         self.cfg["wireframe"] = self.cfg.get("wireframe",False)
@@ -88,18 +91,38 @@ class PengWindow(pyglet.window.Window):
         return
     
     # Various methods
-    def addLayer(self,layer,z=-1):
-        if z==-1:
-            self.layers.append(layer)
-        else:
-            self.layers.insert(z,layer)
+    def changeMenu(self,menu):
+        if menu not in self.menus:
+            raise ValueError("Menu %s does not exist!"%menu)
+        elif menu == self.activeMenu:
+            return # Ignore double menu activation to prevent bugs in menu initializer
+        old = self.activeMenu
+        self.activeMenu = menu
+        if old is not None:
+            self.menus[old].on_exit()
+            self.pop_handlers()
+        self.menu.on_enter(old)
+        self.push_handlers(self.menu)
+    def addMenu(self,menu):
+        self.menus[menu.name]=menu
+        if self.activeMenu is None:
+            self.changeMenu(menu.name)
     
     # Event handlers
     def on_draw(self):
+        # This just draws the appropriate menu
         self.clear()
-        for layer in self.layers:
-            if layer.enabled:
-                layer._draw()
+        self.menu.draw()
+    
+    def on_key_press(self,symbol,modifiers):
+        return True
+    
+    # Properties/Proxies for various things
+    
+    # Proxy for self.menus[self.activeMenu]
+    @property
+    def menu(self):
+        return self.menus[self.activeMenu]
     
     # Proxy for self.cam.rotation
     @property

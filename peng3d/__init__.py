@@ -27,3 +27,4 @@
 from peng import Peng
 from window import PengWindow
 from layer import Layer,Layer2D,Layer3D
+from menu import BasicMenu,Menu

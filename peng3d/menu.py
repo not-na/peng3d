@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  layer.py
+#  menu.py
 #  
 #  Copyright 2016 notna <notna@apparat.org>
 #  
@@ -22,32 +22,31 @@
 #  
 #  
 
-__all__ = ["Layer", "Layer2D", "Layer3D"]
-
-class Layer(object):
-    def __init__(self,menu,window,peng):
+class BasicMenu(object):
+    def __init__(self,name,window,peng):
+        self.name = name
         self.window = window
-        self.menu = menu
         self.peng = peng
-        self.enabled = True
-    # Subclass overrides
     def draw(self):
-        """Override in subclasses to define functionality."""
         pass
-    def predraw(self):
-        pass
-    def postdraw(self):
-        pass
-    # End subclass overrides
-    def _draw(self):
-        self.predraw()
-        self.draw()
-        self.postdraw()
+    
+    # Event handlers
+    def on_enter(self,old):
+        pass # Custom fake event handler for entering the menu
 
-class Layer2D(Layer):
-    def predraw(self):
-        self.window.set2d()
-
-class Layer3D(Layer):
-    def predraw(self):
-        self.window.set3d()
+class Menu(BasicMenu):
+    def __init__(self,name,window,peng):
+        super(Menu,self).__init__(name,window,peng)
+        self.layers = []
+    def addLayer(self,layer,z=-1):
+        # Adds a new layer to the stack, optionally at the specified z-value
+        # The z-value is the index this layer should be inserted in, or -1 for appending
+        if z==-1:
+            self.layers.append(layer)
+        else:
+            self.layers.insert(z,layer)
+    def draw(self):
+        # Draws each layer in the given order
+        for layer in self.layers:
+            if layer.enabled:
+                layer._draw()

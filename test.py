@@ -29,8 +29,11 @@ import peng3d
 
 def main(args):
     p = peng3d.Peng()
-    threading.Thread(target=code.interact,name="REPL Thread",kwargs={"local":locals()}).start()
-    p.createWindow()
+    t = threading.Thread(target=code.interact,name="REPL Thread",kwargs={"local":locals()})
+    t.daemon = True
+    t.start()
+    p.createWindow(caption="Peng3d Test Project")
+    p.window.addMenu(peng3d.Menu("main",p.window,p))
     p.run()
     return 0
 
