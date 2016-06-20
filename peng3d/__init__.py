@@ -25,6 +25,6 @@
 # These imports are here for convenience
 
 from peng import Peng
-from window import PengWindow
+from window import *
 from layer import Layer,Layer2D,Layer3D
 from menu import BasicMenu,Menu
