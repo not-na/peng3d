@@ -21,6 +21,18 @@ import shlex
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
 
+class Mock(object):
+    def __init__(self, *args):
+        pass
+
+    def __getattr__(self, name):
+        return Mock
+    def __call__(self,*args,**kwargs):
+        return Mock
+
+for mod_name in ('pygtk', 'gtk', 'gobject', 'argparse',"pyglet"):
+    sys.modules[mod_name] = Mock()
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
