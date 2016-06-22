@@ -52,7 +52,7 @@ except:
     print "ERROR: pyglet not found"
     sys.exit(1)
 pyglet.gl = Mock()
-pyglet.gl.lib = Mock()
+pyglet.lib = Mock()
 
 # -- General configuration ------------------------------------------------
 
