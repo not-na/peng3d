@@ -95,7 +95,7 @@ class Layer3D(Layer):
     
     This class works the same as :py:class:`Layer2D()`\ , only for 3D drawing instead.
     
-    Also, the correct ``glTranslatef()`` and ``glRotatef()`` are applied to simplify drawing objects.
+    Also, the correct :py:func:`glTranslatef()` and :py:func:`glRotatef()` are applied to simplify drawing objects.
     Withing the :py:meth:`draw()` method of this class, you will only need to use world coordinates, not camera coordinates.
     This allows for easy building of Games using First-Person-Perspectives.
     """

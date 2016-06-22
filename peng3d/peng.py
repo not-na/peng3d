@@ -43,6 +43,8 @@ class Peng(object):
     
     def createWindow(self,cls=window.PengWindow,*args,**kwargs):
         """
+        createWindow(cls=window.PengWindow, *args, **kwargs)
+        
         Creates a new window using the supplied ``cls``\ .
         
         If ``cls`` is not given, :py:class:`peng3d.window.PengWindow()` will be used.
