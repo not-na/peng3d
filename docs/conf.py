@@ -45,6 +45,8 @@ sys.path.insert(0, os.path.abspath('.'))
 # import the pyglet package.
 sys.path.insert(0, os.path.abspath('..'))
 
+import pyglet
+print(pyglet)
 
 # -- General configuration ------------------------------------------------
 
