@@ -32,6 +32,9 @@ class Mock(object):
 
 sys.modules["pyglet"]=Mock()
 
+print sys.path
+print sys.modules
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
