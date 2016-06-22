@@ -29,6 +29,10 @@ class Mock(object):
         return Mock()
     def __call__(self,*args,**kwargs):
         return Mock()
+    def __getitem__(self,*args,**kwargs):
+        return Mock()
+    def __setitem__(self,*args,**kwargs):
+        pass
 
 sys.modules["pyglet"]=Mock()
 sys.modules["pyglet.gl"]=Mock()
