@@ -45,14 +45,6 @@ sys.path.insert(0, os.path.abspath('.'))
 # import the pyglet package.
 sys.path.insert(0, os.path.abspath('..'))
 
-try:
-    import pyglet
-    print "Using pyglet Version %s" % (pyglet.version)
-except:
-    print "ERROR: pyglet not found"
-    sys.exit(1)
-pyglet.gl = Mock()
-pyglet.lib = Mock()
 
 # -- General configuration ------------------------------------------------
 
