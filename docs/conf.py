@@ -26,12 +26,11 @@ class Mock(object):
         pass
 
     def __getattr__(self, name):
-        return Mock
+        return Mock()
     def __call__(self,*args,**kwargs):
-        return Mock
+        return Mock()
 
-for mod_name in ('pygtk', 'gtk', 'gobject', 'argparse',"pyglet"):
-    sys.modules[mod_name] = Mock()
+sys.modules["pyglet"]=Mock()
 
 # -- General configuration ------------------------------------------------
 
