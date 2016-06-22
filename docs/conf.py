@@ -31,6 +31,7 @@ class Mock(object):
         return Mock()
 
 sys.modules["pyglet"]=Mock()
+sys.modules["pyglet.gl"]=Mock()
 
 print sys.path
 print sys.modules
