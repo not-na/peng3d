@@ -19,7 +19,9 @@ import shlex
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('..'))
+#sys.path.insert(0, os.path.abspath('..'))
+
+# Pyglet patch
 
 class Mock(object):
     def __init__(self, *args):
@@ -33,12 +35,25 @@ class Mock(object):
         return Mock()
     def __setitem__(self,*args,**kwargs):
         pass
+    def __in__(self,*args,**kwargs):
+        pass
 
-sys.modules["pyglet"]=Mock()
-sys.modules["pyglet.gl"]=Mock()
 
-print sys.path
-print sys.modules
+# Patched extensions base path.
+sys.path.insert(0, os.path.abspath('.'))
+
+from sphinx_mod import find_all_modules, write_build, write_blacklist
+
+# import the pyglet package.
+sys.path.insert(0, os.path.abspath('..'))
+
+try:
+    import pyglet
+    print "Using pyglet Version %s" % (pyglet.version)
+except:
+    print "ERROR: pyglet not found"
+    sys.exit(1)
+#pyglet.gl = Mock()
 
 # -- General configuration ------------------------------------------------
 
