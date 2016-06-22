@@ -42,8 +42,6 @@ class Mock(object):
 # Patched extensions base path.
 sys.path.insert(0, os.path.abspath('.'))
 
-from sphinx_mod import find_all_modules, write_build, write_blacklist
-
 # import the pyglet package.
 sys.path.insert(0, os.path.abspath('..'))
 
