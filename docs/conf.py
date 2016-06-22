@@ -24,7 +24,7 @@ import shlex
 # Pyglet patch
 
 class Mock(object):
-    def __init__(self, *args):
+    def __init__(self, *args,**kwargs):
         pass
 
     def __getattr__(self, name):
@@ -52,6 +52,7 @@ except:
     print "ERROR: pyglet not found"
     sys.exit(1)
 pyglet.gl = Mock()
+pyglet.gl.lib = Mock()
 
 # -- General configuration ------------------------------------------------
 
