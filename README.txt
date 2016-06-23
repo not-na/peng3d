@@ -1,8 +1,10 @@
-#peng3d
 
-[![Documentation Status](https://readthedocs.org/projects/peng3d/badge/?version=latest)](http://peng3d.readthedocs.io/en/latest/?badge=latest)
+``peng3d`` - Python and pyglet based 3D Engine and toolkit
+==========================================================
 
-[![PyPI](https://img.shields.io/pypi/dm/peng3d.svg)](https://pypi.python.org/pypi/peng3d)
+.. image:: https://readthedocs.org/projects/peng3d/badge/?version=latest
+   :target: http://peng3d.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 peng3d is an opensource 3d graphics engine written in python and with pyglet.
 
@@ -12,12 +14,12 @@ peng3d is a set of tools and classes extending built-in pyglet and python functi
 
 You can install peng3d by cloning this project and executing ``python setup.py install``.
 
-See here for Linux:
-    
-    $ git clone https://github.com/not-na/peng3d.git
-    
-    $ cd peng3d
-    
-    $ python setup.py install
+See here for Linux::
+   
+   $ git clone https://github.com/not-na/peng3d.git
+   
+   $ cd peng3d
+   
+   $ python setup.py install
 
 More features coming soon!
