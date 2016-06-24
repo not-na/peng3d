@@ -22,6 +22,8 @@
 #  
 #  
 
+__all__ = ["VERSION","RELEASE"]
+
 VERSION = "1.0.1a1"
 """
 Full version number of format ``MAJOR.MINOR.BUGFIX(a|b|pre)SUBRELEASE`` where major is increased only on very major feature changes.

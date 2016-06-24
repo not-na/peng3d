@@ -22,7 +22,10 @@
 #  
 #  
 
-from peng3d import version
+# Distribution command:
+# sudo python setup.py install sdist bdist register upload
+
+from peng3d import version as ver
 
 from distutils.core import setup
 
@@ -36,7 +39,7 @@ if version < '2.2.3':
     DistributionMetadata.download_url = None
 
 setup(name='peng3d',
-      version=version.VERSION,
+      version=ver.VERSION,
       description="Python and pyglet based 3D Engine and toolkit", # from the github repo
       long_description=open("README.txt","r").read(),
       author="notna",
