@@ -22,6 +22,8 @@
 #  
 #  
 
+from peng3d import version
+
 from distutils.core import setup
 
 # Fix for very old python versions from https://docs.python.org/2/distutils/setupscript.html#additional-meta-data
@@ -34,7 +36,7 @@ if version < '2.2.3':
     DistributionMetadata.download_url = None
 
 setup(name='peng3d',
-      version='1.0.1',
+      version=version.VERSION,
       description="Python and pyglet based 3D Engine and toolkit", # from the github repo
       long_description=open("README.txt","r").read(),
       author="notna",
