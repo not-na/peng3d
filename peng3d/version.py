@@ -24,7 +24,7 @@
 
 __all__ = ["VERSION","RELEASE"]
 
-VERSION = "1.0.1a1"
+VERSION = "1.0.1a2"
 """
 Full version number of format ``MAJOR.MINOR.BUGFIX(a|b|pre)SUBRELEASE`` where major is increased only on very major feature changes.
 Minor is changed if a new feature is introduced or an API change is made, while bugfix only changes if an important bugfix needs to be provided before the next release.

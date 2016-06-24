@@ -38,10 +38,15 @@ if version < '2.2.3':
     DistributionMetadata.classifiers = None
     DistributionMetadata.download_url = None
 
+try:
+    longdesc = open("README.txt","r").read()
+except Exception:
+    longdesc = "Python and pyglet based 3D Engine and toolkit"
+
 setup(name='peng3d',
       version=ver.VERSION,
       description="Python and pyglet based 3D Engine and toolkit", # from the github repo
-      long_description=open("README.txt","r").read(),
+      long_description=longdesc,
       author="notna",
       author_email="notna@apparat.org",
       url="https://github.com/not-na/peng3d",
