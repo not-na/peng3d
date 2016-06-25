@@ -31,10 +31,26 @@ from pyglet.gl import *
 
 
 CFG_FOG_DEFAULT = {"enable":False}
+"""
+Default fog configuration.
+
+This configuration simply disables fog.
+"""
 
 CFG_LIGHT_DEFAULT = {"enable":False}
+"""
+Default lighting configuration.
+
+This configuration simply disables lighting.
+"""
 
 class PengWindow(pyglet.window.Window):
+    """
+    Main window class for peng3d and subclass of :py:class:`pyglet.window.Window()`\ .
+    
+    This class should not be instantiated directly, use the :py:meth:`Peng.createWindow()` method.
+    """
+    
     def __init__(self,peng,*args,**kwargs):
         super(PengWindow,self).__init__(*args,**kwargs)
         self.cameras = {}
@@ -44,10 +60,24 @@ class PengWindow(pyglet.window.Window):
         self.activeMenu = None
         self.started = False
         self.cfg = {}
+        self._setup = False
     def setup(self):
-        # This method should be called once after the config has been created and before the main loop is started
+        """
+        Sets up the OpenGL state.
+        
+        This method should be called once after the config has been created and before the main loop is started.
+        You should not need to manually call this method, as it is automatically called by :py:meth:`cleanConfig()`\ .
+        
+        Repeatedly calling this method has no effects.
+        """
+        if self._setup:
+            return
+        self._setup = True
+        
+        # Ensures that default values are supplied
         self.cleanConfig()
         
+        # Sets up basic OpenGL state
         glClearColor(*self.cfg["clearColor"])
         
         glEnable(GL_DEPTH_TEST)
@@ -61,9 +91,24 @@ class PengWindow(pyglet.window.Window):
             self.setupLight()
     
     def run(self):
+        """
+        Runs the application in the current thread.
+        
+        This method should not be called directly, especially when using multiple windows, use :py:meth:`Peng.run()` instead.
+        
+        Note that this method is blocking as rendering needs to happen in the main thread.
+        It is thus recommendable to run your game logic in another thread that should be started before calling this method.
+        """
         self.setup()
         pyglet.app.run() # This currently just calls the basic pyglet main loop, maybe implement custom main loop for more control
     def cleanConfig(self):
+        """
+        Sets default values for various config values.
+        
+        .. todo::
+           
+           Use an defaultdict or similiar instead.
+        """
         # Various default values are set in this method, this should really be replaced with something more easy to use and robust
         # A possible replacement could be a defaultdict or similiar
         
@@ -92,6 +137,13 @@ class PengWindow(pyglet.window.Window):
     
     # Various methods
     def changeMenu(self,menu):
+        """
+        Changes to the given menu.
+        
+        ``menu`` must be a valid menu name that is currently known.
+        
+        This method will also pop any old handlers and push new handlers from the menu object.
+        """
         if menu not in self.menus:
             raise ValueError("Menu %s does not exist!"%menu)
         elif menu == self.activeMenu:
@@ -104,12 +156,18 @@ class PengWindow(pyglet.window.Window):
         self.menu.on_enter(old)
         self.push_handlers(self.menu)
     def addMenu(self,menu):
+        """
+        Adds a menu to the list of menus.
+        
+        If there is no menu selected currently, this menu will automatically be made active.
+        """
         self.menus[menu.name]=menu
         if self.activeMenu is None:
             self.changeMenu(menu.name)
     
     # Event handlers
     def on_draw(self):
+        # Not documented
         # This just draws the appropriate menu
         self.clear()
         self.menu.draw()
@@ -122,11 +180,23 @@ class PengWindow(pyglet.window.Window):
     # Proxy for self.menus[self.activeMenu]
     @property
     def menu(self):
+        """
+        Property for accessing the currently active menu.
+        
+        Always equals ``self.menus[self.activeMenu]``\ .
+        
+        This property is read-only.
+        """
         return self.menus[self.activeMenu]
     
     # Proxy for self.cam.rotation
     @property
     def rotation(self):
+        """
+        Property for accessing the current rotation of the active camera.
+        
+        This property can also be written to.
+        """
         return self.cam.rotation
     @rotation.setter
     def rotation(self,value):
@@ -135,6 +205,11 @@ class PengWindow(pyglet.window.Window):
     # Proxy for self.cam.position
     @property
     def position(self):
+        """
+        Property for accessing the current position of the active camera.
+        
+        This property can also be written to.
+        """
         return self.cam.position
     @position.setter
     def position(self,value):
@@ -143,7 +218,10 @@ class PengWindow(pyglet.window.Window):
     # Utility methods
     
     def set2d(self):
-        """ Configure OpenGL to draw in 2d.
+        """
+        Configures OpenGL to draw in 2D.
+        
+        Note that wireframe mode is always disabled in 2D-Mode, but can be re-enabled by calling ``glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)``\ .
         """
         # Light
         
@@ -161,7 +239,15 @@ class PengWindow(pyglet.window.Window):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
     def set3d(self):
-        """ Configure OpenGL to draw in 3d.
+        """
+        Configures OpenGL to draw in 3D.
+        
+        This method also applies the correct rotation and translation as set in the current camera.
+        It is discouraged to use :py:func:`glTranslatef()` or :py:func:`glRotatef()` directly as this may cause visual glitches.
+        
+        If you need to configure any of the standard parameters, see the docs about :doc:`/configoption`\ .
+        
+        The :confval:`wireframe` config value can be used to enable a wireframe mode, useful for debugging visual glitches.
         """
         
         # Light

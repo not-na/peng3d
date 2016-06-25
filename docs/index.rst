@@ -14,6 +14,8 @@ Contents:
    guide/index
    
    api/peng3d
+   
+   configoption
 
 
 

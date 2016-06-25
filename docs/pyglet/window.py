@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  window.py
 #  
 #  Copyright 2016 notna <notna@apparat.org>
 #  
@@ -22,21 +22,5 @@
 #  
 #  
 
-import window
-
-class Mock(object):
-    def __init__(self, *args,**kwargs):
-        pass
-
-    def __getattr__(self, name):
-        return Mock()
-    def __call__(self,*args,**kwargs):
-        return Mock()
-    def __getitem__(self,*args,**kwargs):
-        return Mock()
-    def __setitem__(self,*args,**kwargs):
-        pass
-    def __in__(self,*args,**kwargs):
-        pass
-
-lib = Mock()
+class Window(object):
+    pass

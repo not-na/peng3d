@@ -63,6 +63,6 @@ class Peng(object):
         """
         Runs the application main loop.
         
-        This method is blocking and needs to be called from the main thread to avoid OpenGL and other bugs that can occur.
+        This method is blocking and needs to be called from the main thread to avoid OpenGL bugs that can occur.
         """
         self.window.run()

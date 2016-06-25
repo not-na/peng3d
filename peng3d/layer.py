@@ -83,6 +83,7 @@ class Layer2D(Layer):
     2D Variant of :py:class:`Layer()` and a subclass of the former.
     
     This class makes use of the :py:meth:`predraw()` method to configure OpenGL to draw 2-Dimensionally.
+    This class uses :py:meth:`PengWindow.set2d()` to set the 2D mode.
     
     When overriding the :py:meth:`predraw()` method, make sure to call the superclass.
     """
@@ -94,9 +95,10 @@ class Layer3D(Layer):
     3D Variant of :py:class:`Layer()` and a subclass of the former.
     
     This class works the same as :py:class:`Layer2D()`\ , only for 3D drawing instead.
+    This class uses :py:meth:`PengWindow.set3d()` to set the 3D mode.
     
     Also, the correct :py:func:`glTranslatef()` and :py:func:`glRotatef()` are applied to simplify drawing objects.
-    Withing the :py:meth:`draw()` method of this class, you will only need to use world coordinates, not camera coordinates.
+    When using the :py:meth:`draw()` method of this class, you will only need to use world coordinates, not camera coordinates.
     This allows for easy building of Games using First-Person-Perspectives.
     """
     def predraw(self):
