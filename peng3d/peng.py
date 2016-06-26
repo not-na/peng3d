@@ -26,7 +26,7 @@ __all__ = ["Peng"]
 
 import pyglet
 
-from . import window
+from . import window, config
 
 
 class Peng(object):
@@ -40,6 +40,8 @@ class Peng(object):
     
     def __init__(self):
         self.window = None
+        
+        self.cfg = config.Config({},defaults=config.DEFAULT_CONFIG)
     
     def createWindow(self,cls=window.PengWindow,*args,**kwargs):
         """

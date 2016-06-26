@@ -27,11 +27,14 @@ import threading
 
 import peng3d
 
+CONSOLE = False
+
 def main(args):
     p = peng3d.Peng()
-    t = threading.Thread(target=code.interact,name="REPL Thread",kwargs={"local":locals()})
-    t.daemon = True
-    t.start()
+    if CONSOLE:
+        t = threading.Thread(target=code.interact,name="REPL Thread",kwargs={"local":locals()})
+        t.daemon = True
+        t.start()
     p.createWindow(caption="Peng3d Test Project")
     p.window.addMenu(peng3d.Menu("main",p.window,p))
     p.run()

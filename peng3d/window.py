@@ -22,27 +22,15 @@
 #  
 #  
 
-__all__ = ["PengWindow","CFG_FOG_DEFAULT","CFG_LIGHT_DEFAULT"]
+__all__ = ["PengWindow"]
 
 import math
 
 import pyglet
 from pyglet.gl import *
 
+from . import config
 
-CFG_FOG_DEFAULT = {"enable":False}
-"""
-Default fog configuration.
-
-This configuration simply disables fog.
-"""
-
-CFG_LIGHT_DEFAULT = {"enable":False}
-"""
-Default lighting configuration.
-
-This configuration simply disables lighting.
-"""
 
 class PengWindow(pyglet.window.Window):
     """
@@ -59,7 +47,7 @@ class PengWindow(pyglet.window.Window):
         self.menus = {}
         self.activeMenu = None
         self.started = False
-        self.cfg = {}
+        self.cfg = config.Config({},defaults=peng.cfg)
         self._setup = False
     def setup(self):
         """
@@ -75,19 +63,19 @@ class PengWindow(pyglet.window.Window):
         self._setup = True
         
         # Ensures that default values are supplied
-        self.cleanConfig()
+        #self.cleanConfig()
         
         # Sets up basic OpenGL state
-        glClearColor(*self.cfg["clearColor"])
+        glClearColor(*self.cfg["graphics.clearColor"])
         
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_BLEND)
         
         glShadeModel(GL_SMOOTH)
         
-        if self.cfg["fogSettings"]["enable"]:
+        if self.cfg["graphics.fogSettings"]["enable"]:
             self.setupFog()
-        if self.cfg["lightSettings"]["enable"]:
+        if self.cfg["graphics.lightSettings"]["enable"]:
             self.setupLight()
     
     def run(self):
@@ -101,40 +89,41 @@ class PengWindow(pyglet.window.Window):
         """
         self.setup()
         pyglet.app.run() # This currently just calls the basic pyglet main loop, maybe implement custom main loop for more control
-    def cleanConfig(self):
-        """
+    """def cleanConfig(self):
+        ########## Reset quotation marks if uncommenting
         Sets default values for various config values.
         
         .. todo::
            
            Use an defaultdict or similiar instead.
-        """
+        ########## End quotation marks
         # Various default values are set in this method, this should really be replaced with something more easy to use and robust
         # A possible replacement could be a defaultdict or similiar
+        # Update: now replaced by :py:class:`Config()`\ .
         
         # OpenGL configs
-        self.cfg["clearColor"] = self.cfg.get("clearColor",(0.,0.,0.,1.))
-        self.cfg["wireframe"] = self.cfg.get("wireframe",False)
-        self.cfg["fieldofview"] = self.cfg.get("fieldofview",65.0)
-        self.cfg["nearclip"] = self.cfg.get("nearclip",0.1)
-        self.cfg["farclip"] = self.cfg.get("farclip",10000) # It's over 9000!
+        self.cfg["graphics.clearColor"] = self.cfg.get("graphics.clearColor",(0.,0.,0.,1.))
+        self.cfg["graphics.wireframe"] = self.cfg.get("graphics.wireframe",False)
+        self.cfg["graphics.fieldofview"] = self.cfg.get("graphics.fieldofview",65.0)
+        self.cfg["graphics.nearclip"] = self.cfg.get("graphics.nearclip",0.1)
+        self.cfg["graphics.farclip"] = self.cfg.get("graphics.farclip",10000) # It's over 9000!
         
         # OpenGL - Fog
-        self.cfg["fogSettings"] = self.cfg.get("fogSettings",CFG_FOG_DEFAULT)
-        self.cfg["fogSettings"]["enable"] = self.cfg["fogSettings"].get("enable",False)
-        if self.cfg["fogSettings"]["enable"]:
+        self.cfg["graphics.fogSettings"] = self.cfg.get("graphics.fogSettings",CFG_FOG_DEFAULT)
+        self.cfg["graphics.fogSettings"]["enable"] = self.cfg["graphics.fogSettings"].get("enable",False)
+        if self.cfg["graphics.fogSettings"]["enable"]:
             pass
         
         # OpenGL - Light
-        self.cfg["lightSettings"] = self.cfg.get("lightSettings",CFG_LIGHT_DEFAULT)
-        self.cfg["lightSettings"]["enable"] = self.cfg["lightSettings"].get("enable",False)
-        if self.cfg["lightSettings"]["enable"]:
+        self.cfg["graphics.lightSettings"] = self.cfg.get("graphics.lightSettings",CFG_LIGHT_DEFAULT)
+        self.cfg["graphics.lightSettings"]["enable"] = self.cfg["graphics.lightSettings"].get("enable",False)
+        if self.cfg["graphics.lightSettings"]["enable"]:
             pass
         
         # Other configs
         
         return
-    
+    """
     # Various methods
     def changeMenu(self,menu):
         """
@@ -247,14 +236,14 @@ class PengWindow(pyglet.window.Window):
         
         If you need to configure any of the standard parameters, see the docs about :doc:`/configoption`\ .
         
-        The :confval:`wireframe` config value can be used to enable a wireframe mode, useful for debugging visual glitches.
+        The :confval:`graphics.wireframe` config value can be used to enable a wireframe mode, useful for debugging visual glitches.
         """
         
         # Light
         
         #glEnable(GL_LIGHTING)
         
-        if self.cfg["wireframe"]:
+        if self.cfg["graphics.wireframe"]:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
         
         width, height = self.get_size()
@@ -262,7 +251,7 @@ class PengWindow(pyglet.window.Window):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(self.cfg["fieldofview"], width / float(height), self.cfg["nearclip"], self.cfg["farclip"]) # default 60
+        gluPerspective(self.cfg["graphics.fieldofview"], width / float(height), self.cfg["graphics.nearclip"], self.cfg["graphics.farclip"]) # default 60
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         x, y = self.rotation
