@@ -24,6 +24,8 @@
 
 __all__ = ["Layer", "Layer2D", "Layer3D"]
 
+import pyglet
+
 class Layer(object):
     """
     Base layer class.
@@ -98,8 +100,32 @@ class Layer3D(Layer):
     This class uses :py:meth:`PengWindow.set3d()` to set the 3D mode.
     
     Also, the correct :py:func:`glTranslatef()` and :py:func:`glRotatef()` are applied to simplify drawing objects.
-    When using the :py:meth:`draw()` method of this class, you will only need to use world coordinates, not camera coordinates.
+    When writing the :py:meth:`draw()` method of this class, you will only need to use world coordinates, not camera coordinates.
     This allows for easy building of Games using First-Person-Perspectives.
     """
     def predraw(self):
         self.window.set3d()
+
+class LayerGroup(Layer):
+    """
+    Layer variant wrapping the supplied pyglet group.
+    
+    ``group`` may only be an instance of :py:class:`pyglet.graphics.Group`\ , else a :py:exc:`TypeError` will be raised.
+    
+    Also note that both the :py:meth:`predraw() <Layer.predraw()>` and :py:meth:`postdraw() <Layer.postdraw()>` methods are overwritten by this class.
+    
+    .. seealso::
+       
+       For more information about pyglet groups, see `the pyglet docs <http://pyglet.readthedocs.io/en/latest/programming_guide/graphics.html#setting-the-opengl-state>`_\ .
+    
+    """
+    
+    def __init__(self,menu,window,peng,group):
+        super(LayerGroup,self).__init__(menu,window,peng)
+        if not isinstance(group,pyglet.graphics.Group):
+            raise TypeError("group must be an instance of pyglet.graphics.Group")
+        self.group = group
+    def predraw(self):
+        self.group.set_state()
+    def postdraw(self):
+        self.group.unset_state()
