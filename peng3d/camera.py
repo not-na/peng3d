@@ -25,23 +25,50 @@
 __all__ = ["Camera","CameraActorFollower"]
 
 class Camera(object):
+    """
+    Camera object representing a location to draw from.
+    
+    Each :py:class:`Camera` object is bound to a world and has three properties: a name, :py:attr:`pos` and :py:attr:`rot`\ .
+    
+    The name of the camera can be any string and is used to identify the camera and thus should be unique.
+    """
     def __init__(self,world,name,pos=None,rot=None):
+        if not isinstance(name,basestring):
+            raise TypeError("name must be an instance of basestring!")
         self.world = world
         self._pos = pos if pos is not None else [0,0,0]
         self._rot = rot if rot is not None else [0,0]
         self.name = name
     
     def on_activate(self,old):
+        """
+        Fake event handler called when this camera is made current by a :py:class:`WorldView()` object.
+        """
         pass
     def on_rotate(self,old,new):
+        """
+        Fake event handler called when this camera is rotated.
+        
+        The ``old`` and ``new`` parameters are both rotations and are not equal. Each parameter is a 2-tuple of ``(yaw,pitch)``\ .
+        """
         pass
     def on_move(self,old,new):
+        """
+        Fake event handler called when this camera moves.
+        
+        The ``old`` and ``new`` parameters are both 3D Locations and are not equal. Each parameter is a 3-tuple of ``(x,y,z)`` in world coordinates.
+        """
         pass
     
     # Move/Rotate methods
     
     @property
     def pos(self):
+        """
+        Property for accessing the position of the camera.
+        
+        This property uses a setter to call the :py:meth:`on_move()` method if set and the new location is not equal to the old location.
+        """
         return self._pos
     @pos.setter
     def pos(self,value):
@@ -53,6 +80,11 @@ class Camera(object):
     
     @property
     def rot(self):
+        """
+        Property for accessing the rotation of the camera.
+        
+        This property uses a setter to call the :py:meth:`on_rotate()` method if set and the new location is not equal to the old location.
+        """
         return self._rot
     @rot.setter
     def rot(self,value):
@@ -63,6 +95,11 @@ class Camera(object):
         self.on_rotate(old,value)
 
 class CameraActorFollower(Camera):
+    """
+    Special Camera that follows the specified :py:class:`Actor()`\ .
+    
+    Note that neither the :py:meth:`on_move() <Camera.on_move>` nor the :py:meth:`on_rotate() <Camera.on_rotate>` event handlers are called due to the way the updating works.
+    """
     def __init__(self,world,name,actor):
         super(CameraActorFollower,self).__init__(world,name)
         del self._pos,self._rot
@@ -70,6 +107,11 @@ class CameraActorFollower(Camera):
     
     @property
     def pos(self):
+        """
+        This property always equals the value of ``self.actor.pos``\ .
+        
+        This property may also be written to.
+        """
         return self.actor.pos
     @pos.setter
     def pos(self,value):
@@ -77,6 +119,11 @@ class CameraActorFollower(Camera):
     
     @property
     def rot(self):
+        """
+        This property always equals the value of ``self.actor.rot``\ .
+        
+        This property may also be written to.
+        """
         return self.actor.rot
     @rot.setter
     def rot(self,value):

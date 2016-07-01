@@ -28,6 +28,7 @@ import math
 
 import pyglet
 from pyglet.gl import *
+from pyglet.window import key
 
 from . import config, camera
 
@@ -48,6 +49,10 @@ class PengWindow(pyglet.window.Window):
         self.exclusive = False
         self.cfg = config.Config({},defaults=peng.cfg)
         self._setup = False
+        def on_key_press(symbol, modifiers):
+            if symbol == key.ESCAPE:
+                return pyglet.event.EVENT_HANDLED
+        self.push_handlers(on_key_press) # to stop the auto-exit on escape
     def setup(self):
         """
         Sets up the OpenGL state.
@@ -148,9 +153,9 @@ class PengWindow(pyglet.window.Window):
     def addMenu(self,menu):
         """
         Adds a menu to the list of menus.
-        
-        If there is no menu selected currently, this menu will automatically be made active.
         """
+        # If there is no menu selected currently, this menu will automatically be made active.
+        # Add the line above to the docstring if fixed
         self.menus[menu.name]=menu
         #if self.activeMenu is None:
         #    self.changeMenu(menu.name)
@@ -158,13 +163,11 @@ class PengWindow(pyglet.window.Window):
     
     # Event handlers
     def on_draw(self):
-        # Not documented
-        # This just draws the appropriate menu
+        """
+        Clears the screen and draws the currently active menu.
+        """
         self.clear()
         self.menu.draw()
-    
-    def on_key_press(self,symbol,modifiers):
-        return True
     
     # Properties/Proxies for various things
     
@@ -183,6 +186,13 @@ class PengWindow(pyglet.window.Window):
     # Utility methods
     
     def toggle_exclusivity(self,override=None):
+        """
+        Toggles mouse exclusivity via pyglet's :py:meth:`set_exclusive_mouse()` method.
+        
+        If ``override`` is given, it will be used instead.
+        
+        You may also read the current exclusivity state via :py:attr:`exclusive`\ .
+        """
         if override is not None:
             new = override
         else:
@@ -215,7 +225,7 @@ class PengWindow(pyglet.window.Window):
         """
         Configures OpenGL to draw in 3D.
         
-        This method also applies the correct rotation and translation as set in the supplied camera.
+        This method also applies the correct rotation and translation as set in the supplied camera ``cam``\ .
         It is discouraged to use :py:func:`glTranslatef()` or :py:func:`glRotatef()` directly as this may cause visual glitches.
         
         If you need to configure any of the standard parameters, see the docs about :doc:`/configoption`\ .

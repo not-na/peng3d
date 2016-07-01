@@ -89,6 +89,10 @@ DEFAULT_CONFIG = {
     "graphics.fogSettings":Config({},defaults=CFG_FOG_DEFAULT),
     "graphics.lightSettings":Config({},defaults=CFG_LIGHT_DEFAULT),
     
+    # controls.*
+    # Controls
+    "controls.mouse.sensitivity":0.15
+    
     # Other config options
 }
 """

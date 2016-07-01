@@ -27,9 +27,18 @@ __all__ = ["World","StaticWorld",
 
 from .camera import Camera
 
+import pyglet
 from pyglet.gl import *
+from pyglet.window import key
 
 class World(object):
+    """
+    World containing terrain, actors, cameras and views.
+    
+    See the docs about :py:class:`Camera()`\ , :py:class:`WorldView()`\ , :py:class:`Actor()` for more information about each class.
+    
+    This class does not draw anything, see :py:class:`StaticWorld()` for drawing simple terrain.
+    """
     def __init__(self,peng):
         self.peng = peng
         self.cameras = {}
@@ -37,23 +46,60 @@ class World(object):
         self.views = {}
     
     def addCamera(self,camera):
+        """
+        Add the camera to the internal registry.
+        
+        Each camera name must be unique, or else only the most recent version will be used. This behaviour should not be relied on because some objects may cache objects.
+        
+        Additionally, only instances of :py:class:`Camera() <peng3d.camera.Camera>` may be used, everything else raises a :py:exc:`TypeError`\ .
+        """
         if not isinstance(camera,Camera):
             raise TypeError("camera is not of type Camera!")
         self.cameras[camera.name]=camera
     def addView(self,view):
+        """
+        Adds the supplied :py:class:`WorldView()` object to the internal registry.
+        
+        The same restrictions as for cameras apply, e.g. no duplicate names.
+        
+        Additionally, only instances of :py:class:`WorldView()` may be used, everything else raises a :py:exc:`TypeError`\ .
+        """
         if not isinstance(view,WorldView):
             raise TypeError("view is not of type WorldView!")
         self.views[view.name]=view
     
     def getView(self,name):
+        """
+        Returns the view with name ``name``\ .
+        
+        Raises a :py:exc:`ValueError` if the view does not exist.
+        """
         if name not in self.views:
             raise ValueError("Unknown world view")
         return self.views[name]
     
     def render3d(self,view=None):
+        """
+        Renders the world in 3d-mode.
+        
+        If you want to render custom terrain, you may override this method. Be careful that you still call the original method or else actors may not be rendered.
+        """
         pass
 
 class StaticWorld(World):
+    """
+    Subclass of :py:class:`StaticWorld()`\ , allows for semi-static terrain to be rendered.
+    
+    This class is not suitable for highly complex or user-modifiable terrain.
+    
+    ``quads`` is a list of 3d vertices, e.g. a single quad may be ``[-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]``\ , which represents a rectangle of size 2x2 centered around 0,0.
+    It should also be noted that all quads have to be in a single list.
+    
+    ``colors`` is a list of RGB Colors in a similiar format to ``quads`` but with colors instead. Note that there must be a color for every vertex in the vertice list.
+    Every color is an integer between 0 and 255 using the internal pyglet scheme ``c3B/static``\ .
+    
+    You can modify the terrain via the ``terrain`` attribute, note that it is a pyglet vertex list, and not a python list.
+    """
     def __init__(self,peng,quads,colors):
         super(StaticWorld,self).__init__(peng)
         self.batch3d = pyglet.graphics.Batch()
@@ -62,15 +108,32 @@ class StaticWorld(World):
             ("c3B/static",colors),
             )
     def render3d(self,view=None):
+        """
+        Renders the world.
+        """
+        super(StaticWorld,self).render3d(view)
         self.batch3d.draw()
 
 class WorldView(object):
+    """
+    Object representing a view on the world.
+    
+    A :py:class:`WorldView()` object references a camera and has a name.
+    
+    ``cam`` is a valid camera name known to the world object supplied.
+    """
     def __init__(self,world,name,cam):
         self.world = world
         self.name = name
         self.activeCamera = cam
+        self.cam.on_activate(None)
     
     def setActiveCamera(self,name):
+        """
+        Sets the active camera.
+        
+        This method also calls the :py:meth:`Camera.on_activate() <peng3d.camera.Camera.on_activate>` event handler if the camera is not already active.
+        """
         if name == self.activeCamera:
             return # Cam is already active
         if name not in self.world.cameras:
@@ -82,8 +145,14 @@ class WorldView(object):
     # Event handlers
     
     def on_menu_enter(self,old):
+        """
+        Fake event handler called by :py:meth:`Layer.on_menu_enter() <peng3d.layer.Layer.on_menu_enter>` when the containing menu is entered.
+        """
         self.world.peng.window.push_handlers(self)
     def on_menu_exit(self,new):
+        """
+        Fake event handler, same as :py:meth:`on_menu_enter()` but for exiting menus instead.
+        """
         self.world.peng.window.pop_handlers()
     
     # Proxy for self.cameras[self.activeCamera]
@@ -92,7 +161,7 @@ class WorldView(object):
         """
         Property for getting the currently active camera.
         
-        Equals ``self.cameras[self.activeCamera]``\ .
+        Always equals ``self.cameras[self.activeCamera]``\ .
         """
         return self.world.cameras[self.activeCamera]
     
@@ -117,7 +186,7 @@ class WorldView(object):
         """
         Property for accessing the current position of the active camera.
         
-        The value of this property always will be a list of length 3.
+        The value of this property will always be a list of length 3.
         
         This property can also be written to.
         """
@@ -131,18 +200,43 @@ class WorldView(object):
         self.world.cameras[self.activeCamera].pos = list(value)
 
 class WorldViewMouseRotatable(WorldView):
+    """
+    Subclass of :py:class:`WorldView()` that is rotatable using the user.
+    
+    Moving the mouse cursor left or right will rotate the attached camera horizontally and moving the mouse cursor up or down will rotate the camera vertically.
+    
+    By default, each pixel travelled changes the angle in degrees by 0.15, though this can be changed via the :confval:`controls.mouse.sensitivity` config value.
+    """
     def on_menu_enter(self,old):
+        """
+        Fake event handler, same as :py:meth:`WorldView.on_menu_enter()` but forces mouse exclusivity.
+        """
         super(WorldViewMouseRotatable,self).on_menu_enter(old)
         self.world.peng.window.toggle_exclusivity(True)
     def on_menu_exit(self,new):
+        """
+        Fake event handler, same as :py:meth:`WorldView.on_menu_exit()` but force-disables mouse exclusivity.
+        """
         super(WorldViewMouseRotatable,self).on_menu_exit(new)
         self.world.peng.window.toggle_exclusivity(False)
     def on_key_press(self,symbol,modifiers):
-        self.world.peng.window.toggle_exclusivity()
+        """
+        Keyboard event handler handling only the escape key.
+        
+        If an escape key press is detected, mouse exclusivity is toggled via :py:meth:`PengWindow.toggle_exclusivity()`\ .
+        """
+        if symbol == key.ESCAPE:
+            self.world.peng.window.toggle_exclusivity()
+            return pyglet.event.EVENT_HANDLED
     def on_mouse_motion(self, x, y, dx, dy):
+        """
+        Handles mouse motion and rotates the attached camera accordingly.
+        
+        For more information about how to customize mouse movement, see the class documentation here :py:class:`WorldViewMouseRotatable()`\ .
+        """
         if not self.world.peng.window.exclusive:
             return
-        m = 0.15
+        m = self.world.peng.cfg["controls.mouse.sensitivity"]
         x, y = self.rot
         x, y = x + dx * m, y + dy * m
         y = max(-90, min(90, y))
@@ -150,4 +244,7 @@ class WorldViewMouseRotatable(WorldView):
         newrot = (x,y)
         self.rot= newrot
     def on_mouse_drag(self,x,y,dx,dy,buttons,modifiers):
+        """
+        Handler used to still enable mouse movement while a button is pressed.
+        """
         self.on_mouse_motion(x,y,dx,dy)

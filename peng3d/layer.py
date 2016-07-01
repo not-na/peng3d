@@ -155,22 +155,46 @@ class LayerGroup(Layer):
         self.group.unset_state()
 
 class LayerWorld(Layer3D):
+    """
+    Subclass of :py:class:`Layer3D()` implementing a 3D Layer showing a specific :py:class:`WorldView`\ .
+    
+    All arguments passed to the constructor should be self-explanatory.
+    
+    Note that you may not set any of the attributes directly, or crashes and bugs may appear indirectly within a certain timeframe.
+    """
     def __init__(self,menu,window,peng,world,viewname):
         super(LayerWorld,self).__init__(menu,window,peng,world.getView(viewname).cam)
         self.world = world
         self.viewname = viewname
         self.view = self.world.getView(self.viewname)
     def setView(self,name):
+        """
+        Sets the view used to the specified ``name``\ .
+        
+        The name must be known to the world or else a :py:exc:`ValueError` is raised.
+        """
         if name not in self.world.views:
             raise ValueError("Invalid viewname for world!")
         self.viewname = viewname
         self.view = self.world.getView(self.viewname)
     def predraw(self):
+        """
+        Sets up the attributes used by :py:class:`Layer3D()` and calls :py:meth:`Layer3D.predraw()`\ .
+        """
         self.cam = self.view.cam
         super(LayerWorld,self).predraw()
     def draw(self):
-        self.world.render3d(self.cam)
+        """
+        Draws the view using the :py:meth:`World.render3d()` method.
+        """
+        self.world.render3d(self.view)
     def on_menu_enter(self,old):
+        """
+        Passes the event through to the WorldView to allow for custom behaviour.
+        """
         return self.view.on_menu_enter(old)
     def on_menu_exit(self,new):
+        """
+        Same as :py:meth:`on_menu_enter()`\ .
+        """
         return self.view.on_menu_exit(new)

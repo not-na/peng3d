@@ -24,3 +24,6 @@
 
 class Window(object):
     pass
+
+class key(object):
+    pass
