@@ -22,9 +22,11 @@
 #  
 #  
 
-__all__ = ["Layer", "Layer2D", "Layer3D"]
+__all__ = ["Layer", "Layer2D", "Layer3D","LayerGroup","LayerWorld"]
 
 import pyglet
+
+from . import camera
 
 class Layer(object):
     """
@@ -69,6 +71,23 @@ class Layer(object):
         pass
     # End subclass overrides
     
+    # Event handlers
+    
+    def on_menu_enter(self,old):
+        """
+        Custom fake event handler called by :py:meth:`Menu.on_enter()` for every layer.
+        
+        Useful for adding and removing event handlers per layer.
+        """
+        pass
+    def on_menu_exit(self,new):
+        """
+        Custom fake event handler called by :py:meth:`Menu.on_exit()` for every layer.
+        
+        Useful for adding and removing event handlers per layer.
+        """
+        pass
+    
     def _draw(self):
         if not self.enabled:
             return
@@ -103,8 +122,13 @@ class Layer3D(Layer):
     When writing the :py:meth:`draw()` method of this class, you will only need to use world coordinates, not camera coordinates.
     This allows for easy building of Games using First-Person-Perspectives.
     """
+    def __init__(self,menu,window,peng,cam):
+        super(Layer3D,self).__init__(menu,window,peng)
+        if not isinstance(cam,camera.Camera):
+            raise TypeError("cam must be of type Camera!")
+        self.cam = cam
     def predraw(self):
-        self.window.set3d()
+        self.window.set3d(self.cam)
 
 class LayerGroup(Layer):
     """
@@ -129,3 +153,24 @@ class LayerGroup(Layer):
         self.group.set_state()
     def postdraw(self):
         self.group.unset_state()
+
+class LayerWorld(Layer3D):
+    def __init__(self,menu,window,peng,world,viewname):
+        super(LayerWorld,self).__init__(menu,window,peng,world.getView(viewname).cam)
+        self.world = world
+        self.viewname = viewname
+        self.view = self.world.getView(self.viewname)
+    def setView(self,name):
+        if name not in self.world.views:
+            raise ValueError("Invalid viewname for world!")
+        self.viewname = viewname
+        self.view = self.world.getView(self.viewname)
+    def predraw(self):
+        self.cam = self.view.cam
+        super(LayerWorld,self).predraw()
+    def draw(self):
+        self.world.render3d(self.cam)
+    def on_menu_enter(self,old):
+        return self.view.on_menu_enter(old)
+    def on_menu_exit(self,new):
+        return self.view.on_menu_exit(new)

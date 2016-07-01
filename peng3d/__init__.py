@@ -24,7 +24,11 @@
 
 # These imports are here for convenience
 
-from peng import Peng
+from peng import *
 from window import *
-from layer import Layer,Layer2D,Layer3D
-from menu import BasicMenu,Menu
+from layer import *
+from menu import *
+from camera import *
+from config import *
+from version import *
+from world import *

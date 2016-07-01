@@ -29,6 +29,10 @@ import peng3d
 
 CONSOLE = False
 
+TERRAIN = [-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]
+
+COLORS  = [255,0,0, 0,255,0, 0,0,255, 255,255,255]
+
 def main(args):
     p = peng3d.Peng()
     if CONSOLE:
@@ -37,6 +41,19 @@ def main(args):
         t.start()
     p.createWindow(caption="Peng3d Test Project")
     p.window.addMenu(peng3d.Menu("main",p.window,p))
+    # Creates world/cam/view
+    w = peng3d.StaticWorld(p,TERRAIN,COLORS)
+    c = peng3d.Camera(w,"cam1",[0,0,0])
+    w.addCamera(c)
+    v = peng3d.WorldViewMouseRotatable(w,"view1","cam1")
+    w.addView(v)
+    # Creates menu/layer
+    m = peng3d.Menu("main",p.window,p)
+    p.window.addMenu(m)
+    l = peng3d.LayerWorld(m,p.window,p,w,"view1")
+    m.addLayer(l)
+    p.window.changeMenu("main")
+    # Done!
     p.run()
     return 0
 

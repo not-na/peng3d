@@ -22,6 +22,8 @@
 #  
 #  
 
+__all__ = ["BasicMenu","Menu"]
+
 from .layer import Layer
 
 class BasicMenu(object):
@@ -51,11 +53,18 @@ class BasicMenu(object):
     # Event handlers
     def on_enter(self,old):
         """
-        This fake event handler will be called everytime this menu is entered via the :py:meth:`PengWindow.changeMenu()`\ .
+        This fake event handler will be called everytime this menu is entered via the :py:meth:`PengWindow.changeMenu()` method.
         
         This handler will not be called if this menu is already active.
         """
         pass # Custom fake event handler for entering the menu
+    def on_exit(self,new):
+        """
+        This fake event handler will be called everytime this menu is exited via the :py:meth:`PengWindow.changeMenu()` method.
+        
+        This handler will not be called if this menu is the same as the new menu.
+        """
+        pass # Custom fake event handler for leaving the menu
 
 class Menu(BasicMenu):
     """
@@ -93,3 +102,17 @@ class Menu(BasicMenu):
         for layer in self.layers:
             if layer.enabled:
                 layer._draw()
+    
+    def on_enter(self,old):
+        """
+        Same as :py:meth:`BasicMenu.on_enter()`\ , but also calls :py:meth:`Layer.on_menu_enter()` on every layer.
+        """
+        for layer in self.layers:
+            layer.on_menu_enter(old)
+    def on_exit(self,new):
+        """
+        Same as :py:meth:`BasicMenu.on_exit()`\ , but also calls :py:meth:`Layer.on_menu_exit()` on every layer.
+        """
+        for layer in self.layers:
+            layer.on_menu_exit(new)
+    

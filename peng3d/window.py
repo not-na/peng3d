@@ -29,7 +29,7 @@ import math
 import pyglet
 from pyglet.gl import *
 
-from . import config
+from . import config, camera
 
 
 class PengWindow(pyglet.window.Window):
@@ -41,12 +41,11 @@ class PengWindow(pyglet.window.Window):
     
     def __init__(self,peng,*args,**kwargs):
         super(PengWindow,self).__init__(*args,**kwargs)
-        self.cameras = {}
-        self.cam = None
         self.exclusive = False
         self.menus = {}
         self.activeMenu = None
         self.started = False
+        self.exclusive = False
         self.cfg = config.Config({},defaults=peng.cfg)
         self._setup = False
     def setup(self):
@@ -131,7 +130,9 @@ class PengWindow(pyglet.window.Window):
         
         ``menu`` must be a valid menu name that is currently known.
         
-        This method will also pop any old handlers and push new handlers from the menu object.
+        .. versionchanged:: 1.2a1
+           
+           The push/pop handlers have been deprecated in favor of the new :py:meth:`Menu.on_enter() <peng3d.menu.Menu.on_enter>`\ , :py:meth:`Menu.on_exit() <peng3d.menu.Menu.on_exit>`\ , etc. events.
         """
         if menu not in self.menus:
             raise ValueError("Menu %s does not exist!"%menu)
@@ -140,10 +141,10 @@ class PengWindow(pyglet.window.Window):
         old = self.activeMenu
         self.activeMenu = menu
         if old is not None:
-            self.menus[old].on_exit()
-            self.pop_handlers()
+            self.menus[old].on_exit(menu)
+            #self.pop_handlers()
         self.menu.on_enter(old)
-        self.push_handlers(self.menu)
+        #self.push_handlers(self.menu)
     def addMenu(self,menu):
         """
         Adds a menu to the list of menus.
@@ -151,8 +152,9 @@ class PengWindow(pyglet.window.Window):
         If there is no menu selected currently, this menu will automatically be made active.
         """
         self.menus[menu.name]=menu
-        if self.activeMenu is None:
-            self.changeMenu(menu.name)
+        #if self.activeMenu is None:
+        #    self.changeMenu(menu.name)
+        # currently disabled because of a bug with adding layers
     
     # Event handlers
     def on_draw(self):
@@ -178,33 +180,15 @@ class PengWindow(pyglet.window.Window):
         """
         return self.menus[self.activeMenu]
     
-    # Proxy for self.cam.rotation
-    @property
-    def rotation(self):
-        """
-        Property for accessing the current rotation of the active camera.
-        
-        This property can also be written to.
-        """
-        return self.cam.rotation
-    @rotation.setter
-    def rotation(self,value):
-        self.cam.rotation = value
-    
-    # Proxy for self.cam.position
-    @property
-    def position(self):
-        """
-        Property for accessing the current position of the active camera.
-        
-        This property can also be written to.
-        """
-        return self.cam.position
-    @position.setter
-    def position(self,value):
-        self.cam.position = value
-    
     # Utility methods
+    
+    def toggle_exclusivity(self,override=None):
+        if override is not None:
+            new = override
+        else:
+            new = not self.exclusive
+        self.exclusive = new
+        self.set_exclusive_mouse(self.exclusive)
     
     def set2d(self):
         """
@@ -227,17 +211,19 @@ class PengWindow(pyglet.window.Window):
         glOrtho(0, width, 0, height, -1, 1)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-    def set3d(self):
+    def set3d(self,cam):
         """
         Configures OpenGL to draw in 3D.
         
-        This method also applies the correct rotation and translation as set in the current camera.
+        This method also applies the correct rotation and translation as set in the supplied camera.
         It is discouraged to use :py:func:`glTranslatef()` or :py:func:`glRotatef()` directly as this may cause visual glitches.
         
         If you need to configure any of the standard parameters, see the docs about :doc:`/configoption`\ .
         
         The :confval:`graphics.wireframe` config value can be used to enable a wireframe mode, useful for debugging visual glitches.
         """
+        if not isinstance(cam,camera.Camera):
+            raise TypeError("cam is not of type Camera!")
         
         # Light
         
@@ -254,8 +240,8 @@ class PengWindow(pyglet.window.Window):
         gluPerspective(self.cfg["graphics.fieldofview"], width / float(height), self.cfg["graphics.nearclip"], self.cfg["graphics.farclip"]) # default 60
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        x, y = self.rotation
+        x, y = cam.rot
         glRotatef(x, 0, 1, 0)
         glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
-        x, y, z = self.position
+        x, y, z = cam.pos
         glTranslatef(-x, -y, -z)
