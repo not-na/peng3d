@@ -26,7 +26,7 @@ __all__ = ["Peng"]
 
 import pyglet
 
-from . import window, config
+from . import window, config, keybind
 
 
 class Peng(object):
@@ -41,7 +41,11 @@ class Peng(object):
     def __init__(self):
         self.window = None
         
+        self.eventHandlers = {}
+        
         self.cfg = config.Config({},defaults=config.DEFAULT_CONFIG)
+        self.keybinds = keybind.KeybindHandler(self)
+        
     
     def createWindow(self,cls=window.PengWindow,*args,**kwargs):
         """
@@ -68,3 +72,17 @@ class Peng(object):
         This method is blocking and needs to be called from the main thread to avoid OpenGL bugs that can occur.
         """
         self.window.run()
+    
+    def handleEvent(self,event_type,args,window=None):
+        args = list(args)
+        #if window is not None:
+        #    args.append(window)
+        if event_type not in ["on_draw","on_mouse_motion"] and self.cfg["debug.events.dump"]:
+            print("Event %s with args %s"%(event_type,args))
+        if event_type in self.eventHandlers:
+            for handler in self.eventHandlers[event_type]:
+                handler(*args)
+    def registerEventHandler(self,event_type,handler):
+        if event_type not in self.eventHandlers:
+            self.eventHandlers[event_type]=[]
+        self.eventHandlers[event_type].append(handler)

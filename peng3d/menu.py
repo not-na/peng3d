@@ -42,6 +42,10 @@ class BasicMenu(object):
         self.name = name
         self.window = window
         self.peng = peng
+        
+        self.eventHandlers = {}
+        
+        self.worlds = []
     def draw(self):
         """
         This method is called if it is time to render the menu.
@@ -50,7 +54,21 @@ class BasicMenu(object):
         """
         pass
     
+    def addWorld(self,world):
+        self.worlds.append(world)
+    
     # Event handlers
+    def handleEvent(self,event_type,args):
+        if event_type in self.eventHandlers:
+            for handler in self.eventHandlers[event_type]:
+                handler(*args)
+        for world in self.worlds:
+            world.handle_event(event_type,args,self.window)
+    def registerEventHandler(self,event_type,handler):
+        if event_type not in self.eventHandlers:
+            self.eventHandlers[event_type]=[]
+        self.eventHandlers[event_type].append(handler)
+    
     def on_enter(self,old):
         """
         This fake event handler will be called everytime this menu is entered via the :py:meth:`PengWindow.changeMenu()` method.

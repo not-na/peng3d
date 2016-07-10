@@ -25,6 +25,8 @@
 import code
 import threading
 
+from pyglet.window import key
+
 import peng3d
 
 CONSOLE = False
@@ -41,14 +43,23 @@ def main(args):
         t.start()
     p.createWindow(caption="Peng3d Test Project")
     p.window.addMenu(peng3d.Menu("main",p.window,p))
+    p.window.toggle_exclusivity()
+    def esc_toggle(symbol,modifiers):
+        if symbol == key.ESCAPE:
+            p.window.toggle_exclusivity()
+            a.active = p.window.exclusive
+    p.window.registerEventHandler("on_key_press",esc_toggle)
     # Creates world/cam/view
     w = peng3d.StaticWorld(p,TERRAIN,COLORS)
-    c = peng3d.Camera(w,"cam1",[0,0,0])
+    a = peng3d.actor.player.FirstPersonPlayer(p,w)
+    w.addActor(a)
+    c = peng3d.CameraActorFollower(w,"cam1",a)
     w.addCamera(c)
-    v = peng3d.WorldViewMouseRotatable(w,"view1","cam1")
+    v = peng3d.WorldView(w,"view1","cam1")
     w.addView(v)
     # Creates menu/layer
     m = peng3d.Menu("main",p.window,p)
+    m.addWorld(w)
     p.window.addMenu(m)
     l = peng3d.LayerWorld(m,p.window,p,w,"view1")
     m.addLayer(l)

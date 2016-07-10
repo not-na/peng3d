@@ -51,7 +51,7 @@ setup(name='peng3d',
       author_email="notna@apparat.org",
       url="https://github.com/not-na/peng3d",
       packages=['peng3d'],
-      requires=["pyglet"],
+      requires=["pyglet","bidict"],
       provides=["peng3d"],
       classifiers=[
         "Development Status :: 4 - Beta",

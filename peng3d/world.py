@@ -44,6 +44,9 @@ class World(object):
         self.cameras = {}
         self.actors = {}
         self.views = {}
+        
+        self.eventHandlers = {}
+        self.recvEvents = True
     
     def addCamera(self,camera):
         """
@@ -67,6 +70,8 @@ class World(object):
         if not isinstance(view,WorldView):
             raise TypeError("view is not of type WorldView!")
         self.views[view.name]=view
+    def addActor(self,actor):
+        self.actors[actor.uuid]=actor
     
     def getView(self,name):
         """
@@ -85,6 +90,21 @@ class World(object):
         If you want to render custom terrain, you may override this method. Be careful that you still call the original method or else actors may not be rendered.
         """
         pass
+    
+    # Event Handlers
+    def handle_event(self,event_type,args,window=None):
+        if not self.recvEvents:
+            return
+        args = list(args)
+        #if window is not None:
+        #    args.append(window)
+        if event_type in self.eventHandlers:
+            for handler in self.eventHandlers[event_type]:
+                handler(*args)
+    def registerEventHandler(self,event_type,handler):
+        if event_type not in self.eventHandlers:
+            self.eventHandlers[event_type]=[]
+        self.eventHandlers[event_type].append(handler)
 
 class StaticWorld(World):
     """

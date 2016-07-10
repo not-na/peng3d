@@ -25,6 +25,7 @@
 __all__ = ["PengWindow"]
 
 import math
+import traceback
 
 import pyglet
 from pyglet.gl import *
@@ -42,12 +43,18 @@ class PengWindow(pyglet.window.Window):
     
     def __init__(self,peng,*args,**kwargs):
         super(PengWindow,self).__init__(*args,**kwargs)
+        self.peng = peng
+        
         self.exclusive = False
-        self.menus = {}
-        self.activeMenu = None
         self.started = False
         self.exclusive = False
+        
+        self.menus = {}
+        self.activeMenu = None
+        
         self.cfg = config.Config({},defaults=peng.cfg)
+        self.eventHandlers = {}
+        
         self._setup = False
         def on_key_press(symbol, modifiers):
             if symbol == key.ESCAPE:
@@ -168,6 +175,30 @@ class PengWindow(pyglet.window.Window):
         """
         self.clear()
         self.menu.draw()
+    
+    def dispatch_event(self,event_type,*args):
+        super(PengWindow,self).dispatch_event(event_type,*args)
+        try:
+            self.peng.handleEvent(event_type,args,self)
+            self.handleEvent(event_type,args)
+            self.menu.handleEvent(event_type,args)
+        except AttributeError:
+            # To prevent early startup errors
+            if hasattr(self,"peng") and self.peng.cfg["debug.events.logerr"]:
+                print("Error:")
+                traceback.print_exc()
+    
+    def handleEvent(self,event_type,args,window=None):
+        args = list(args)
+        #if window is not None:
+        #    args.append(window)
+        if event_type in self.eventHandlers:
+            for handler in self.eventHandlers[event_type]:
+                handler(*args)
+    def registerEventHandler(self,event_type,handler):
+        if event_type not in self.eventHandlers:
+            self.eventHandlers[event_type]=[]
+        self.eventHandlers[event_type].append(handler)
     
     # Properties/Proxies for various things
     

@@ -2,6 +2,7 @@
 
 MANIFEST
 docs/_build
+docs/sudo
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

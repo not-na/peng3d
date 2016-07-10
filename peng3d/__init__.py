@@ -32,3 +32,5 @@ from camera import *
 from config import *
 from version import *
 from world import *
+import actor.player
+from actor import *
