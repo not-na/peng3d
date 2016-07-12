@@ -25,5 +25,8 @@
 class Window(object):
     pass
 
-class key(object):
-    pass
+class _key(object):
+    def __getattr__(self,key):
+        return "<value for key %s>"%key
+
+key = _key()
