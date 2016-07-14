@@ -83,6 +83,8 @@ class Peng(object):
             for handler in self.eventHandlers[event_type]:
                 handler(*args)
     def registerEventHandler(self,event_type,handler):
+        if self.cfg["debug.events.register"]:
+            print("Registered Event: %s Handler: %s"%(event_type,handler))
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
         self.eventHandlers[event_type].append(handler)

@@ -106,6 +106,8 @@ DEFAULT_CONFIG = {
     # debug.*
     # Debug config
     "debug.events.dump":False,
+    "debug.events.logerr":False,
+    "debug.events.register":False,
     
     # Other config options
 }

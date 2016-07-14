@@ -26,21 +26,44 @@ __all__ = ["Actor","RotatableActor"]
 
 import uuid as uuidm
 
+class Controller(object):
+    def __init__(self,actor):
+        self.world = actor.world
+        self.peng = actor.world.peng
+        self.actor = actor
+        self._enabled = True
+        self.registerEventHandlers()
+    def registerEventHandlers(self):
+        pass
+    
+    @property
+    def enabled(self):
+        return self._enabled and self.actor.controlleroptions["enabled"]
+    @enabled.setter
+    def enabled(self,value):
+        assert isinstance(value,bool)
+        self._enabled = value
+
 class Actor(object):
-    def __init__(self,peng,world,uuid,pos=[0,0,0]):
+    def __init__(self,peng,world,uuid=None,pos=[0,0,0]):
         self.peng = peng
         self.world = world
         self.uuid = uuid if uuid is not None else uuidm.uuid4()
+        self.controllers = []
+        self.controlleroptions = {
+            "enabled":True
+            }
         
         self._pos = pos
     
-    # Event handlers
+    def addController(self,controller):
+        self.controllers = controller
     
+    # Event handlers
     def on_move(self,old):
         pass
     
     # Properties
-    
     @property
     def pos(self):
         return self._pos
@@ -69,12 +92,10 @@ class RotatableActor(Actor):
         return dx,dy,dz
     
     # Event handlers
-    
     def on_rotate(self,old):
         pass
     
     # Properties
-    
     @property
     def rot(self):
         return self._rot

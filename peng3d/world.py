@@ -94,6 +94,8 @@ class World(object):
     # Event Handlers
     def handle_event(self,event_type,args,window=None):
         if not self.recvEvents:
+            if self.peng.cfg["debug.events.dump"]:
+                print("World skyps event type %s"%event_type)
             return
         args = list(args)
         #if window is not None:
@@ -102,6 +104,8 @@ class World(object):
             for handler in self.eventHandlers[event_type]:
                 handler(*args)
     def registerEventHandler(self,event_type,handler):
+        if self.peng.cfg["debug.events.register"]:
+            print("Registered Event: %s Handler: %s"%(event_type,handler))
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
         self.eventHandlers[event_type].append(handler)

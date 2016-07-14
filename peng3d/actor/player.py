@@ -28,7 +28,94 @@ import math
 
 import pyglet
 
-from . import Actor,RotatableActor
+from . import Actor,RotatableActor,Controller
+
+class FourDirectionalMoveController(Controller):
+    def __init__(self,*args,**kwargs):
+        super(FourDirectionalMoveController,self).__init__(*args,**kwargs)
+        self.move = [0,0]
+        self.movespeed = self.peng.cfg["controls.controls.movespeed"]
+    def registerEventHandlers(self):
+        # Forward
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward",self.on_fwd_down)
+        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward.release",self.on_fwd_up)
+        # Backward
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.backward"],"peng3d:actor.player.controls.backward",self.on_bwd_down)
+        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.backward"],"peng3d:actor.player.controls.backward.release",self.on_bwd_up)
+        # Strafe Left
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.strafeleft"],"peng3d:actor.player.controls.strafeleft",self.on_left_down)
+        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.strafeleft"],"peng3d:actor.player.controls.strafeleft.release",self.on_left_up)
+        # Strafe Right
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.straferight"],"peng3d:actor.player.controls.straferight",self.on_right_down)
+        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.straferight"],"peng3d:actor.player.controls.straferight.release",self.on_right_up)
+        pyglet.clock.schedule_interval(self.update,1.0/60)
+    def update(self,dt):
+        if not self.enabled:
+            return
+        speed = self.movespeed
+        d = dt * speed # distance covered this tick.
+        dx, dy, dz = self.get_motion_vector()
+        # New position in space, before accounting for gravity.
+        dx, dy, dz = dx * d, dy * d, dz * d
+        #dy+=self.vert*VERT_SPEED
+        x,y,z = self.actor._pos
+        newpos = dx+x, dy+y, dz+z
+        self.actor.pos = newpos
+    def get_motion_vector(self):
+        if any(self.move):
+            x, y = self.actor._rot
+            strafe = math.degrees(math.atan2(*self.move))
+            y_angle = math.radians(y)
+            x_angle = math.radians(x + strafe)
+            dy = 0.0
+            dx = math.cos(x_angle)
+            dz = math.sin(x_angle)
+        else:
+            dy = 0.0
+            dx = 0.0
+            dz = 0.0
+        return (dx, dy, dz)
+    
+    # Event Handlers
+    def on_fwd_down(self,symbol,modifiers):
+        self.move[0]-=1
+    def on_fwd_up(self,symbol,modifiers):
+        self.move[0]+=1
+    def on_bwd_down(self,symbol,modifiers):
+        self.move[0]+=1
+    def on_bwd_up(self,symbol,modifiers):
+        self.move[0]-=1
+    
+    def on_left_down(self,symbol,modifiers):
+        self.move[1]-=1
+    def on_left_up(self,symbol,modifiers):
+        self.move[1]+=1
+    def on_right_down(self,symbol,modifiers):
+        self.move[1]+=1
+    def on_right_up(self,symbol,modifiers):
+        self.move[1]-=1
+
+class EgoMouseRotationalController(Controller):
+    def __init__(self,*args,**kwargs):
+        super(EgoMouseRotationalController,self).__init__(*args,**kwargs)
+    def registerEventHandlers(self):
+        self.world.registerEventHandler("on_mouse_motion",self.on_mouse_motion)
+        self.world.registerEventHandler("on_mouse_drag",self.on_mouse_drag)
+    def on_mouse_motion(self, x, y, dx, dy):
+        if self.enabled:
+            m = 0.15
+            x, y = self.actor._rot
+            x, y = x + dx * m, y + dy * m
+            y = max(-90, min(90, y))
+            x %= 360
+            newrot = (x,y)
+            self.actor.rot = newrot
+    def on_mouse_drag(self,x,y,dx,dy,buttons,modifiers):
+        """
+        Handler used to still enable mouse movement while a button is pressed.
+        """
+        self.on_mouse_motion(x,y,dx,dy)
+
 
 class BasicPlayer(RotatableActor):
     def __init__(self,peng,world,uuid=None,pos=[0,0,0],rot=[0,0]):
@@ -36,6 +123,9 @@ class BasicPlayer(RotatableActor):
         self.uuid = uuid
 
 class FirstPersonPlayer(BasicPlayer):
+    """
+    :deprecated:
+    """
     def __init__(self,peng,world,uuid=None,pos=[0,0,0],rot=[0,0]):
         super(FirstPersonPlayer,self).__init__(peng,world,uuid,pos,rot)
         self.move = [0,0]
@@ -89,6 +179,7 @@ class FirstPersonPlayer(BasicPlayer):
         self.move[0]-=1
     def on_fwd_up(self,symbol,modifiers):
         self.move[0]+=1
+    
     def on_bwd_down(self,symbol,modifiers):
         self.move[0]+=1
     def on_bwd_up(self,symbol,modifiers):
@@ -98,6 +189,7 @@ class FirstPersonPlayer(BasicPlayer):
         self.move[1]-=1
     def on_left_up(self,symbol,modifiers):
         self.move[1]+=1
+    
     def on_right_down(self,symbol,modifiers):
         self.move[1]+=1
     def on_right_up(self,symbol,modifiers):

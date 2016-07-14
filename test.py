@@ -36,36 +36,39 @@ TERRAIN = [-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]
 COLORS  = [255,0,0, 0,255,0, 0,0,255, 255,255,255]
 
 def main(args):
-    p = peng3d.Peng()
+    peng = peng3d.Peng()
+    peng.createWindow(caption="Peng3d Test Project")
+    peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
+    peng.window.toggle_exclusivity()
+    def esc_toggle(symbol,modifiers):
+        if symbol == key.ESCAPE:
+            peng.window.toggle_exclusivity()
+            player.controlleroptions["enabled"] = peng.window.exclusive
+    peng.window.registerEventHandler("on_key_press",esc_toggle)
+    # Creates world/cam/view/player
+    world = peng3d.StaticWorld(peng,TERRAIN,COLORS)
+    #player = peng3d.actor.player.FirstPersonPlayer(peng,world)
+    player = peng3d.actor.player.BasicPlayer(peng,world)
+    player.addController(peng3d.actor.player.FourDirectionalMoveController(player))
+    player.addController(peng3d.actor.player.EgoMouseRotationalController(player))
+    world.addActor(player)
+    c = peng3d.CameraActorFollower(world,"cam1",player)
+    world.addCamera(c)
+    v = peng3d.WorldView(world,"view1","cam1")
+    world.addView(v)
+    # Creates menu/layer
+    m = peng3d.Menu("main",peng.window,peng)
+    m.addWorld(world)
+    peng.window.addMenu(m)
+    l = peng3d.LayerWorld(m,peng.window,peng,world,"view1")
+    m.addLayer(l)
+    peng.window.changeMenu("main")
+    # Done!
     if CONSOLE:
         t = threading.Thread(target=code.interact,name="REPL Thread",kwargs={"local":locals()})
         t.daemon = True
         t.start()
-    p.createWindow(caption="Peng3d Test Project")
-    p.window.addMenu(peng3d.Menu("main",p.window,p))
-    p.window.toggle_exclusivity()
-    def esc_toggle(symbol,modifiers):
-        if symbol == key.ESCAPE:
-            p.window.toggle_exclusivity()
-            a.active = p.window.exclusive
-    p.window.registerEventHandler("on_key_press",esc_toggle)
-    # Creates world/cam/view
-    w = peng3d.StaticWorld(p,TERRAIN,COLORS)
-    a = peng3d.actor.player.FirstPersonPlayer(p,w)
-    w.addActor(a)
-    c = peng3d.CameraActorFollower(w,"cam1",a)
-    w.addCamera(c)
-    v = peng3d.WorldView(w,"view1","cam1")
-    w.addView(v)
-    # Creates menu/layer
-    m = peng3d.Menu("main",p.window,p)
-    m.addWorld(w)
-    p.window.addMenu(m)
-    l = peng3d.LayerWorld(m,p.window,p,w,"view1")
-    m.addLayer(l)
-    p.window.changeMenu("main")
-    # Done!
-    p.run()
+    peng.run()
     return 0
 
 if __name__ == '__main__':
