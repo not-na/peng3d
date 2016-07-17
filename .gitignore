@@ -4,6 +4,9 @@ MANIFEST
 docs/_build
 docs/sudo
 
+peng3d-py2.7/
+peng3d-py3.5/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
