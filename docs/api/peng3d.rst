@@ -20,5 +20,8 @@ Most classes contained in submodules are available under the same name, e.g. you
    peng3d.menu
    peng3d.camera
    peng3d.world
+   actor/index
+   actor/player
+   peng3d.keybind
    peng3d.config
    peng3d.version

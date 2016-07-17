@@ -55,6 +55,13 @@ class BasicMenu(object):
         pass
     
     def addWorld(self,world):
+        """
+        Adds the given world to the internal list.
+        
+        Worlds that are registered via this method will get all events that are given to this menu passed through.
+        
+        This mechanic is mainly used to implement actor controllers.
+        """
         self.worlds.append(world)
     
     # Event handlers

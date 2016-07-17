@@ -22,7 +22,7 @@
 #  
 #  
 
-__all__ = ["BasicPlayer","FirstPersonPlayer"]
+__all__ = ["BasicPlayer","FirstPersonPlayer","FourDirectionalMoveController","EgoMouseRotationalController"]
 
 import math
 
@@ -31,11 +31,26 @@ import pyglet
 from . import Actor,RotatableActor,Controller
 
 class FourDirectionalMoveController(Controller):
+    """
+    Controller allowing the user to control the actor with the keyboard.
+    
+    You can configure the used keybinds with the :confval:`controls.controls.forward` etc.
+    The keybinds can also be changed with their keybindnames, e.g. ``peng3d:actor.player.controls.forward`` for forward, do not forget to also set the release variants.
+    
+    The movement speed may also be changed via the :py:attr:`movespeed` instance attribute, which defaults to :confval:`controls.controls.movespeed`\ .
+    
+    You may also access the currently held keys via :py:attr:`move`\ , which is a list with 2 items, forwards/backwards and left/right.
+    """
     def __init__(self,*args,**kwargs):
         super(FourDirectionalMoveController,self).__init__(*args,**kwargs)
         self.move = [0,0]
         self.movespeed = self.peng.cfg["controls.controls.movespeed"]
     def registerEventHandlers(self):
+        """
+        Registers needed keybinds and schedules the :py:meth:`update` Method.
+        
+        You can control what keybinds are used via the :confval:`controls.controls.forward` etc. Configuration Values.
+        """
         # Forward
         self.peng.keybinds.add(self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward",self.on_fwd_down)
         self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward.release",self.on_fwd_up)
@@ -50,6 +65,13 @@ class FourDirectionalMoveController(Controller):
         self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.straferight"],"peng3d:actor.player.controls.straferight.release",self.on_right_up)
         pyglet.clock.schedule_interval(self.update,1.0/60)
     def update(self,dt):
+        """
+        Should be called regularly to move the actor.
+        
+        This method does nothing if the :py:attr:`enabled` property is set to false.
+        
+        Note that this method is called automatically and should not be manually called.
+        """
         if not self.enabled:
             return
         speed = self.movespeed
@@ -62,6 +84,12 @@ class FourDirectionalMoveController(Controller):
         newpos = dx+x, dy+y, dz+z
         self.actor.pos = newpos
     def get_motion_vector(self):
+        """
+        Returns the movement vector according to held buttons and the rotation.
+        
+        :return: 3-Tuple of ``(dx,dy,dz)``
+        :rtype: tuple
+        """
         if any(self.move):
             x, y = self.actor._rot
             strafe = math.degrees(math.atan2(*self.move))
@@ -96,14 +124,22 @@ class FourDirectionalMoveController(Controller):
         self.move[1]-=1
 
 class EgoMouseRotationalController(Controller):
+    """
+    Controller allowing the user to rotate the actor with the mouse.
+    """
     def __init__(self,*args,**kwargs):
         super(EgoMouseRotationalController,self).__init__(*args,**kwargs)
     def registerEventHandlers(self):
+        """
+        Registers the motion and drag handlers.
+        
+        Note that because of the way pyglet treats mouse dragging, there is also an handler registered to the on_mouse_drag event.
+        """
         self.world.registerEventHandler("on_mouse_motion",self.on_mouse_motion)
         self.world.registerEventHandler("on_mouse_drag",self.on_mouse_drag)
     def on_mouse_motion(self, x, y, dx, dy):
         if self.enabled:
-            m = 0.15
+            m = self.peng.cfg["controls.mouse.sensitivity"]
             x, y = self.actor._rot
             x, y = x + dx * m, y + dy * m
             y = max(-90, min(90, y))
@@ -111,20 +147,22 @@ class EgoMouseRotationalController(Controller):
             newrot = (x,y)
             self.actor.rot = newrot
     def on_mouse_drag(self,x,y,dx,dy,buttons,modifiers):
-        """
-        Handler used to still enable mouse movement while a button is pressed.
-        """
         self.on_mouse_motion(x,y,dx,dy)
 
 
 class BasicPlayer(RotatableActor):
-    def __init__(self,peng,world,uuid=None,pos=[0,0,0],rot=[0,0]):
-        super(BasicPlayer,self).__init__(peng,world,uuid,pos,rot)
-        self.uuid = uuid
+    """
+    Basic Player class, subclass of :py:class:`RotatableActor()`\ .
+    
+    This class adds no features currently, it can be used to identify player actors via :py:func:`isinstance()`\ .
+    """
+    pass
 
 class FirstPersonPlayer(BasicPlayer):
     """
-    :deprecated:
+    Old class allowing to create standard first-person players easily.
+    
+    :deprecated: See :py:class:`EgoMouseRotationalController()` and :py:class:`FourDirectionalMoveController()` instead
     """
     def __init__(self,peng,world,uuid=None,pos=[0,0,0],rot=[0,0]):
         super(FirstPersonPlayer,self).__init__(peng,world,uuid,pos,rot)
@@ -150,6 +188,11 @@ class FirstPersonPlayer(BasicPlayer):
         self.world.registerEventHandler("on_mouse_drag",self.on_mouse_drag)
         pyglet.clock.schedule_interval(self.update,1.0/60)
     def update(self,dt):
+        """
+        Internal method used for moving the player.
+        
+        :param float dt: Time delta since the last call to this method
+        """
         speed = self.movespeed
         d = dt * speed # distance covered this tick.
         dx, dy, dz = self.get_motion_vector()
@@ -160,6 +203,12 @@ class FirstPersonPlayer(BasicPlayer):
         newpos = dx+x, dy+y, dz+z
         self.pos = newpos
     def get_motion_vector(self):
+        """
+        Returns the movement vector according to held buttons and the rotation.
+        
+        :return: 3-Tuple of ``(dx,dy,dz)``
+        :rtype: tuple
+        """
         if any(self.move):
             x, y = self._rot
             strafe = math.degrees(math.atan2(*self.move))
@@ -205,7 +254,4 @@ class FirstPersonPlayer(BasicPlayer):
             newrot = (x,y)
             self.rot = newrot
     def on_mouse_drag(self,x,y,dx,dy,buttons,modifiers):
-        """
-        Handler used to still enable mouse movement while a button is pressed.
-        """
         self.on_mouse_motion(x,y,dx,dy)

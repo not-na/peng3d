@@ -27,7 +27,14 @@ from pyglet.window import key
 
 import bidict
 
-MOD_RELEASE = 1 << 15 # Additional fake modifier applied if on_key_released is called
+MOD_RELEASE = 1 << 15 # Additional fake modifier applied if on_key_release is called
+"""
+Fake modifier applied when a key is released instead of pressed.
+
+This modifier internally has the value of ``1<<15`` and should thus be safe from any added modifiers in the future.
+
+Note that this modifier is only applied within keybinds, not in regular ``on_key_down`` and ``on_key_up`` handlers.
+"""
 
 MODNAME2MODIFIER = bidict.orderedbidict([
     ("ctrl",key.MOD_ACCEL), # For compat between MacOSX and everything else, equals to MOD_COMMAND on OSX and MOD_CTRL everywhere else
@@ -41,12 +48,56 @@ MODNAME2MODIFIER = bidict.orderedbidict([
     ("scrolllock",key.MOD_SCROLLLOCK),
     ("release",MOD_RELEASE),
     ])
+"""
+Ordered Bidict that maps between user-friendly names and internal constants.
+
+Note that since this is a bidict, you can query the reverse mapping by accessing :py:attr:`MODNAME2MODIFIER.inv`\ .
+The non-inverse mapping maps from user-friendly name to internal constant.
+
+This mapping is used by the Keybind system to convert the modifier constants to names.
+
+The Mapping is as follows:
+
+================ =============================== =======
+Name             Pyglet constant                 Notes
+================ =============================== =======
+ctrl             :py:data:`key.MOD_ACCEL`
+alt              :py:data:`key.MOD_ALT`          1
+shift            :py:data:`key.MOD_SHIFT`
+option           :py:data:`key.MOD_OPTION`
+capslock         :py:data:`key.MOD_CAPSLOCK`
+numlock          :py:data:`key.MOD_NUMLOCK`
+scrollock        :py:data:`key.MOD_SCROLLOCK`
+release          :py:data:`key.MOD_RELEASE`
+================ =============================== =======
+
+1: automatically replaced by MOD_CTRL on Darwin/OSX
+"""
 if pyglet.compat_platform=="darwin":
     MODNAME2MODIFIER["alt"]=key.MOD_CTRL
 
 OPTIONAL_MODNAMES = ["capslock","numlock","scrollock"]
+"""
+List of modifiers that are not substantial to a key combo.
+
+If the :confval:`controls.keybinds.strict` option is disabled, every key combo is emitted with and without the modifiers in this list.
+Else, only the combo with these modifiers is emitted.
+
+This may cause no more combos to get through if numlock or capslock are activated.
+"""
 
 class KeybindHandler(object):
+    """
+    Handler class that automatically converts incoming key events to key combo events.
+    
+    A keybinding always is of format ``[MOD1-[MOD2-]]KEY`` with potentially more modifiers.
+    
+    See :py:data:`MODNAME2MODIFIER` for more information about existing modifiers.
+    
+    Note that the order in which modifiers are listed also is the order of the above listing.
+    
+    Keybindings are matched exactly, and optionally a second time without the modifiers listed in :py:data:`OPTIONAL_MODNAMES` if :confval:`controls.keybinds.strict` is set to False.
+    """
     def __init__(self,peng):
         self.peng = peng
         self.peng.registerEventHandler("on_key_press",self.on_key_press)
@@ -54,15 +105,41 @@ class KeybindHandler(object):
         self.keybinds = {}
         self.kbname = bidict.bidict()
     def add(self,keybind,kbname,handler):
+        """
+        Adds a keybind to the internal registry.
+        
+        Keybind names should be of the format ``namespace:category.subcategory.name``\ e.g. ``peng3d:actor.player.controls.forward`` for the forward key combo for the player actor.
+        
+        :param str keybind: Keybind string, as described above
+        :param str kbname: Name of the keybind, may be used to later change the keybinding without re-registering
+        :param function handler: Function or any other callable called with the positional arguments ``(symbol,modifiers)`` if the keybind is pressed
+        """
         keybind = keybind.lower()
         if keybind not in self.keybinds:
             self.keybinds[keybind]=[]
         self.keybinds[keybind].append(kbname)
         self.kbname[kbname]=handler
-    def changeKeybind(self,kbname,handler):
-        assert kbname in self.kbname
-        self.kbname[kbname]=handler
+    def changeKeybind(self,kbname,combo):
+        """
+        Changes a keybind of a specific keybindname.
+        
+        :param str kbname: Same as kbname of :py:meth:`add()`
+        :param str combo: New key combination
+        """
+        for key,value in self.keybinds.items():
+            if kbname in value:
+                del value[value.index(kbname)]
+                break
+        if combo not in self.keybinds:
+            self.keybinds[combo]=[]
+        self.keybinds[combo].append(kbname)
     def mod_is_held(self,modname,modifiers):
+        """
+        Helper method to simplify checking if a modifier is held.
+        
+        :param str modname: Name of the modifier, see :py:data:`MODNAME2MODIFIER`
+        :param int modifiers: Bitmask to check in, same as the modifiers argument of the on_key_press etc. handlers
+        """
         modifier = MODNAME2MODIFIER[modname.lower()]
         return modifiers&modifier
     def on_key_press(self,symbol,modifiers):
@@ -80,9 +157,21 @@ class KeybindHandler(object):
             for modname in modnames:
                 if modname not in OPTIONAL_MODNAMES:
                     newmodnames.append(modname)
+            if newmodnames==modnames:
+                return
             combo = "-".join(newmodnames).lower()
             self.handle_combo(combo,symbol,modifiers)
     def handle_combo(self,combo,symbol,modifiers):
+        """
+        Handles a key combination and dispatches associated events.
+        
+        First, all keybind handlers registered via :py:meth:`add` will be handled,
+        then the event ``on_key_combo`` with params ``(combo,symbol,modifiers)`` is sent to the :py:class:`Peng()` instance.
+        
+        :params str combo: Key combination pressed
+        :params int symbol: Key pressed, passed from the same argument within pyglet
+        :params int modifiers: Modifiers held while the key was pressed
+        """
         if self.peng.cfg["controls.keybinds.debug"]:
             print("combo: %s"%combo)
         for kbname in self.keybinds.get(combo,[]):

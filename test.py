@@ -37,14 +37,17 @@ COLORS  = [255,0,0, 0,255,0, 0,0,255, 255,255,255]
 
 def main(args):
     peng = peng3d.Peng()
-    peng.createWindow(caption="Peng3d Test Project")
+    peng.createWindow(caption="Peng3d Test Project",resizable=True,vsync=True)
     peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
     peng.window.toggle_exclusivity()
     def esc_toggle(symbol,modifiers):
-        if symbol == key.ESCAPE:
-            peng.window.toggle_exclusivity()
-            player.controlleroptions["enabled"] = peng.window.exclusive
-    peng.window.registerEventHandler("on_key_press",esc_toggle)
+        peng.window.toggle_exclusivity()
+        player.controlleroptions["enabled"] = peng.window.exclusive
+    peng.keybinds.add("escape","testpy:handler.esctoggle",esc_toggle)
+    def test_handler(symbol,modifiers):
+        peng.keybinds.changeKeybind("peng3d:actor.player.controls.forward","space")
+        peng.keybinds.changeKeybind("peng3d:actor.player.controls.forward.release","release-space")
+    peng.keybinds.add("f3","testpy:handler.test",test_handler)
     # Creates world/cam/view/player
     world = peng3d.StaticWorld(peng,TERRAIN,COLORS)
     #player = peng3d.actor.player.FirstPersonPlayer(peng,world)

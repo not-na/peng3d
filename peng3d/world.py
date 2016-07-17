@@ -71,6 +71,11 @@ class World(object):
             raise TypeError("view is not of type WorldView!")
         self.views[view.name]=view
     def addActor(self,actor):
+        """
+        Adds the given actor to the internal registry.
+        
+        Note that this actors :py:attr:`uuid` attribute must be unique, else it will override any actors previously registered with its UUID.
+        """
         self.actors[actor.uuid]=actor
     
     def getView(self,name):

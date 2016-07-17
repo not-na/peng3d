@@ -27,7 +27,10 @@
 
 from peng3d import version as ver
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 # Fix for very old python versions from https://docs.python.org/2/distutils/setupscript.html#additional-meta-data
 # patch distutils if it can't cope with the "classifiers" or

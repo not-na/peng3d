@@ -177,6 +177,15 @@ class PengWindow(pyglet.window.Window):
         self.menu.draw()
     
     def dispatch_event(self,event_type,*args):
+        """
+        Internal event handling method.
+        
+        This method extends the behaviour inherited from :py:meth:`pyglet.window.Window.dispatch_event()` by calling the various :py:meth:`handleEvent()` methods.
+        
+        By default, :py:meth:`Peng.handleEvent()`\ , :py:meth:`handleEvent()` and :py:meth:`Menu.handleEvent()` are called in this order to handle events.
+        
+        Note that any :py:exc:`AttributeError` will be ignored to prevent exceptions during handling of some early startup events.
+        """
         super(PengWindow,self).dispatch_event(event_type,*args)
         try:
             self.peng.handleEvent(event_type,args,self)

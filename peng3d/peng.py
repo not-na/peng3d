@@ -45,7 +45,6 @@ class Peng(object):
         
         self.cfg = config.Config({},defaults=config.DEFAULT_CONFIG)
         self.keybinds = keybind.KeybindHandler(self)
-        
     
     def createWindow(self,cls=window.PengWindow,*args,**kwargs):
         """
@@ -74,6 +73,13 @@ class Peng(object):
         self.window.run()
     
     def handleEvent(self,event_type,args,window=None):
+        """
+        Handles a pyglet event.
+        
+        This method is called by :py:meth:`PengWindow.dispatch_event()` and handles all events.
+        
+        See :py:meth:`registerEventHandler()` for how to listen to these events.
+        """
         args = list(args)
         #if window is not None:
         #    args.append(window)
@@ -83,6 +89,13 @@ class Peng(object):
             for handler in self.eventHandlers[event_type]:
                 handler(*args)
     def registerEventHandler(self,event_type,handler):
+        """
+        Registers an event handler.
+        
+        The specified callable handler will be called everytime an event with the same ``event_type`` is encountered.
+        
+        All event arguments are passed as positional arguments.
+        """
         if self.cfg["debug.events.register"]:
             print("Registered Event: %s Handler: %s"%(event_type,handler))
         if event_type not in self.eventHandlers:

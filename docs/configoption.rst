@@ -89,6 +89,87 @@ Light settings
    
    Implement light settings with shader system
 
+Controls
+--------
+
+Note that most of these config values are read when the appropriate objects are initialized,
+this means that you should consult the objects documentation for how to change the configvalue at runtime.
+
+Mouse
+^^^^^
+
+.. confval:: controls.mouse.sensitivity
+   
+   Degrees to move per pixel travelled by the mouse.
+   
+   This applies to both horizontal and vertical movement.
+   
+   Defaults to ``0.15``\ .
+
+Keyboard
+^^^^^^^^
+
+.. confval:: controls.controls.movespeed
+   
+   Speed multiplier for most movements.
+   
+   Defaults to ``10.0``\ .
+
+.. confval:: controls.controls.forward
+             controls.controls.backward
+             controls.controls.strafeleft
+             controls.controls.straferight
+   
+   Four basic movement key combinations.
+   
+   Each of these key combinations can be changed individually.
+   
+   Defaults are ``w``\ , ``s``\ , ``a`` and ``d``\, respectively.
+
+.. confval:: controls.controls.jump
+   
+   Jump key combination.
+   
+   Defaults to ``space``\ .
+   
+   .. todo::
+     
+     Actually implement this.
+
+General Controls Configuration Values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. confval:: controls.keybinds.strict
+   
+   Whether or not keybindings should be strict.
+   
+   See :py:class:`peng3d.keybind.KeybindHandler()` for more information.
+
+Debug Options
+-------------
+
+All of these options are disabled by default.
+
+.. confval:: controls.keybinds.debug
+   
+   If enabled, all pressed keybinds will be printed.
+
+.. confval:: debug.events.dump
+   
+   If enabled, all events are printed including their arguments.
+   
+   Note that ``on_draw`` and ``on_mouse_motion`` are never printed to avoid excessive outputs.
+
+.. confval:: debug.events.logerr
+   
+   If enabled, Exceptions catched during event handling are printed.
+   
+   Note that only :py:exc:`AttributeError` exceptions are catched and printed, other exceptions will propagate further.
+
+.. confval:: debug.events.register
+   
+   If enabled, all event handler registrations are printed.
+
 Other Options
 -------------
 

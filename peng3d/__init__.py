@@ -24,13 +24,13 @@
 
 # These imports are here for convenience
 
-from peng import *
-from window import *
-from layer import *
-from menu import *
-from camera import *
-from config import *
-from version import *
-from world import *
-import actor.player
-from actor import *
+from .peng import *
+from .window import *
+from .layer import *
+from .menu import *
+from .camera import *
+from .config import *
+from .version import *
+from .world import *
+from .actor.player import *
+from .actor import *
