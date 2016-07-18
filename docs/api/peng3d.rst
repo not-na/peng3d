@@ -24,4 +24,5 @@ Most classes contained in submodules are available under the same name, e.g. you
    actor/player
    peng3d.keybind
    peng3d.config
+   peng3d.pyglet_patch
    peng3d.version

@@ -24,10 +24,13 @@
 
 __all__ = ["Peng"]
 
+import sys
+
 import pyglet
 
-from . import window, config, keybind
+from . import window, config, keybind, pyglet_patch
 
+_pyglet_patched = sys.version_info.major == 2
 
 class Peng(object):
     """
@@ -38,13 +41,20 @@ class Peng(object):
     Be sure to keep your instance accessible, as it will be needed to create most other classes.
     """
     
-    def __init__(self):
+    def __init__(self,cfg={}):
+        global _pyglet_patched
         self.window = None
         
         self.eventHandlers = {}
         
-        self.cfg = config.Config({},defaults=config.DEFAULT_CONFIG)
+        if cfg == {}:
+            cfg = {} # To avoid bugs with default arguments
+        self.cfg = config.Config(cfg,defaults=config.DEFAULT_CONFIG)
         self.keybinds = keybind.KeybindHandler(self)
+        
+        if not _pyglet_patched and self.cfg["pyglet.patch.patch_float2int"]:
+            _pyglet_patched = True
+            pyglet_patch.patch_float2int()
     
     def createWindow(self,cls=window.PengWindow,*args,**kwargs):
         """

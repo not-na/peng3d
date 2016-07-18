@@ -33,7 +33,7 @@ class Camera(object):
     The name of the camera can be any string and is used to identify the camera and thus should be unique.
     """
     def __init__(self,world,name,pos=None,rot=None):
-        if not isinstance(name,basestring):
+        if not (isinstance(name,str) or isinstance(name,bytes) or isinstance(unicode)):
             raise TypeError("name must be an instance of basestring!")
         self.world = world
         self._pos = pos if pos is not None else [0,0,0]

@@ -173,6 +173,14 @@ All of these options are disabled by default.
 Other Options
 -------------
 
+.. confval:: pyglet.patch.patch_float2int
+   
+   Enables the float2int patch for pyglet.
+   
+   See :py:func:`peng3d.pyglet_patch.patch_float2int()` for more information.
+   
+   Enabled by default.
+
 .. todo::
    
    Implement more config options

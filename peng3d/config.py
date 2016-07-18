@@ -110,6 +110,7 @@ DEFAULT_CONFIG = {
     "debug.events.register":False,
     
     # Other config options
+    "pyglet.patch.patch_float2int":True,
 }
 """
 Default configuration values.
