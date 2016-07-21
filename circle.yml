@@ -5,3 +5,7 @@ dependencies:
 test:
    override:
      - tox
+
+machine:
+   python:
+      version: 3.5.0
