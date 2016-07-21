@@ -72,7 +72,10 @@ class Peng(object):
            
            Implement having multiple windows.
         """
+        if self.window is not None:
+            raise RuntimeError("Window already created!")
         self.window = cls(self,*args,**kwargs)
+        return self.window
     
     def run(self):
         """

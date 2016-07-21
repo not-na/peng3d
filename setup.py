@@ -25,7 +25,19 @@
 # Distribution command:
 # sudo python setup.py install sdist bdist register upload
 
-from peng3d import version as ver
+#import peng3d.version as ver
+
+import imp
+
+def load_module(name):
+    names = name.split(".")
+    path = None
+    for name in names:
+        f, path, info = imp.find_module(name, path)
+        path = [path]
+    return imp.load_module(name, f, path[0], info)    
+
+ver = load_module("peng3d.version")
 
 try:
     from setuptools import setup
@@ -53,9 +65,11 @@ setup(name='peng3d',
       author="notna",
       author_email="notna@apparat.org",
       url="https://github.com/not-na/peng3d",
-      packages=['peng3d'],
+      packages=['peng3d',"peng3d.actor"],
       requires=["pyglet","bidict"],
       provides=["peng3d"],
+      setup_requires=['pytest-runner'],
+      tests_require=['pytest'],
       classifiers=[
         "Development Status :: 4 - Beta",
         
