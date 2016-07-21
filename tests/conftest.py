@@ -37,8 +37,18 @@ import peng3d
 #    os.environ["DISPLAY"]=":0"
 #    for k,v in os.environ.items():print(k,v)
 
+def pytest_addoption(parser):
+    parser.addoption("--x-display", action="store", default=":0",
+        help="X Display to use")
+
+
 @pytest.fixture(scope="module")
-def peng(request):
+def xdisplay(request):
+    return request.config.getoption("--x-display")
+
+@pytest.fixture(scope="module")
+def peng(request,xdisplay):
+    os.environ["DISPLAY"]=xdisplay
     p = peng3d.Peng()
     def fin(p):
         def f():
@@ -51,5 +61,6 @@ def peng(request):
     return p
 
 @pytest.fixture(scope="module")
-def window(peng):
+def window(peng,xdisplay):
+    os.environ["DISPLAY"]=xdisplay
     return peng.createWindow() if peng.window is None else peng.window
