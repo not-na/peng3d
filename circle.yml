@@ -4,7 +4,7 @@ dependencies:
 
 test:
    override:
-     - tox -- --junitxml=$CIRCLE_TEST_REPORTS/junit/junit.xml --x-display=$DISPLAY
+     - tox -- --junitxml=$CIRCLE_TEST_REPORTS/junit/junit.xml --x-display=$DISPLAY -v -m "not graphical"
 
 machine:
    python:

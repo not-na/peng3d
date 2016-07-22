@@ -64,3 +64,5 @@ def peng(request,xdisplay):
 def window(peng,xdisplay):
     os.environ["DISPLAY"]=xdisplay
     return peng.createWindow() if peng.window is None else peng.window
+
+from graphicalhelpers import *
