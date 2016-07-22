@@ -65,7 +65,7 @@ class PengWindow(pyglet.window.Window):
         Sets up the OpenGL state.
         
         This method should be called once after the config has been created and before the main loop is started.
-        You should not need to manually call this method, as it is automatically called by :py:meth:`cleanConfig()`\ .
+        You should not need to manually call this method, as it is automatically called by :py:meth:`run()`\ .
         
         Repeatedly calling this method has no effects.
         """
