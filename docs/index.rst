@@ -6,6 +6,16 @@
 Welcome to Peng3d's documentation!
 ==================================
 
+.. image:: https://readthedocs.org/projects/peng3d/badge/?version=latest
+   :target: http://peng3d.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
+.. image:: https://circleci.com/gh/not-na/peng3d.svg?style=svg
+    :target: https://circleci.com/gh/not-na/peng3d
+
+.. image:: https://img.shields.io/pypi/dm/peng3d.svg
+   :target: https://pypi.python.org/pypi/peng3d
+
 Contents:
 
 .. toctree::
