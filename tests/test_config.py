@@ -29,7 +29,6 @@ import peng3d
 def test_config_defaults():
     cfg = peng3d.config.Config(defaults=peng3d.config.DEFAULT_CONFIG)
     for k,v in peng3d.config.DEFAULT_CONFIG.items():
-        #print(k,v)
         assert k not in cfg
         assert cfg[k]==v
 

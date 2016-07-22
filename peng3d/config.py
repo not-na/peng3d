@@ -72,12 +72,10 @@ class Config(object):
         self.config = config
         self.defaults = defaults
     def __getitem__(self,key):
-        print(key,self.config)
         return self.config[key] if key in self.config else self.defaults[key]
     def __setitem__(self,key,value):
         self.config[key] = value
     def __contains__(self,key):
-        #raise Exception(key,self.config)
         return key in self.config
 
 DEFAULT_CONFIG = {
