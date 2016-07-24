@@ -26,7 +26,10 @@ __all__ = ["BasicPlayer","FirstPersonPlayer","FourDirectionalMoveController","Eg
 
 import math
 
-import pyglet
+try:
+    import pyglet
+except ImportError:
+    pass
 
 from . import Actor,RotatableActor,Controller
 

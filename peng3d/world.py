@@ -27,9 +27,13 @@ __all__ = ["World","StaticWorld",
 
 from .camera import Camera
 
-import pyglet
-from pyglet.gl import *
-from pyglet.window import key
+try:
+    import pyglet
+    from pyglet.gl import *
+    from pyglet.window import key
+    _have_pyglet = True
+except ImportError:
+    _have_pyglet = False
 
 class World(object):
     """
@@ -131,6 +135,7 @@ class StaticWorld(World):
     """
     def __init__(self,peng,quads,colors):
         super(StaticWorld,self).__init__(peng)
+        assert _have_pyglet
         self.batch3d = pyglet.graphics.Batch()
         self.terrain = self.batch3d.add(len(quads)/3, GL_QUADS, None,
             ("v3f/static",quads),

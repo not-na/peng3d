@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  test_headless.py
 #  
 #  Copyright 2016 notna <notna@apparat.org>
 #  
@@ -22,15 +22,6 @@
 #  
 #  
 
-# These imports are here for convenience
+import peng3d
 
-from .peng import *
-#from .window import *
-from .layer import *
-from .menu import *
-from .camera import *
-from .config import *
-from .version import *
-from .world import *
-from .actor.player import *
-from .actor import *
+p = peng3d.Peng()

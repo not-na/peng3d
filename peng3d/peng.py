@@ -26,11 +26,10 @@ __all__ = ["Peng"]
 
 import sys
 
-import pyglet
+#from . import window, config, keybind, pyglet_patch
+from . import config, world
 
-from . import window, config, keybind, pyglet_patch
-
-_pyglet_patched = sys.version_info.major == 2
+_pyglet_patched = sys.version_info.major == 2 or not world._have_pyglet
 
 class Peng(object):
     """
@@ -43,6 +42,8 @@ class Peng(object):
     
     def __init__(self,cfg={}):
         global _pyglet_patched
+        if world._have_pyglet:
+            from . import pyglet_patch, keybind # Local import for compat with headless machines
         self.window = None
         
         self.eventHandlers = {}
@@ -50,13 +51,14 @@ class Peng(object):
         if cfg == {}:
             cfg = {} # To avoid bugs with default arguments
         self.cfg = config.Config(cfg,defaults=config.DEFAULT_CONFIG)
-        self.keybinds = keybind.KeybindHandler(self)
+        if world._have_pyglet:
+            self.keybinds = keybind.KeybindHandler(self)
         
         if not _pyglet_patched and self.cfg["pyglet.patch.patch_float2int"]:
             _pyglet_patched = True
             pyglet_patch.patch_float2int()
     
-    def createWindow(self,cls=window.PengWindow,*args,**kwargs):
+    def createWindow(self,cls=None,*args,**kwargs):
         """
         createWindow(cls=window.PengWindow, *args, **kwargs)
         
@@ -72,6 +74,9 @@ class Peng(object):
            
            Implement having multiple windows.
         """
+        if cls is None:
+            from . import window
+            cls = window.PengWindow
         if self.window is not None:
             raise RuntimeError("Window already created!")
         self.window = cls(self,*args,**kwargs)
@@ -114,3 +119,6 @@ class Peng(object):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
         self.eventHandlers[event_type].append(handler)
+
+class HeadlessPeng(object):
+    pass

@@ -24,7 +24,10 @@
 
 __all__ = ["Layer", "Layer2D", "Layer3D","LayerGroup","LayerWorld"]
 
-import pyglet
+try:
+    import pyglet
+except ImportError:
+    pass
 
 from . import camera
 

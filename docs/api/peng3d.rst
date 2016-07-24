@@ -8,6 +8,7 @@
 This Module represents the root of the peng3d Engine.
 
 Most classes contained in submodules are available under the same name, e.g. you can use :py:class:`peng3d.Peng()` instead of :py:class:`peng3d.peng.Peng()`\ .
+Note that for compatibility reasons, peng3d.window is not available by default and will need to be imported directly.
 
 ``*``\ - importing submodules should be safe as most modules define an ``__all__`` variable.
 
