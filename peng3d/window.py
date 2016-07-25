@@ -184,18 +184,21 @@ class PengWindow(pyglet.window.Window):
         
         By default, :py:meth:`Peng.handleEvent()`\ , :py:meth:`handleEvent()` and :py:meth:`Menu.handleEvent()` are called in this order to handle events.
         
-        Note that any :py:exc:`AttributeError` will be ignored to prevent exceptions during handling of some early startup events.
+        Note that some events may not be handled by all handlers during early startup.
         """
         super(PengWindow,self).dispatch_event(event_type,*args)
         try:
-            self.peng.handleEvent(event_type,args,self)
-            self.handleEvent(event_type,args)
-            self.menu.handleEvent(event_type,args)
+            p = self.peng
+            m = self.menu
         except AttributeError:
             # To prevent early startup errors
             if hasattr(self,"peng") and self.peng.cfg["debug.events.logerr"]:
                 print("Error:")
                 traceback.print_exc()
+            return
+        p.handleEvent(event_type,args,self)
+        self.handleEvent(event_type,args)
+        m.handleEvent(event_type,args)
     
     def handleEvent(self,event_type,args,window=None):
         args = list(args)
