@@ -94,12 +94,13 @@ DEFAULT_CONFIG = {
     "controls.mouse.sensitivity":0.15,
     
     "controls.controls.movespeed":10.0,
+    "controls.controls.verticalspeed":5.0,
     "controls.controls.forward":"w",
     "controls.controls.backward":"s",
     "controls.controls.strafeleft":"a",
     "controls.controls.straferight":"d",
     "controls.controls.jump":"space",
-    #"controls.controls.crouch":"lshift",
+    "controls.controls.crouch":"lshift",
     "controls.keybinds.strict":False,
     "controls.keybinds.debug":False,
     

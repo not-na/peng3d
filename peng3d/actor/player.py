@@ -22,7 +22,7 @@
 #  
 #  
 
-__all__ = ["BasicPlayer","FirstPersonPlayer","FourDirectionalMoveController","EgoMouseRotationalController"]
+__all__ = ["BasicPlayer","FirstPersonPlayer","FourDirectionalMoveController","EgoMouseRotationalController","BasicFlightController"]
 
 import math
 
@@ -38,7 +38,7 @@ class FourDirectionalMoveController(Controller):
     Controller allowing the user to control the actor with the keyboard.
     
     You can configure the used keybinds with the :confval:`controls.controls.forward` etc.
-    The keybinds can also be changed with their keybindnames, e.g. ``peng3d:actor.player.controls.forward`` for forward, do not forget to also set the release variants.
+    The keybinds can also be changed with their keybindnames, e.g. ``peng3d:actor.player.controls.forward`` for forward.
     
     The movement speed may also be changed via the :py:attr:`movespeed` instance attribute, which defaults to :confval:`controls.controls.movespeed`\ .
     
@@ -55,17 +55,13 @@ class FourDirectionalMoveController(Controller):
         You can control what keybinds are used via the :confval:`controls.controls.forward` etc. Configuration Values.
         """
         # Forward
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward",self.on_fwd_down)
-        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward.release",self.on_fwd_up)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward",self.on_fwd_down,False)
         # Backward
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.backward"],"peng3d:actor.player.controls.backward",self.on_bwd_down)
-        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.backward"],"peng3d:actor.player.controls.backward.release",self.on_bwd_up)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.backward"],"peng3d:actor.player.controls.backward",self.on_bwd_down,False)
         # Strafe Left
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.strafeleft"],"peng3d:actor.player.controls.strafeleft",self.on_left_down)
-        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.strafeleft"],"peng3d:actor.player.controls.strafeleft.release",self.on_left_up)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.strafeleft"],"peng3d:actor.player.controls.strafeleft",self.on_left_down,False)
         # Strafe Right
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.straferight"],"peng3d:actor.player.controls.straferight",self.on_right_down)
-        self.peng.keybinds.add("release-"+self.peng.cfg["controls.controls.straferight"],"peng3d:actor.player.controls.straferight.release",self.on_right_up)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.straferight"],"peng3d:actor.player.controls.straferight",self.on_right_down,False)
         pyglet.clock.schedule_interval(self.update,1.0/60)
     def update(self,dt):
         """
@@ -108,23 +104,15 @@ class FourDirectionalMoveController(Controller):
         return (dx, dy, dz)
     
     # Event Handlers
-    def on_fwd_down(self,symbol,modifiers):
-        self.move[0]-=1
-    def on_fwd_up(self,symbol,modifiers):
-        self.move[0]+=1
-    def on_bwd_down(self,symbol,modifiers):
-        self.move[0]+=1
-    def on_bwd_up(self,symbol,modifiers):
-        self.move[0]-=1
+    def on_fwd_down(self,symbol,modifiers,release):
+        self.move[0]-=1 if not release else -1
+    def on_bwd_down(self,symbol,modifiers,release):
+        self.move[0]+=1 if not release else -1
     
-    def on_left_down(self,symbol,modifiers):
-        self.move[1]-=1
-    def on_left_up(self,symbol,modifiers):
-        self.move[1]+=1
-    def on_right_down(self,symbol,modifiers):
-        self.move[1]+=1
-    def on_right_up(self,symbol,modifiers):
-        self.move[1]-=1
+    def on_left_down(self,symbol,modifiers,release):
+        self.move[1]-=1 if not release else -1
+    def on_right_down(self,symbol,modifiers,release):
+        self.move[1]+=1 if not release else -1
 
 class EgoMouseRotationalController(Controller):
     """
@@ -152,6 +140,48 @@ class EgoMouseRotationalController(Controller):
     def on_mouse_drag(self,x,y,dx,dy,buttons,modifiers):
         self.on_mouse_motion(x,y,dx,dy)
 
+class BasicFlightController(Controller):
+    """
+    Controller allowing the user to move up and down with the jump and crouch controls.
+    
+    The used keybinds may be configured via :confval:`controls.controls.crouch` and :confval:`controls.controls.jump`\ .
+    
+    The vertical speed used when flying may be configured via :confval:`controls.controls.verticalspeed` or the :py:attr:`speed` attribute.
+    """
+    def __init__(self,*args,**kwargs):
+        super(BasicFlightController,self).__init__(*args,**kwargs)
+        self.speed = self.peng.cfg["controls.controls.verticalspeed"]
+        self.move = 0
+    def registerEventHandlers(self):
+        """
+        Registers the up and down handlers.
+        
+        Also registers a scheduled function every 60th of a second, causing pyglet to redraw your window with 60fps.
+        """
+        # Crouch/fly down
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.crouch"],"peng3d:actor.player.controls.crouch",self.on_crouch_down,False)
+        # Jump/fly up
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.jump"],"peng3d:actor.player.controls.jump",self.on_jump_down,False)
+        pyglet.clock.schedule_interval(self.update,1.0/60)
+    def update(self,dt):
+        """
+        Should be called regularly to move the actor.
+        
+        This method does nothing if the :py:attr:`enabled` property is set to False.
+        
+        This method is called automatically and should not be called manually.
+        """
+        if not self.enabled:
+            return
+        dy = self.speed * dt * self.move
+        x,y,z = self.actor._pos
+        newpos = x,dy+y,z
+        self.actor.pos = newpos
+    
+    def on_crouch_down(self,symbol,modifiers,release):
+        self.move -= 1 if not release else -1
+    def on_jump_down(self,symbol,modifiers,release):
+        self.move += 1 if not release else -1
 
 class BasicPlayer(RotatableActor):
     """

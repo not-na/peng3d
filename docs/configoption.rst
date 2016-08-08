@@ -115,26 +115,36 @@ Keyboard
    
    Defaults to ``10.0``\ .
 
+.. confval:: controls.controls.verticalspeed
+   
+   Speed multiplier for vertical movement.
+   
+   Defaults to ``5.0``\ .
+
+These keys are all registered with the ``mod`` flag set to False, thus they will ignore any modifiers.
+
 .. confval:: controls.controls.forward
              controls.controls.backward
              controls.controls.strafeleft
              controls.controls.straferight
    
-   Four basic movement key combinations.
+   Four basic movement keys.
    
-   Each of these key combinations can be changed individually.
+   Each of these keys can be changed individually.
    
    Defaults are ``w``\ , ``s``\ , ``a`` and ``d``\, respectively.
 
 .. confval:: controls.controls.jump
    
-   Jump key combination.
+   Jump key.
    
    Defaults to ``space``\ .
+
+.. confval:: controls.controls.crouch
    
-   .. todo::
-     
-     Actually implement this.
+   Crouch key.
+   
+   Defaults to ``lshift``\ .
 
 General Controls Configuration Values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

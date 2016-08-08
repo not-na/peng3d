@@ -40,11 +40,15 @@ def main(args):
     peng.createWindow(caption="Peng3d Test Project",resizable=True,vsync=True)
     peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
     peng.window.toggle_exclusivity()
-    def esc_toggle(symbol,modifiers):
+    def esc_toggle(symbol,modifiers,release):
+        if release:
+            return
         peng.window.toggle_exclusivity()
         player.controlleroptions["enabled"] = peng.window.exclusive
     peng.keybinds.add("escape","testpy:handler.esctoggle",esc_toggle)
-    def test_handler(symbol,modifiers):
+    def test_handler(symbol,modifiers,release):
+        if release:
+            return
         peng.keybinds.changeKeybind("peng3d:actor.player.controls.forward","space")
         peng.keybinds.changeKeybind("peng3d:actor.player.controls.forward.release","release-space")
     peng.keybinds.add("f3","testpy:handler.test",test_handler)
@@ -54,6 +58,7 @@ def main(args):
     player = peng3d.actor.player.BasicPlayer(peng,world)
     player.addController(peng3d.actor.player.FourDirectionalMoveController(player))
     player.addController(peng3d.actor.player.EgoMouseRotationalController(player))
+    player.addController(peng3d.actor.player.BasicFlightController(player))
     world.addActor(player)
     c = peng3d.CameraActorFollower(world,"cam1",player)
     world.addCamera(c)

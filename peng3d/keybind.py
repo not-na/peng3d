@@ -46,7 +46,7 @@ MODNAME2MODIFIER = bidict.orderedbidict([
     ("capslock",key.MOD_CAPSLOCK),
     ("numlock",key.MOD_NUMLOCK),
     ("scrolllock",key.MOD_SCROLLLOCK),
-    ("release",MOD_RELEASE),
+    #("release",MOD_RELEASE), # Deprecated, use the released flag instead
     ])
 """
 Ordered Bidict that maps between user-friendly names and internal constants.
@@ -68,7 +68,6 @@ option           :py:data:`key.MOD_OPTION`
 capslock         :py:data:`key.MOD_CAPSLOCK`
 numlock          :py:data:`key.MOD_NUMLOCK`
 scrollock        :py:data:`key.MOD_SCROLLOCK`
-release          :py:data:`key.MOD_RELEASE`
 ================ =============================== =======
 
 1: automatically replaced by MOD_CTRL on Darwin/OSX
@@ -103,8 +102,9 @@ class KeybindHandler(object):
         self.peng.registerEventHandler("on_key_press",self.on_key_press)
         self.peng.registerEventHandler("on_key_release",self.on_key_release)
         self.keybinds = {}
+        self.keybinds_nm = {}
         self.kbname = bidict.bidict()
-    def add(self,keybind,kbname,handler):
+    def add(self,keybind,kbname,handler,mod=True):
         """
         Adds a keybind to the internal registry.
         
@@ -112,12 +112,18 @@ class KeybindHandler(object):
         
         :param str keybind: Keybind string, as described above
         :param str kbname: Name of the keybind, may be used to later change the keybinding without re-registering
-        :param function handler: Function or any other callable called with the positional arguments ``(symbol,modifiers)`` if the keybind is pressed
+        :param function handler: Function or any other callable called with the positional arguments ``(symbol,modifiers,release)`` if the keybind is pressed or released
+        :param int mod: If the keybind should respect modifiers
         """
         keybind = keybind.lower()
-        if keybind not in self.keybinds:
-            self.keybinds[keybind]=[]
-        self.keybinds[keybind].append(kbname)
+        if mod:
+            if keybind not in self.keybinds:
+                self.keybinds[keybind]=[]
+            self.keybinds[keybind].append(kbname)
+        else:
+            if keybind not in self.keybinds_nm:
+                self.keybinds_nm[keybind]=[]
+            self.keybinds_nm[keybind].append(kbname)
         self.kbname[kbname]=handler
     def changeKeybind(self,kbname,combo):
         """
@@ -142,8 +148,8 @@ class KeybindHandler(object):
         """
         modifier = MODNAME2MODIFIER[modname.lower()]
         return modifiers&modifier
-    def on_key_press(self,symbol,modifiers):
-        # Format: "MOD1-MOD2-MOD3-KEY"
+    def on_key_press(self,symbol,modifiers,release=False):
+        # Format: "MOD1-MOD2-MOD3-KEY" in all lowercase
         modnames = []
         for modname in MODNAME2MODIFIER:
             if self.mod_is_held(modname,modifiers):
@@ -151,7 +157,8 @@ class KeybindHandler(object):
         keyname = key.symbol_string(symbol)
         modnames.append(keyname)
         combo = "-".join(modnames).lower()
-        self.handle_combo(combo,symbol,modifiers)
+        self.handle_combo(combo,symbol,modifiers,release,True)
+        self.handle_combo(keyname.lower(),symbol,modifiers,release,False)
         if not self.peng.cfg["controls.keybinds.strict"]:
             newmodnames = []
             for modname in modnames:
@@ -160,22 +167,29 @@ class KeybindHandler(object):
             if newmodnames==modnames:
                 return
             combo = "-".join(newmodnames).lower()
-            self.handle_combo(combo,symbol,modifiers)
-    def handle_combo(self,combo,symbol,modifiers):
+            self.handle_combo(combo,symbol,modifiers,release,True)
+    def handle_combo(self,combo,symbol,modifiers,release=False,mod=True):
         """
         Handles a key combination and dispatches associated events.
         
         First, all keybind handlers registered via :py:meth:`add` will be handled,
-        then the event ``on_key_combo`` with params ``(combo,symbol,modifiers)`` is sent to the :py:class:`Peng()` instance.
+        then the event ``on_key_combo`` with params ``(combo,symbol,modifiers,release,mod)`` is sent to the :py:class:`Peng()` instance.
         
         :params str combo: Key combination pressed
         :params int symbol: Key pressed, passed from the same argument within pyglet
         :params int modifiers: Modifiers held while the key was pressed
+        :params bool release: If the combo was released
+        :params bool mod: If the combo was sent without mods
         """
         if self.peng.cfg["controls.keybinds.debug"]:
-            print("combo: %s"%combo)
-        for kbname in self.keybinds.get(combo,[]):
-            self.kbname[kbname](symbol,modifiers)
-        self.peng.handleEvent("on_key_combo",(combo,symbol,modifiers))
+            print("combo: nm=%s %s"%(mod,combo))
+        if mod:
+            for kbname in self.keybinds.get(combo,[]):
+                self.kbname[kbname](symbol,modifiers,release)
+        else:
+            for kbname in self.keybinds_nm.get(combo,[]):
+                self.kbname[kbname](symbol,modifiers,release)
+        self.peng.handleEvent("on_key_combo",(combo,symbol,modifiers,release,mod))
     def on_key_release(self,symbol,modifiers):
-        self.on_key_press(symbol,modifiers|MOD_RELEASE)
+        #self.on_key_press(symbol,modifiers|MOD_RELEASE)
+        self.on_key_press(symbol,modifiers,release=True)
