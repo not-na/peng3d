@@ -66,9 +66,24 @@ Fog settings
    
    By default disabled.
 
-.. todo::
+.. confval:: graphics.fogSettings["color"]
    
-   Implement fog settings
+   A 4-Tuple representing an RGB Color.
+   
+   Note that the values should be 0<=n<=1, not in range(0,256).
+   
+   For most cases, this value should be set to the clear color, else, visual artifacts may occur.
+
+.. confval:: graphics.fogSettings["start"]
+             graphics.fogSettings["end"]
+   
+   Defines start and end of the fog zone.
+   
+   The end value should be nearer than the far clipping plane to avoid cut-off vertices.
+   
+   Each value should be a float and is measured in standard OpenGL units.
+   
+   By default, the fog starts at 128 units and ends 32 units further out.
 
 Light settings
 ^^^^^^^^^^^^^^

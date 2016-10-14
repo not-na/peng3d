@@ -88,6 +88,28 @@ class PengWindow(pyglet.window.Window):
             self.setupFog()
         if self.cfg["graphics.lightSettings"]["enable"]:
             self.setupLight()
+    def setupFog(self):
+        fogcfg = self.cfg["graphics.fogSettings"]
+        if not fogcfg["enable"]:
+            return
+        
+        glEnable(GL_FOG)
+        
+        if fogcfg["color"] is None:
+            fogcfg["color"] = self.cfg["graphics.clearColor"]
+        # Set the fog color.
+        glFogfv(GL_FOG_COLOR, (GLfloat * 4)(*fogcfg["color"]))
+        # Set the performance hint.
+        glHint(GL_FOG_HINT, GL_DONT_CARE) # TODO: add customization, including headless support
+        # Specify the equation used to compute the blending factor.
+        glFogi(GL_FOG_MODE, GL_LINEAR)
+        # How close and far away fog starts and ends. The closer the start and end,
+        # the denser the fog in the fog range.
+        glFogf(GL_FOG_START, fogcfg["start"])
+        glFogf(GL_FOG_END, fogcfg["end"])
+        
+    def setupLight(self):
+        raise NotImplementedError("Currently not implemented")
     
     def run(self):
         """

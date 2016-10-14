@@ -36,10 +36,12 @@ TERRAIN = [-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]
 COLORS  = [255,0,0, 0,255,0, 0,0,255, 255,255,255]
 
 def main(args):
+    # Peng engine instance creation and creating the window
     peng = peng3d.Peng()
     peng.createWindow(caption="Peng3d Test Project",resizable=True,vsync=True)
     peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
     peng.window.toggle_exclusivity()
+    # Keybinds
     def esc_toggle(symbol,modifiers,release):
         if release:
             return
@@ -50,15 +52,21 @@ def main(args):
         if release:
             return
         peng.keybinds.changeKeybind("peng3d:actor.player.controls.forward","space")
-        peng.keybinds.changeKeybind("peng3d:actor.player.controls.forward.release","release-space")
     peng.keybinds.add("f3","testpy:handler.test",test_handler)
+    # Fog and clear color config
+    peng.cfg["graphics.clearColor"]=[0.5,0.69,1.0,1.0]
+    peng.cfg["graphics.fogSettings"]["enable"]=True
+    peng.cfg["graphics.fogSettings"]["start"]=4
+    peng.cfg["graphics.fogSettings"]["end"]=8
     # Creates world/cam/view/player
     world = peng3d.StaticWorld(peng,TERRAIN,COLORS)
     #player = peng3d.actor.player.FirstPersonPlayer(peng,world)
     player = peng3d.actor.player.BasicPlayer(peng,world)
+    # Player controllers
     player.addController(peng3d.actor.player.FourDirectionalMoveController(player))
     player.addController(peng3d.actor.player.EgoMouseRotationalController(player))
     player.addController(peng3d.actor.player.BasicFlightController(player))
+    # Player view/camera
     world.addActor(player)
     c = peng3d.CameraActorFollower(world,"cam1",player)
     world.addCamera(c)
@@ -70,12 +78,15 @@ def main(args):
     peng.window.addMenu(m)
     l = peng3d.LayerWorld(m,peng.window,peng,world,"view1")
     m.addLayer(l)
+    # Switch to the main menu
     peng.window.changeMenu("main")
     # Done!
     if CONSOLE:
+        # Starts a console in seperate Thread, allows interactive debugging and testing stuff easily
         t = threading.Thread(target=code.interact,name="REPL Thread",kwargs={"local":locals()})
         t.daemon = True
         t.start()
+    # Starts the main loop
     peng.run()
     return 0
 

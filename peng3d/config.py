@@ -24,20 +24,6 @@
 
 __all__ = ["CFG_FOG_DEFAULT","CFG_LIGHT_DEFAULT","DEFAULT_CONFIG","Config"]
 
-CFG_FOG_DEFAULT = {"enable":False}
-"""
-Default fog configuration.
-
-This configuration simply disables fog.
-"""
-
-CFG_LIGHT_DEFAULT = {"enable":False}
-"""
-Default lighting configuration.
-
-This configuration simply disables lighting.
-"""
-
 class Config(object):
     """
     Configuration object imitating a dictionary.
@@ -77,6 +63,26 @@ class Config(object):
         self.config[key] = value
     def __contains__(self,key):
         return key in self.config
+
+CFG_FOG_DEFAULT = {
+    "enable":False,
+    
+    "color":None,
+    "start":128,
+    "end":128+32,
+    }
+"""
+Default fog configuration.
+
+This configuration simply disables fog.
+"""
+
+CFG_LIGHT_DEFAULT = {"enable":False}
+"""
+Default lighting configuration.
+
+This configuration simply disables lighting.
+"""
 
 DEFAULT_CONFIG = {
     # graphics.*
