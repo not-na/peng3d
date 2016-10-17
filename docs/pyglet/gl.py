@@ -22,3 +22,5 @@
 #  
 #  
 
+GL_TEXTURE_2D =         -1
+GL_TEXTURE1 =           -1
