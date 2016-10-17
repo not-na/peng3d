@@ -34,3 +34,5 @@ from .version import *
 from .world import *
 from .actor.player import *
 from .actor import *
+from .gui import *
+from .gui.widgets import *
