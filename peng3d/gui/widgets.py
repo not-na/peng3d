@@ -283,11 +283,11 @@ class _FakeTexture(object):
         self.anchor_x = 0
         self.anchor_y = 0
 
-class TextureGroup(pyglet.graphics.TextureGroup):
-    def unset_state(self):
-        super(TextureGroup,self).unset_state()
-        print("unset State %.4f"%time.time())
-        pass
+#class TextureGroup(pyglet.graphics.TextureGroup):
+#    def unset_state(self):
+#        super(TextureGroup,self).unset_state()
+#        print("unset State %.4f"%time.time())
+#        pass
 
 class ImageButton(Button):
     def __init__(self,name,submenu,window,peng,
@@ -307,7 +307,7 @@ class ImageButton(Button):
     def init_bg(self):
         # Currently disabled due to extremely buggy behaviour
         return
-        self.bg_group = TextureGroup(_FakeTexture(*self.bg_texinfo))
+        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo))
         self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,self.bg_group,
             "v2f",
             ("t3f",self.bg_texinfo[2]),
