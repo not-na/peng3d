@@ -45,6 +45,8 @@ def createTexBin():
 def createGUI(main,game):
     global title,playbtn,optionsbtn,testbtn,tex, options,backbtn
     global gamel
+    peng.resourceMgr.addCategory("gui")
+    
     # Titlescreen
     title = peng3d.gui.SubMenu("titlescreen",main,peng.window,peng)
     title.setBackground([242,241,240])
@@ -53,7 +55,7 @@ def createGUI(main,game):
     playbtn = peng3d.gui.Button("playbtn",title,peng.window,peng,
                                 pos=lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.),
                                 size=[100,100],
-                                borderstyle="gradient",
+                                borderstyle="oldshadow",
                                 label="Play",
                                 )
     # Changes both the menu and enables exclusivity
@@ -65,7 +67,7 @@ def createGUI(main,game):
     optionsbtn = peng3d.gui.Button("optionsbtn",title,peng.window,peng,
                                 pos=lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-120),
                                 size=[100,100],
-                                borderstyle="material",
+                                borderstyle="oldshadow",
                                 label="Options",
                                 )
     # Changes submenu
@@ -73,24 +75,11 @@ def createGUI(main,game):
     title.addWidget(optionsbtn)
     
     # Testbtn
-    img = pyglet.image.load("testbtn.png")
-    tex = texBin.add(img)
-    #tex = img.get_texture()
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
-    glGenerateMipmap(GL_TEXTURE_2D)
-    #tex = tex.get_transform(True,True)
-    #print(GL_TEXTURE_2D)
-    #print(GL_TEXTURE0)
-    #print(tex.id)
-    #print([tex.target,tex.id,tex.tex_coords])
     testbtn = peng3d.gui.ImageButton("testbtn",title,peng.window,peng,
                                 pos=lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+120),
                                 size=[100,100],
                                 label="Test",
-                                bg=[tex.target,tex.id,tex.tex_coords],
+                                bg=peng.resourceMgr.getTex("test_gui:gui.testbtn","gui")
                                 )
     # Debug Print
     def f():print("Testbtn clicked!")
@@ -129,7 +118,7 @@ def createGUI(main,game):
     continuebtn = peng3d.gui.Button("continuebtn",pause,peng.window,peng,
                                 pos=lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.),
                                 size=[100,100],
-                                borderstyle="gradient",
+                                borderstyle="oldshadow",
                                 label="Continue",
                                 )
     # Returns to the game

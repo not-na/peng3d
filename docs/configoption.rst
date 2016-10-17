@@ -195,6 +195,29 @@ All of these options are disabled by default.
    
    If enabled, all event handler registrations are printed.
 
+Resource Options
+----------------
+
+.. confval:: rsrc.enable
+   
+   Enables or Disables the resource module.
+   
+   By default enabled.
+
+.. confval:: rsrc.basepath
+   
+   Base directory of the Resource Manager.
+   
+   By default determined via :py:func:`pyglet.resource.get_script_home()`\ .
+
+.. confval:: rsrc.maxtexsize
+   
+   Maximum Texture size per bin.
+   
+   Limits the texture in size, useful if the graphics card has big textures (16kx16k) but only few textures will be needed.
+   
+   By default set to 1024.
+
 Other Options
 -------------
 

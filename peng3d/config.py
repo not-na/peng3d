@@ -22,7 +22,31 @@
 #  
 #  
 
+import sys
+import os
+
 __all__ = ["CFG_FOG_DEFAULT","CFG_LIGHT_DEFAULT","DEFAULT_CONFIG","Config"]
+
+def _get_script_home():
+    # Docs removed to not show on autodoc
+    # Integrated from pyglet.resource to also work on headless distributions
+    # see http://pyglet.readthedocs.io/en/pyglet-1.2-maintenance/programming_guide/resources.html
+    frozen = getattr(sys, 'frozen', None)
+    if frozen in ('windows_exe', 'console_exe'):
+        return os.path.dirname(sys.executable)
+    elif frozen == 'macosx_app':
+        # py2app
+        return os.environ['RESOURCEPATH']
+    else:
+        main = sys.modules['__main__']
+        if hasattr(main, '__file__'):
+            return os.path.dirname(os.path.abspath(main.__file__))
+        else:
+            # cx_Freeze
+            return os.path.dirname(sys.executable)
+
+    # Probably interactive
+    return os.getcwd() # Always return a path
 
 class Config(object):
     """
@@ -115,6 +139,12 @@ DEFAULT_CONFIG = {
     "debug.events.dump":False,
     "debug.events.logerr":False,
     "debug.events.register":False,
+    
+    # rsrc.*
+    # Resource config
+    "rsrc.enable":True,
+    "rsrc.basepath":_get_script_home(),
+    "rsrc.maxtexsize":1024, # Actual limit may be less, will be adjusted based on GL Capabilities
     
     # Other config options
     "pyglet.patch.patch_float2int":True,

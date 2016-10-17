@@ -27,7 +27,7 @@ __all__ = ["Peng"]
 import sys
 
 #from . import window, config, keybind, pyglet_patch
-from . import config, world
+from . import config, world, resource
 
 _pyglet_patched = sys.version_info.major == 2 or not world._have_pyglet
 
@@ -53,6 +53,11 @@ class Peng(object):
         self.cfg = config.Config(cfg,defaults=config.DEFAULT_CONFIG)
         if world._have_pyglet:
             self.keybinds = keybind.KeybindHandler(self)
+        
+        if self.cfg["rsrc.enable"]:
+            self.resourceMgr = resource.ResourceManager(self,self.cfg["rsrc.basepath"])
+        else:
+            self.resourceMgr = None
         
         if not _pyglet_patched and self.cfg["pyglet.patch.patch_float2int"]:
             _pyglet_patched = True

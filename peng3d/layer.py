@@ -112,6 +112,9 @@ class Layer2D(Layer):
     When overriding the :py:meth:`predraw()` method, make sure to call the superclass.
     """
     def predraw(self):
+        """
+        Uses :py:meth:`PengWindow.set2d()` to enable a 2D OpenGL state.
+        """
         self.window.set2d()
 
 class Layer3D(Layer):
@@ -131,6 +134,9 @@ class Layer3D(Layer):
             raise TypeError("cam must be of type Camera!")
         self.cam = cam
     def predraw(self):
+        """
+        Uses :py:meth:`PengWindow.set3d()` to enable a 3D OpenGL state.
+        """
         self.window.set3d(self.cam)
 
 class LayerGroup(Layer):
@@ -146,15 +152,20 @@ class LayerGroup(Layer):
        For more information about pyglet groups, see `the pyglet docs <http://pyglet.readthedocs.io/en/latest/programming_guide/graphics.html#setting-the-opengl-state>`_\ .
     
     """
-    
     def __init__(self,menu,window,peng,group):
         super(LayerGroup,self).__init__(menu,window,peng)
         if not isinstance(group,pyglet.graphics.Group):
             raise TypeError("group must be an instance of pyglet.graphics.Group")
         self.group = group
     def predraw(self):
+        """
+        Sets the group state.
+        """
         self.group.set_state()
     def postdraw(self):
+        """
+        Unsets the group state.
+        """
         self.group.unset_state()
 
 class LayerWorld(Layer3D):
