@@ -54,10 +54,7 @@ class Peng(object):
         if world._have_pyglet:
             self.keybinds = keybind.KeybindHandler(self)
         
-        if self.cfg["rsrc.enable"]:
-            self.resourceMgr = resource.ResourceManager(self,self.cfg["rsrc.basepath"])
-        else:
-            self.resourceMgr = None
+        self.resourceMgr = None
         
         if not _pyglet_patched and self.cfg["pyglet.patch.patch_float2int"]:
             _pyglet_patched = True
@@ -85,6 +82,8 @@ class Peng(object):
         if self.window is not None:
             raise RuntimeError("Window already created!")
         self.window = cls(self,*args,**kwargs)
+        if self.cfg["rsrc.enable"]:
+            self.resourceMgr = resource.ResourceManager(self,self.cfg["rsrc.basepath"])
         return self.window
     
     def run(self):
@@ -126,4 +125,7 @@ class Peng(object):
         self.eventHandlers[event_type].append(handler)
 
 class HeadlessPeng(object):
-    pass
+    def __init__(self,cfg={}):
+        if "rsrc.enable" not in cfg:
+            cfg["rsrc.enable"]=False
+        super(HeadlessPeng,self).__init__(cfg)
