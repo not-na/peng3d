@@ -38,8 +38,6 @@ class ResourceManager(object):
         glGetIntegerv(GL_MAX_TEXTURE_SIZE,maxsize)
         maxsize = min(maxsize.value,self.peng.cfg["rsrc.maxtexsize"]) # This is here to avoid massive memory overhead when only loading a few textures
         self.texsize = maxsize
-        self.blockTexBin = pyglet.image.atlas.TextureBin(maxsize,maxsize)
-        self.generalTexBin = pyglet.image.atlas.TextureBin(maxsize,maxsize)
         self.categories = {}
         self.categoriesTexCache = {}
         self.categoriesTexBin = {}
