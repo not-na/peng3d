@@ -54,6 +54,7 @@ class Widget(object):
         
         self.is_hovering = False
         self.pressed = False
+        self._enabled = True
         
         self.registerEventHandlers()
     
@@ -84,7 +85,19 @@ class Widget(object):
     
     @property
     def clickable(self):
-        return self.submenu.name == self.submenu.menu.activeSubMenu and self.submenu.menu.name == self.window.activeMenu
+        return self.submenu.name == self.submenu.menu.activeSubMenu and self.submenu.menu.name == self.window.activeMenu and self.enabled
+    @clickable.setter
+    def clickable(self,value):
+        self._enabled=value
+        self.redraw()
+    
+    @property
+    def enabled(self):
+        return self._enabled
+    @enabled.setter
+    def enabled(self,value):
+        self._enabled=value
+        self.redraw()
     
     def addAction(self,action,func,*args,**kwargs):
         if action not in self.actions:
@@ -165,7 +178,6 @@ class Button(Widget):
             "v2f",
             "c3B",
             )
-        self.vlists.append([self.vlist,GL_QUADS])
     
     def draw(self):
         super(Button,self).draw()
@@ -283,39 +295,40 @@ class _FakeTexture(object):
         self.anchor_x = 0
         self.anchor_y = 0
 
-#class TextureGroup(pyglet.graphics.TextureGroup):
-#    def unset_state(self):
-#        super(TextureGroup,self).unset_state()
-#        print("unset State %.4f"%time.time())
-#        pass
-
 class ImageButton(Button):
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],
                  label="Button",
-                 bg=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12]
+                 bg=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_hover=None,
+                 bg_disabled=None,
+                 bg_pressed=None,
                  ):
         self.bg_texinfo = bg
-        #if len(self.bg_texinfo[2])==12:
-        #    self.bg_texinfo[2]=list(self.bg_texinfo[2])
-        #    del self.bg_texinfo[2][2]
-        #    del self.bg_texinfo[2][4]
-        #    del self.bg_texinfo[2][6]
-        #    del self.bg_texinfo[2][8]
-        #print(self.bg_texinfo)
+        if bg_hover is None:
+            assert bg_hover[1]==self.bg_texinfo[1] # see init_bg()
+            self.bg_hover=bg
+        else:
+            self.bg_hover=bg_hover
+        if bg_disabled is None:
+            assert bg_disabled[1]==self.bg_texinfo[1] # see init_bg()
+            self.bg_disabled=bg
+        else:
+            self.bg_disabled=bg_disabled
+        if bg_pressed is None:
+            assert bg_pressed[1]==self.bg_texinfo[1] # see init_bg()
+            self.bg_pressed=bg
+        else:
+            self.bg_pressed=bg_pressed
         super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,label=label)
     def init_bg(self):
-        # Currently disabled due to extremely buggy behaviour
-        return
+        # TODO: add seperate groups per active texture, in case the different images are on different textures
         self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo))
         self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,self.bg_group,
             "v2f",
             ("t3f",self.bg_texinfo[2]),
             )
-        self.vlists.append([self.vlist_bg,GL_QUADS])
     def redraw_bg(self):
-        # Currently disabled due to extremely buggy behaviour
-        return
         # Convenience variables
         sx,sy = self.size
         x,y = self.pos
@@ -336,12 +349,11 @@ class ImageButton(Button):
         
         # Textures
         
-        #self.vlist_bg.tex_coords = self.bg_texinfo[2]
-        #self.vlist_bg.tex_coords = [0,0,1,0,1,1,0,1]
-        #self.vlist_bg.tex_coords = [0,0,0,1,0,0,1,1,0,0,1,0]
-        #print(list(self.vlist_bg.tex_coords))
-        #print(list(self.vlist_bg.vertices))
-    def draw(self):
-        # Very hacky code because my own code doesn't seem to work at all
-        pyglet.image.Texture.blit(_FakeTexture(*self.bg_texinfo),x=self.pos[0],y=self.pos[1],width=self.size[0],height=self.size[1])
-        super(ImageButton,self).draw()
+        if not self.enabled:
+            self.vlist_bg.tex_coords = self.bg_disabled[2]
+        elif self.pressed:
+            self.vlist_bg.tex_coords = self.bg_pressed[2]
+        elif self.is_hovering:
+            self.vlist_bg.tex_coords = self.bg_hover[2]
+        else:
+            self.vlist_bg.tex_coords = self.bg_texinfo[2]

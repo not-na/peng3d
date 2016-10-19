@@ -61,7 +61,8 @@ class ResourceManager(object):
         except FileNotFoundError:
             img = self.getMissingTexture()
         texreg = self.categoriesTexBin[category].add(img)
-        texreg = texreg.get_transform(True,True) # Mirrors the image due to how pyglets coordinate system works
+        #texreg = texreg.get_transform(True,True) # Mirrors the image due to how pyglets coordinate system works
+        # Strange behaviour, sometimes needed and sometimes not
         self.categories[category][name]=texreg
         target = texreg.target
         texid = texreg.id

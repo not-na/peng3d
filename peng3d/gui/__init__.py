@@ -96,6 +96,7 @@ class SubMenu(object):
         else:
             raise TypeError("Unknown background type")
         self.window.set2d() # In case the bg layer was in 3d
+        self.batch2d.draw()
         for widget in self.widgets.values():
             widget.draw()
     

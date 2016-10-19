@@ -79,11 +79,15 @@ def createGUI(main,game):
                                 pos=lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+120),
                                 size=[100,100],
                                 label="Test",
-                                bg=peng.resourceMgr.getTex("test_gui:gui.testbtn","gui")
+                                bg=peng.resourceMgr.getTex("test_gui:gui.testbtn","gui"),
+                                bg_pressed=peng.resourceMgr.getTex("test_gui:gui.testbtn-pressed","gui"),
+                                bg_hover=peng.resourceMgr.getTex("test_gui:gui.testbtn-hover","gui"),
+                                bg_disabled=peng.resourceMgr.getTex("test_gui:gui.testbtn-disabled","gui"),
                                 )
     # Debug Print
     def f():print("Testbtn clicked!")
     testbtn.addAction("click",f)
+    testbtn.addAction("click",setattr,testbtn,"enabled",False)
     title.addWidget(testbtn)
     
     main.addSubMenu(title)
