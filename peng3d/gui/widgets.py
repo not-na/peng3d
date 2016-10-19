@@ -37,7 +37,188 @@ def mouse_aabb(mpos,size,pos):
 
 LABEL_FONT_SIZE = 16
 
-class Widget(object):
+class Background(object):
+    def __init__(self,widget):
+        self.widget = widget
+    def init_bg(self):
+        pass
+    def redraw_bg(self):
+        pass
+    
+    @property
+    def submenu(self):
+        return self.widget.submenu
+    
+    @property
+    def window(self):
+        return self.widget.window
+    
+    @property
+    def peng(self):
+        return self.widget.peng
+
+class EmptyBackground(Background):
+    pass
+
+class _FakeTexture(object):
+    def __init__(self,target,texid,texcoords):
+        self.target = target
+        self.id = texid
+        self.tex_coords = texcoords
+        self.anchor_x = 0
+        self.anchor_y = 0
+
+class ImageBackground(Background):
+    def __init__(self,widget,bg=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None):
+        self.bg_texinfo = bg
+        if bg_hover is None:
+            assert bg_hover[1]==self.bg_texinfo[1] # see init_bg()
+            self.bg_hover=bg
+        else:
+            self.bg_hover=bg_hover
+        if bg_disabled is None:
+            assert bg_disabled[1]==self.bg_texinfo[1] # see init_bg()
+            self.bg_disabled=bg
+        else:
+            self.bg_disabled=bg_disabled
+        if bg_pressed is None:
+            assert bg_pressed[1]==self.bg_texinfo[1] # see init_bg()
+            self.bg_pressed=bg
+        else:
+            self.bg_pressed=bg_pressed
+        super(ImageBackground,self).__init__(widget)
+    def init_bg(self):
+        # TODO: add seperate groups per active texture, in case the different images are on different textures
+        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo))
+        self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,self.bg_group,
+            "v2f",
+            ("t3f",self.bg_texinfo[2]),
+            )
+    def redraw_bg(self):
+        # Convenience variables
+        sx,sy = self.widget.size
+        x,y = self.widget.pos
+        
+        # Button background
+        
+        # Outer vertices
+        #    x          y
+        v1 = x,         y+sy
+        v2 = x+sx,      y+sy
+        v3 = x,         y
+        v4 = x+sx,      y
+        
+        q = v3+v4+v2+v1
+        
+        self.vlist_bg.vertices = q
+        
+        # Textures
+        
+        if not self.widget.enabled:
+            self.vlist_bg.tex_coords = self.bg_disabled[2]
+        elif self.widget.pressed:
+            self.vlist_bg.tex_coords = self.bg_pressed[2]
+        elif self.widget.is_hovering:
+            self.vlist_bg.tex_coords = self.bg_hover[2]
+        else:
+            self.vlist_bg.tex_coords = self.bg_texinfo[2]
+
+class ButtonBackground(Background):
+    def __init__(self,widget,border,borderstyle="flat"):
+        self.border = border
+        self.borderstyle = borderstyle
+        super(ButtonBackground,self).__init__(widget)
+    def init_bg(self):
+        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,None,
+            "v2f",
+            "c3B",
+            )
+    def redraw_bg(self):
+        # Convenience variables
+        sx,sy = self.widget.size
+        x,y = self.widget.pos
+        bx,by = self.border
+        
+        # Button background
+        
+        # Outer vertices
+        #    x          y
+        v1 = x,         y+sy
+        v2 = x+sx,      y+sy
+        v3 = x,         y
+        v4 = x+sx,      y
+        
+        # Inner vertices
+        #    x          y
+        v5 = x+bx,      y+sy-by
+        v6 = x+sx-bx,   y+sy-by
+        v7 = x+bx,      y+by
+        v8 = x+sx-bx,   y+by
+        
+        # 5 Quads, for edges and the center
+        qb1 = v5+v6+v2+v1
+        qb2 = v8+v4+v2+v6
+        qb3 = v3+v4+v8+v7
+        qb4 = v3+v7+v5+v1
+        qc  = v7+v8+v6+v5
+        
+        v = qb1+qb2+qb3+qb4+qc
+        
+        self.vlist.vertices = v
+        
+        bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
+        o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
+        s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
+        # Outer,Inner,Shadow,Highlight
+        
+        if self.borderstyle == "flat":
+            # Flat style makes no difference between normal,hover and pressed
+            cb1 = i+i+i+i
+            cb2 = i+i+i+i
+            cb3 = i+i+i+i
+            cb4 = i+i+i+i
+            cc  = i+i+i+i
+        elif self.borderstyle == "gradient":
+            if self.widget.pressed:
+                i = s
+            elif self.widget.is_hovering:
+                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+            cb1 = i+i+o+o
+            cb2 = i+o+o+i
+            cb3 = o+o+i+i
+            cb4 = o+i+i+o
+            cc  = i+i+i+i
+        elif self.borderstyle == "oldshadow":
+            if self.widget.pressed:
+                i = s
+                s,h = h,s
+            elif self.widget.is_hovering:
+                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+                s = [min(s[0]+6,255),min(s[1]+6,255),min(s[2]+6,255)]
+            cb1 = h+h+h+h
+            cb2 = s+s+s+s
+            cb3 = s+s+s+s
+            cb4 = h+h+h+h
+            cc  = i+i+i+i
+        elif self.borderstyle == "material":
+            if self.widget.pressed:
+                i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
+            elif self.widget.is_hovering:
+                i = [max(bg[0]-10,0),max(bg[1]-10,0),max(bg[2]-10,0)]
+            cb1 = s+s+o+o
+            cb2 = s+o+o+s
+            cb3 = o+o+s+s
+            cb4 = o+s+s+o
+            cc  = i+i+i+i
+        else:
+            raise ValueError("Invalid Border style")
+        
+        c = cb1+cb2+cb3+cb4+cc
+        
+        self.vlist.colors = c
+    
+
+class BasicWidget(object):
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None):
         self.name = name
@@ -151,12 +332,34 @@ class Widget(object):
     def on_resize(self,width,height):
         self.redraw()
 
+class Widget(BasicWidget):
+    def __init__(self,name,submenu,window,peng,
+                 pos=None,size=None,
+                 bg=None
+                ):
+        self.bg = bg
+        self.bg_initialized = False
+        super(Widget,self).__init__(name,submenu,window,peng,pos,size)
+    def setBackground(self,bg):
+        self.bg = bg
+        self.redraw()
+    
+    def redraw(self):
+        if self.bg is not None:
+            if not self.bg_initialized:
+                self.bg.init_bg()
+                self.bg_initialized=True
+            self.bg.redraw_bg()
+        super(Widget,self).redraw()
+
 class Button(Widget):
     def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],
+                 pos=None, size=[100,24],bg=None,
                  border=[4,4], borderstyle="flat",
                  label="Button"):
-        super(Button,self).__init__(name,submenu,window,peng,pos,size)
+        if bg is None:
+            bg = ButtonBackground(self,border,borderstyle)
+        super(Button,self).__init__(name,submenu,window,peng,pos,size,bg)
         self._label = pyglet.text.Label(label,
                 font_name="Arial",
                 font_size=LABEL_FONT_SIZE,
@@ -165,120 +368,23 @@ class Button(Widget):
                 batch=self.submenu.batch2d,
                 anchor_x="center", anchor_y="center"
                 )
-        self.border = border
-        self.borderstyle = borderstyle
-        self.init_bg()
         self.redraw()
         
         # Redraws the button every 2 seconds to prevent glitched graphics
         pyglet.clock.schedule_interval(self.redraw,2)
     
-    def init_bg(self):
-        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,None,
-            "v2f",
-            "c3B",
-            )
-    
-    def draw(self):
-        super(Button,self).draw()
-        self._label.draw()
-    
     def redraw(self,dt=None):
-        self.redraw_bg()
+        super(Button,self).redraw()
         self.redraw_label()
     def redraw_label(self):
         # Convenience variables
         sx,sy = self.size
         x,y = self.pos
-        bx,by = self.border
         
         # Label position
         self._label.x = x+sx/2.
         self._label.y = y+sy/2.
         self._label._update() # Needed to prevent the label from drifting to the top-left after resizing by odd amounts
-    def redraw_bg(self):
-        # Convenience variables
-        sx,sy = self.size
-        x,y = self.pos
-        bx,by = self.border
-        
-        # Button background
-        
-        # Outer vertices
-        #    x          y
-        v1 = x,         y+sy
-        v2 = x+sx,      y+sy
-        v3 = x,         y
-        v4 = x+sx,      y
-        
-        # Inner vertices
-        #    x          y
-        v5 = x+bx,      y+sy-by
-        v6 = x+sx-bx,   y+sy-by
-        v7 = x+bx,      y+by
-        v8 = x+sx-bx,   y+by
-        
-        # 5 Quads, for edges and the center
-        qb1 = v5+v6+v2+v1
-        qb2 = v8+v4+v2+v6
-        qb3 = v3+v4+v8+v7
-        qb4 = v3+v7+v5+v1
-        qc  = v7+v8+v6+v5
-        
-        v = qb1+qb2+qb3+qb4+qc
-        
-        self.vlist.vertices = v
-        
-        bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
-        o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
-        s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
-        # Outer,Inner,Shadow,Highlight
-        
-        if self.borderstyle == "flat":
-            # Flat style makes no difference between normal,hover and pressed
-            cb1 = i+i+i+i
-            cb2 = i+i+i+i
-            cb3 = i+i+i+i
-            cb4 = i+i+i+i
-            cc  = i+i+i+i
-        elif self.borderstyle == "gradient":
-            if self.pressed:
-                i = s
-            elif self.is_hovering:
-                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
-            cb1 = i+i+o+o
-            cb2 = i+o+o+i
-            cb3 = o+o+i+i
-            cb4 = o+i+i+o
-            cc  = i+i+i+i
-        elif self.borderstyle == "oldshadow":
-            if self.pressed:
-                i = s
-                s,h = h,s
-            elif self.is_hovering:
-                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
-                s = [min(s[0]+6,255),min(s[1]+6,255),min(s[2]+6,255)]
-            cb1 = h+h+h+h
-            cb2 = s+s+s+s
-            cb3 = s+s+s+s
-            cb4 = h+h+h+h
-            cc  = i+i+i+i
-        elif self.borderstyle == "material":
-            if self.pressed:
-                i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
-            elif self.is_hovering:
-                i = [max(bg[0]-10,0),max(bg[1]-10,0),max(bg[2]-10,0)]
-            cb1 = s+s+o+o
-            cb2 = s+o+o+s
-            cb3 = o+o+s+s
-            cb4 = o+s+s+o
-            cc  = i+i+i+i
-        else:
-            raise ValueError("Invalid Border style")
-        
-        c = cb1+cb2+cb3+cb4+cc
-        
-        self.vlist.colors = c
     
     @property
     def label(self):
@@ -287,73 +393,15 @@ class Button(Widget):
     def label(self,label):
         self._label.text = label
 
-class _FakeTexture(object):
-    def __init__(self,target,texid,texcoords):
-        self.target = target
-        self.id = texid
-        self.tex_coords = texcoords
-        self.anchor_x = 0
-        self.anchor_y = 0
-
 class ImageButton(Button):
     def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],
+                 pos=None, size=[100,24],bg=None,
                  label="Button",
-                 bg=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
                  bg_hover=None,
                  bg_disabled=None,
                  bg_pressed=None,
                  ):
-        self.bg_texinfo = bg
-        if bg_hover is None:
-            assert bg_hover[1]==self.bg_texinfo[1] # see init_bg()
-            self.bg_hover=bg
-        else:
-            self.bg_hover=bg_hover
-        if bg_disabled is None:
-            assert bg_disabled[1]==self.bg_texinfo[1] # see init_bg()
-            self.bg_disabled=bg
-        else:
-            self.bg_disabled=bg_disabled
-        if bg_pressed is None:
-            assert bg_pressed[1]==self.bg_texinfo[1] # see init_bg()
-            self.bg_pressed=bg
-        else:
-            self.bg_pressed=bg_pressed
-        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,label=label)
-    def init_bg(self):
-        # TODO: add seperate groups per active texture, in case the different images are on different textures
-        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo))
-        self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,self.bg_group,
-            "v2f",
-            ("t3f",self.bg_texinfo[2]),
-            )
-    def redraw_bg(self):
-        # Convenience variables
-        sx,sy = self.size
-        x,y = self.pos
-        bx,by = self.border
-        
-        # Button background
-        
-        # Outer vertices
-        #    x          y
-        v1 = x,         y+sy
-        v2 = x+sx,      y+sy
-        v3 = x,         y
-        v4 = x+sx,      y
-        
-        q = v3+v4+v2+v1
-        
-        self.vlist_bg.vertices = q
-        
-        # Textures
-        
-        if not self.enabled:
-            self.vlist_bg.tex_coords = self.bg_disabled[2]
-        elif self.pressed:
-            self.vlist_bg.tex_coords = self.bg_pressed[2]
-        elif self.is_hovering:
-            self.vlist_bg.tex_coords = self.bg_hover[2]
-        else:
-            self.vlist_bg.tex_coords = self.bg_texinfo[2]
+        if bg is None:
+            bg = ImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed)
+        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label)
