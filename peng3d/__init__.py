@@ -36,4 +36,6 @@ from .actor.player import *
 from .actor import *
 from .gui import *
 from .gui.widgets import *
+from .gui.button import *
+from .gui.slider import *
 from .resource import *

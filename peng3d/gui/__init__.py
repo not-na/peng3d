@@ -33,6 +33,8 @@ except ImportError:
 from ..menu import Menu
 from ..layer import Layer,Layer2D
 from .widgets import *
+from .button import *
+from .slider import *
 
 class GUIMenu(Menu):
     def __init__(self,name,window,peng):
