@@ -78,17 +78,40 @@ def createGUI(main,game):
     testbtn = peng3d.gui.ImageButton("testbtn",title,peng.window,peng,
                                 pos=lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+120),
                                 size=[100,100],
+                                #size=lambda w,h: (w*.10,h*.10),
                                 label="Test",
+                                #borderstyle="oldshadow",
                                 bg_idle=peng.resourceMgr.getTex("test_gui:gui.testbtn","gui"),
                                 bg_pressed=peng.resourceMgr.getTex("test_gui:gui.testbtn-pressed","gui"),
                                 bg_hover=peng.resourceMgr.getTex("test_gui:gui.testbtn-hover","gui"),
                                 bg_disabled=peng.resourceMgr.getTex("test_gui:gui.testbtn-disabled","gui"),
+                                #frame_size=[
+                                #    [9,81,10],
+                                #    [9,81,10],
+                                #    ]
                                 )
     # Debug Print
     def f():print("Testbtn clicked!")
     testbtn.addAction("click",f)
     testbtn.addAction("click",setattr,testbtn,"enabled",False)
+    def f():testslider.value=200
+    testbtn.addAction("click",f)
     title.addWidget(testbtn)
+    
+    testslider = peng3d.gui.Slider("testslider",title,peng.window,peng,
+                                pos=lambda sw,sh,bw,bh: (sw/2.+70,sh/2.-bh/2.),
+                                size=[200,24],
+                                borderstyle="oldshadow",
+                                nmin=0,nmax=100,
+                                n=0,
+                                )
+    def f():print(testslider.n)
+    #testslider.addAction("progresschange",f)
+    title.addWidget(testslider)
+    def f(dt=0):
+        testslider.value+=1
+        testslider.value%=100
+    #pyglet.clock.schedule_interval(f,1./30)
     
     main.addSubMenu(title)
     
