@@ -22,7 +22,7 @@
 #  
 #  
 
-__all__ = ["Peng"]
+__all__ = ["Peng","HeadlessPeng"]
 
 import sys
 
@@ -125,6 +125,13 @@ class Peng(object):
         self.eventHandlers[event_type].append(handler)
 
 class HeadlessPeng(object):
+    """
+    Variant of peng that should work without having pyglet installed.
+    
+    This class is intended for use in servers as a drop-in replacement for the normal engine class.
+    
+    Note that this class is only in its beginnings and should not be used yet.
+    """
     def __init__(self,cfg={}):
         if "rsrc.enable" not in cfg:
             cfg["rsrc.enable"]=False

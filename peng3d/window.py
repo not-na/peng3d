@@ -89,6 +89,11 @@ class PengWindow(pyglet.window.Window):
         if self.cfg["graphics.lightSettings"]["enable"]:
             self.setupLight()
     def setupFog(self):
+        """
+        Sets the fog system up.
+        
+        The specific options available are documented under :confval:`graphics.fogSettings`\ .
+        """
         fogcfg = self.cfg["graphics.fogSettings"]
         if not fogcfg["enable"]:
             return
@@ -109,6 +114,13 @@ class PengWindow(pyglet.window.Window):
         glFogf(GL_FOG_END, fogcfg["end"])
         
     def setupLight(self):
+        """
+        Sets the light system up.
+        
+        The specific options available are documented under :confval:`graphics.lightSettings`\ .
+        
+        Note that this feature is currently not implemented.
+        """
         raise NotImplementedError("Currently not implemented")
     
     def run(self):

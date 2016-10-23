@@ -101,8 +101,14 @@ def build_py_coverage(self): # Method taken from sphinx source code v1.3.3 on th
                         if attr_name[0] == '_':
                             # starts with an underscore, ignore it
                             continue
+                        ######### Custom filters
                         if attr_name.startswith("on_"):
                             continue
+                        if attr_name in ["init_bg","redraw_bg"]:
+                            continue
+                        if getattr(attr,"__noautodoc__",False):
+                            continue
+                        ######### End Custom filters
                         if skip_undoc and not attr.__doc__:
                             # skip methods without docstring if wished
                             continue

@@ -34,6 +34,12 @@ from .widgets import Background,Widget
 from .button import ButtonBackground
 
 class ProgressbarBackground(Background):
+    """
+    Background for the :py:class:`Progressbar` Widget.
+    
+    This background displays a bar with a border similiar to :py:class:`ButtonBackground`\ .
+    Note that two colors may be given, one for the left and one for the right.
+    """
     def __init__(self,widget,border,borderstyle,colors):
         super(ProgressbarBackground,self).__init__(widget)
         self.border = border
@@ -124,9 +130,20 @@ class ProgressbarBackground(Background):
         c = cb1+cb2+cb3+cb4+cc1+cc2
         
         self.vlist.colors = c
-        
 
 class Progressbar(Widget):
+    """
+    Progressbar displaying a progress of any action to the user.
+    
+    By default, this Widget uses :py:class:`ProgressbarBackground` as its Background class.
+    
+    The border and borderstyle options are the same as for the :py:class:`peng3d.gui.button.Button` Widget.
+    
+    The two colors given are for left and right, respectively. This may be used to create gradients.
+    
+    ``nmin``\ , ``nmax`` and ``n`` represent the minimal value, maximal value and current value, respectively.
+    Unexpected behaviour may occur if the minimal value is bigger then the maximum value.
+    """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
                  bg=None,
@@ -145,6 +162,9 @@ class Progressbar(Widget):
     
     @property
     def nmin(self):
+        """
+        Property representing the minimal value of the progressbar. Typically ``0``\ .
+        """
         return self._nmin
     @nmin.setter
     def nmin(self,value):
@@ -153,6 +173,9 @@ class Progressbar(Widget):
     
     @property
     def nmax(self):
+        """
+        Property representing the maximum value of the progressbar. Typically ``100`` to represent percentages easily.
+        """
         return self._nmax
     @nmax.setter
     def nmax(self,value):
@@ -161,6 +184,11 @@ class Progressbar(Widget):
     
     @property
     def n(self):
+        """
+        Property representing the current value of the progressbar.
+        
+        Changing this property will activate the ``progresschange`` action.
+        """
         return self._n
     @n.setter
     def n(self,value):
@@ -172,6 +200,9 @@ class Progressbar(Widget):
     
     @property
     def value(self):
+        """
+        Alias to the :py:attr:`n` property.
+        """
         return self._n
     @value.setter
     def value(self,value):
@@ -181,7 +212,15 @@ class Progressbar(Widget):
         self._n = value
         self.redraw()
 
+
 class SliderBackground(ButtonBackground):
+    """
+    Background for the :py:class:`Slider` Widget.
+    
+    This background displays a button-like handle on top of a bar representing the selectable range.
+    
+    All given parameters will affect the handle.
+    """
     def init_bg(self):
         self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,None,
             "v2f",
@@ -292,6 +331,17 @@ class SliderBackground(ButtonBackground):
         self.vlist_bg.colors=cbg
 
 class Slider(Progressbar):
+    """
+    Slider that can be used to get a number from the user.
+    
+    By default, this Widget uses :py:class:`SliderBackground` as its Background class.
+    
+    Most options are the same as for :py:class:`Progressbar`\ .
+    
+    ``handlesize`` simply determines the size of the handle.
+    
+    Note that scaling this widget on the y-axis will not do much, scale the handlesize instead.
+    """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  border=[4,4], borderstyle="flat",
@@ -314,5 +364,10 @@ class Slider(Progressbar):
     
     @property
     def p(self):
+        """
+        Helper property containing the percentage this slider is "filled".
+        
+        This property is read-only.
+        """
         return (self.n-self.nmin)/(self.nmax-self.nmin)
 

@@ -22,7 +22,7 @@
 #  
 #  
 
-__all__ = ["GUIMenu","SubMenu"]
+__all__ = ["GUIMenu","SubMenu","GUILayer"]
 
 try:
     import pyglet
@@ -37,6 +37,11 @@ from .button import *
 from .slider import *
 
 class GUIMenu(Menu):
+    """
+    :py:class:`peng3d.menu.Menu` subclass adding 2D GUI Support.
+    
+    Note that widgets are not managed directly by this class, but rather by each :py:class:`SubMenu`\ .
+    """
     def __init__(self,name,window,peng):
         super(GUIMenu,self).__init__(name,window,peng)
         pyglet.clock.schedule_interval(lambda dt: None,1./30)
@@ -44,8 +49,18 @@ class GUIMenu(Menu):
         self.activeSubMenu = None
     
     def addSubMenu(self,submenu):
+        """
+        Adds a :py:class:`SubMenu` to this Menu.
+        
+        Note that nothing will be displayed unless a submenu is activated.
+        """
         self.submenus[submenu.name] = submenu
     def changeSubMenu(self,submenu):
+        """
+        Changes the submenu that is displayed.
+        
+        :raises ValueError: if the name was not previously registered
+        """
         if submenu not in self.submenus:
             raise ValueError("Submenu %s does not exist!"%submenu)
         elif submenu == self.activeSubMenu:
@@ -57,14 +72,27 @@ class GUIMenu(Menu):
         self.submenu.on_enter(old)
     
     def draw(self):
+        """
+        Draws each menu layer and the active submenu.
+        
+        Note that the layers are drawn first and may be overriden by the submenu and widgets.
+        """
         super(GUIMenu,self).draw()
         self.submenu.draw()
     
     @property
     def submenu(self):
+        """
+        Property containing the :py:class:`SubMenu` instance that is currently active.
+        """
         return self.submenus[self.activeSubMenu]
 
 class SubMenu(object):
+    """
+    Sub Menu of the GUI system.
+    
+    Each instance must be registered with their menu to work properly, see :py:meth:`GUIMenu.addSubMenu()`\ .
+    """
     def __init__(self,name,menu,window,peng):
         self.name = name
         self.menu = menu
@@ -84,6 +112,11 @@ class SubMenu(object):
         self.batch2d = pyglet.graphics.Batch()
     
     def draw(self):
+        """
+        Draws the submenu and its background.
+        
+        Note that this leaves the OpenGL state set to 2d drawing.
+        """
         self.window.set2d()
         if isinstance(self.bg,Layer):
             self.bg._draw()
@@ -103,11 +136,27 @@ class SubMenu(object):
             widget.draw()
     
     def addWidget(self,widget):
+        """
+        Adds a widget to this submenu.
+        """
         self.widgets[widget.name]=widget
     def getWidget(self,name):
+        """
+        Returns the widget with the given name.
+        """
         return self.widgets[name]
     
     def setBackground(self,bg):
+        """
+        Sets the background of the submenu.
+        
+        The background may be a RGB or RGBA color to fill the background with.
+        
+        Alternatively, a :py:class:`peng3d.layer.Layer` instance or other object with a ``.draw()`` method may be supplied.
+        It is also possible to supply any other method or function that will get called.
+        
+        Lastly, the string ``"blank"`` may be passed to skip background drawing.
+        """
         self.bg = bg
         if isinstance(bg,list) or isinstance(bg,tuple):
             if len(bg)==3 and isinstance(bg,list):
@@ -124,11 +173,19 @@ class SubMenu(object):
         pass
 
 class GUILayer(GUIMenu,Layer2D):
+    """
+    Hybrid of :py:class:`GUIMenu` and :py:class:`peng3d.layer.Layer2D`\ .
+    
+    This class allows you to create Head-Up Displays and other overlays easily.
+    """
     # TODO: add safety recursion breaker if this is added as a layer to itself
     def __init__(self,name,menu,window,peng):
         Layer2D.__init__(self,menu,window,peng)
         GUIMenu.__init__(self,menu.name,window,peng)
     def draw(self):
+        """
+        Draws the Menu.
+        """
         self.predraw()
         GUIMenu.draw(self)
         self.postdraw()

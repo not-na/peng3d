@@ -19,6 +19,10 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    peng3d.window
    peng3d.layer
    peng3d.menu
+   gui/index
+   gui/widgets
+   gui/button
+   gui/slider
    peng3d.camera
    peng3d.world
    actor/index

@@ -37,6 +37,181 @@ from .widgets import Background,Widget
 
 LABEL_FONT_SIZE = 16
 
+
+class ButtonBackground(Background):
+    """
+    Background for the :py:class:`Button` Widget.
+    
+    This background renders the button and its border, but not the label.
+    """
+    def __init__(self,widget,border,borderstyle="flat"):
+        self.border = border
+        self.borderstyle = borderstyle
+        super(ButtonBackground,self).__init__(widget)
+    def init_bg(self):
+        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,None,
+            "v2f",
+            "c3B",
+            )
+    def redraw_bg(self):
+        # Convenience variables
+        sx,sy = self.widget.size
+        x,y = self.widget.pos
+        bx,by = self.border
+        
+        # Button background
+        
+        # Outer vertices
+        #    x          y
+        v1 = x,         y+sy
+        v2 = x+sx,      y+sy
+        v3 = x,         y
+        v4 = x+sx,      y
+        
+        # Inner vertices
+        #    x          y
+        v5 = x+bx,      y+sy-by
+        v6 = x+sx-bx,   y+sy-by
+        v7 = x+bx,      y+by
+        v8 = x+sx-bx,   y+by
+        
+        # 5 Quads, for edges and the center
+        qb1 = v5+v6+v2+v1
+        qb2 = v8+v4+v2+v6
+        qb3 = v3+v4+v8+v7
+        qb4 = v3+v7+v5+v1
+        qc  = v7+v8+v6+v5
+        
+        v = qb1+qb2+qb3+qb4+qc
+        
+        self.vlist.vertices = v
+        
+        bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
+        o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
+        s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
+        # Outer,Inner,Shadow,Highlight
+        
+        if self.borderstyle == "flat":
+            # Flat style makes no difference between normal,hover and pressed
+            cb1 = i+i+i+i
+            cb2 = i+i+i+i
+            cb3 = i+i+i+i
+            cb4 = i+i+i+i
+            cc  = i+i+i+i
+        elif self.borderstyle == "gradient":
+            if self.widget.pressed:
+                i = s
+            elif self.widget.is_hovering:
+                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+            cb1 = i+i+o+o
+            cb2 = i+o+o+i
+            cb3 = o+o+i+i
+            cb4 = o+i+i+o
+            cc  = i+i+i+i
+        elif self.borderstyle == "oldshadow":
+            if self.widget.pressed:
+                i = s
+                s,h = h,s
+            elif self.widget.is_hovering:
+                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+                s = [min(s[0]+6,255),min(s[1]+6,255),min(s[2]+6,255)]
+            cb1 = h+h+h+h
+            cb2 = s+s+s+s
+            cb3 = s+s+s+s
+            cb4 = h+h+h+h
+            cc  = i+i+i+i
+        elif self.borderstyle == "material":
+            if self.widget.pressed:
+                i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
+            elif self.widget.is_hovering:
+                i = [max(bg[0]-10,0),max(bg[1]-10,0),max(bg[2]-10,0)]
+            cb1 = s+s+o+o
+            cb2 = s+o+o+s
+            cb3 = o+o+s+s
+            cb4 = o+s+s+o
+            cc  = i+i+i+i
+        else:
+            raise ValueError("Invalid Border style")
+        
+        c = cb1+cb2+cb3+cb4+cc
+        
+        self.vlist.colors = c
+
+class Button(Widget):
+    """
+    Button Widget allowing the user to trigger specific actions.
+    
+    By default, this Widget uses :py:class:`ButtonBackground` as its Background class.
+    
+    The border given is in pixels from the left/right and top/bottom, respectively.
+    
+    The borderstyle may be either ``flat``\ , which has no border at all, 
+    ``gradient``\ , which fades from the inner color to the background color, 
+    ``oldshadow``\ , which uses a simple fake shadow with the light from the top-left corner and
+    ``material``\ , which imitates Google Material Design shadows.
+    
+    Also, the label of the button may only be a single line of text, anything else may produce undocumented behaviour.
+    
+    If neccessary, the font size of the Label may be changed via the global Constant :py:data:`LABEL_FONT_SIZE`\ , changes will only apply to Buttons created after change.
+    The text color used is ``[62,67,73,255]`` in RGBA and the font used is Arial, which should be available on most systems.
+    """
+    def __init__(self,name,submenu,window,peng,
+                 pos=None, size=[100,24],bg=None,
+                 border=[4,4], borderstyle="flat",
+                 label="Button"):
+        if bg is None:
+            bg = ButtonBackground(self,border,borderstyle)
+        super(Button,self).__init__(name,submenu,window,peng,pos,size,bg)
+        self._label = pyglet.text.Label(label,
+                font_name="Arial",
+                font_size=LABEL_FONT_SIZE,
+                color=[62,67,73,255],
+                x=0,y=0,
+                batch=self.submenu.batch2d,
+                anchor_x="center", anchor_y="center"
+                )
+        self.redraw()
+        
+        # Redraws the button every 2 seconds to prevent glitched graphics
+        pyglet.clock.schedule_interval(self.redraw,2)
+    
+    def draw(self):
+        """
+        Draws the button and its Label.
+        """
+        super(Button,self).draw()
+        self._label.draw()
+    
+    def redraw(self,dt=None):
+        super(Button,self).redraw()
+        self.redraw_label()
+    redraw.__noautodoc__ = True
+    def redraw_label(self):
+        """
+        Re-draws the label by calculating its position.
+        
+        Currently, the label will always be centered on the Button.
+        """
+        # Convenience variables
+        sx,sy = self.size
+        x,y = self.pos
+        
+        # Label position
+        self._label.x = x+sx/2.
+        self._label.y = y+sy/2.
+        self._label._update() # Needed to prevent the label from drifting to the top-left after resizing by odd amounts
+    
+    @property
+    def label(self):
+        """
+        Property for accessing the label of this Button.
+        """
+        return self._label.text
+    @label.setter
+    def label(self,label):
+        self._label.text = label
+
+
 class _FakeTexture(object):
     def __init__(self,target,texid,texcoords):
         self.target = target
@@ -46,6 +221,13 @@ class _FakeTexture(object):
         self.anchor_y = 0
 
 class ImageBackground(Background):
+    """
+    Background for the :py:class:`ImageButton` Widget.
+    
+    This background renders a image given based on whether the widget is pressed, hovered over or disabled.
+    
+    It should also be possible to use this class as a background for most other Widgets.
+    """
     def __init__(self,widget,bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None):
         bg = bg_idle
         self.bg_texinfo = bg
@@ -101,7 +283,35 @@ class ImageBackground(Background):
         else:
             self.vlist_bg.tex_coords = self.bg_texinfo[2]
 
+class ImageButton(Button):
+    """
+    Subclass of :py:class:`Button` using an image as a background instead.
+    
+    By default, this Widget uses :py:class:`ImageBackground` as its Background class.
+    
+    There are no changes to any other mechanics of the Button, only visually.
+    """
+    def __init__(self,name,submenu,window,peng,
+                 pos=None, size=[100,24],bg=None,
+                 label="Button",
+                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_hover=None,
+                 bg_disabled=None,
+                 bg_pressed=None,
+                 ):
+        if bg is None:
+            bg = ImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed)
+        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label)
+
+
 class FramedImageBackground(ImageBackground):
+    """
+    Background for the :py:class:`FramedImageButton` Widget.
+    
+    This background is similiar to :py:class:`ImageBackground`\ , but it attempts to scale smarter with less artifacts.
+    
+    Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
+    """
     def __init__(self,widget,bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None,frame_size=[[2,10,2],[2,10,2]]):
         print("Use FramedImageBackground with care, may produce graphical glitches and crashes")
         # TODO: fix this
@@ -320,146 +530,38 @@ class FramedImageBackground(ImageBackground):
         self.vlist_bg.vertices=v
         self.vlist_bg.tex_coords=t
 
-class ButtonBackground(Background):
-    def __init__(self,widget,border,borderstyle="flat"):
-        self.border = border
-        self.borderstyle = borderstyle
-        super(ButtonBackground,self).__init__(widget)
-    def init_bg(self):
-        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,None,
-            "v2f",
-            "c3B",
-            )
-    def redraw_bg(self):
-        # Convenience variables
-        sx,sy = self.widget.size
-        x,y = self.widget.pos
-        bx,by = self.border
-        
-        # Button background
-        
-        # Outer vertices
-        #    x          y
-        v1 = x,         y+sy
-        v2 = x+sx,      y+sy
-        v3 = x,         y
-        v4 = x+sx,      y
-        
-        # Inner vertices
-        #    x          y
-        v5 = x+bx,      y+sy-by
-        v6 = x+sx-bx,   y+sy-by
-        v7 = x+bx,      y+by
-        v8 = x+sx-bx,   y+by
-        
-        # 5 Quads, for edges and the center
-        qb1 = v5+v6+v2+v1
-        qb2 = v8+v4+v2+v6
-        qb3 = v3+v4+v8+v7
-        qb4 = v3+v7+v5+v1
-        qc  = v7+v8+v6+v5
-        
-        v = qb1+qb2+qb3+qb4+qc
-        
-        self.vlist.vertices = v
-        
-        bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
-        o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
-        s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
-        # Outer,Inner,Shadow,Highlight
-        
-        if self.borderstyle == "flat":
-            # Flat style makes no difference between normal,hover and pressed
-            cb1 = i+i+i+i
-            cb2 = i+i+i+i
-            cb3 = i+i+i+i
-            cb4 = i+i+i+i
-            cc  = i+i+i+i
-        elif self.borderstyle == "gradient":
-            if self.widget.pressed:
-                i = s
-            elif self.widget.is_hovering:
-                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
-            cb1 = i+i+o+o
-            cb2 = i+o+o+i
-            cb3 = o+o+i+i
-            cb4 = o+i+i+o
-            cc  = i+i+i+i
-        elif self.borderstyle == "oldshadow":
-            if self.widget.pressed:
-                i = s
-                s,h = h,s
-            elif self.widget.is_hovering:
-                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
-                s = [min(s[0]+6,255),min(s[1]+6,255),min(s[2]+6,255)]
-            cb1 = h+h+h+h
-            cb2 = s+s+s+s
-            cb3 = s+s+s+s
-            cb4 = h+h+h+h
-            cc  = i+i+i+i
-        elif self.borderstyle == "material":
-            if self.widget.pressed:
-                i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
-            elif self.widget.is_hovering:
-                i = [max(bg[0]-10,0),max(bg[1]-10,0),max(bg[2]-10,0)]
-            cb1 = s+s+o+o
-            cb2 = s+o+o+s
-            cb3 = o+o+s+s
-            cb4 = o+s+s+o
-            cc  = i+i+i+i
-        else:
-            raise ValueError("Invalid Border style")
-        
-        c = cb1+cb2+cb3+cb4+cc
-        
-        self.vlist.colors = c
-
-class Button(Widget):
+class FramedImageButton(ImageButton):
+    """
+    Subclass of :py:class:`ImageButton` adding smart scaling to the background.
+    
+    By default, this Widget uses :py:class:`FramedImageBackground` as its Background class.
+    
+    Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
+    """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
-                 border=[4,4], borderstyle="flat",
-                 label="Button"):
+                 label="Button",
+                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_hover=None,
+                 bg_disabled=None,
+                 bg_pressed=None,
+                 frame_size=[[2,10,2],[2,10,2]],
+                 ):
         if bg is None:
-            bg = ButtonBackground(self,border,borderstyle)
-        super(Button,self).__init__(name,submenu,window,peng,pos,size,bg)
-        self._label = pyglet.text.Label(label,
-                font_name="Arial",
-                font_size=LABEL_FONT_SIZE,
-                color=[62,67,73,255],
-                x=0,y=0,
-                batch=self.submenu.batch2d,
-                anchor_x="center", anchor_y="center"
-                )
-        self.redraw()
-        
-        # Redraws the button every 2 seconds to prevent glitched graphics
-        pyglet.clock.schedule_interval(self.redraw,2)
-    
-    def draw(self):
-        super(Button,self).draw()
-        self._label.draw()
-    
-    def redraw(self,dt=None):
-        super(Button,self).redraw()
-        self.redraw_label()
-    def redraw_label(self):
-        # Convenience variables
-        sx,sy = self.size
-        x,y = self.pos
-        
-        # Label position
-        self._label.x = x+sx/2.
-        self._label.y = y+sy/2.
-        self._label._update() # Needed to prevent the label from drifting to the top-left after resizing by odd amounts
-    
-    @property
-    def label(self):
-        return self._label.text
-    @label.setter
-    def label(self,label):
-        self._label.text = label
+            bg = FramedImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed,frame_size)
+        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label)
+
 
 class ToggleButton(Button):
+    """
+    Variant of :py:class:`Button` that stays pressed until clicked again.
+    
+    This widgets adds the following actions:
+    
+    - ``press_down`` is called upon depressing the button
+    - ``press_up`` is called upon releasing the button
+    - ``click`` is changed to be called on every click on the button, e.g. like ``press_down`` and ``press_up`` combined
+    """
     def on_mouse_press(self,x,y,button,modifiers):
         if not self.clickable:
             return
@@ -477,35 +579,15 @@ class ToggleButton(Button):
     def on_mouse_release(self,x,y,button,modifiers):
         pass
 
-class ImageButton(Button):
-    def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],bg=None,
-                 label="Button",
-                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
-                 bg_hover=None,
-                 bg_disabled=None,
-                 bg_pressed=None,
-                 ):
-        if bg is None:
-            bg = ImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed)
-        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label)
-
-class FramedImageButton(ImageButton):
-    def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],bg=None,
-                 label="Button",
-                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
-                 bg_hover=None,
-                 bg_disabled=None,
-                 bg_pressed=None,
-                 frame_size=[[2,10,2],[2,10,2]],
-                 ):
-        if bg is None:
-            bg = FramedImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed,frame_size)
-        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label)
-
 
 class CheckboxBackground(ButtonBackground):
+    """
+    Background for the :py:class:`Checkbox` Widget.
+    
+    This background looks like a button, but adds a square in the middle if it is pressed.
+    
+    The color of the square defaults to a tone of orange commonly found in GTK GUIs on Ubuntu.
+    """
     def __init__(self,widget,borderstyle,checkcolor=[240,119,70]):
         self.checkcolor = checkcolor
         super(CheckboxBackground,self).__init__(widget,[3,3],borderstyle)
@@ -644,6 +726,15 @@ class CheckboxBackground(ButtonBackground):
         self.vlist_check.vertices = v3+v4+v2+v1
 
 class Checkbox(ToggleButton):
+    """
+    Variant of :py:class:`ToggleButton` using a different visual indicator.
+    
+    By default, this Widget uses :py:class:`CheckboxBackground` as its Background class.
+    
+    Note that the position and size given are for the indicator, the label will be bigger than the given size.
+    
+    The label given will be displayed to the right of the Checkbox.
+    """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  borderstyle="flat",
@@ -653,6 +744,9 @@ class Checkbox(ToggleButton):
             bg = CheckboxBackground(self,borderstyle,checkcolor)
         super(Checkbox,self).__init__(name,submenu,window,peng,pos,size,bg,borderstyle=borderstyle,label=label)
     def redraw_label(self):
+        """
+        Re-calculates the position of the Label.
+        """
         # Convenience variables
         sx,sy = self.size
         x,y = self.pos
