@@ -35,6 +35,7 @@ from ..layer import Layer,Layer2D
 from .widgets import *
 from .button import *
 from .slider import *
+from .text import *
 
 class GUIMenu(Menu):
     """

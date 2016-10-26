@@ -38,4 +38,5 @@ from .gui import *
 from .gui.widgets import *
 from .gui.button import *
 from .gui.slider import *
+from .gui.text import *
 from .resource import *

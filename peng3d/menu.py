@@ -71,6 +71,7 @@ class BasicMenu(object):
                 handler(*args)
         for world in self.worlds:
             world.handle_event(event_type,args,self.window)
+    handleEvent.__noautodoc__ = True
     def registerEventHandler(self,event_type,handler):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]

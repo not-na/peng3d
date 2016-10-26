@@ -112,6 +112,7 @@ class World(object):
         if event_type in self.eventHandlers:
             for handler in self.eventHandlers[event_type]:
                 handler(*args)
+    handle_event.__noautodoc__ = True
     def registerEventHandler(self,event_type,handler):
         if self.peng.cfg["debug.events.register"]:
             print("Registered Event: %s Handler: %s"%(event_type,handler))

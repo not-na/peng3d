@@ -592,11 +592,11 @@ class CheckboxBackground(ButtonBackground):
         self.checkcolor = checkcolor
         super(CheckboxBackground,self).__init__(widget,[3,3],borderstyle)
     def init_bg(self):
-        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,None,
+        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,pyglet.graphics.OrderedGroup(1),
             "v2f",
             "c3B",
             )
-        self.vlist_check = self.submenu.batch2d.add(4,GL_QUADS,None,
+        self.vlist_check = self.submenu.batch2d.add(4,GL_QUADS,pyglet.graphics.OrderedGroup(10),
             "v2f",
             "c3B",
             )

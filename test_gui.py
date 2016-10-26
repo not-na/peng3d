@@ -99,19 +99,43 @@ def createGUI(main,game):
     title.addWidget(testbtn)
     
     testslider = peng3d.gui.Slider("testslider",title,peng.window,peng,
-                                pos=lambda sw,sh,bw,bh: (sw/2.+70,sh/2.-bh/2.),
-                                size=[200,24],
+                                pos=lambda sw,sh,bw,bh: (sw/2.-70-bw,sh/2.-bh/2.),
+                                size=[255,24],
                                 borderstyle="oldshadow",
-                                nmin=0,nmax=100,
+                                nmin=0,nmax=255,
                                 n=0,
                                 )
+    def f():
+        testlabel._label.color[3]=testslider.n
+        testlabel._label._update()
+    testslider.addAction("progresschange",f)
     def f():print(testslider.n)
     #testslider.addAction("progresschange",f)
     title.addWidget(testslider)
     def f(dt=0):
         testslider.value+=1
-        testslider.value%=100
-    #pyglet.clock.schedule_interval(f,1./30)
+        testslider.value%=testslider.nmax
+    pyglet.clock.schedule_interval(f,1./30)
+    
+    # Testlabel
+    testlabel = peng3d.gui.Label("testlabel",title,peng.window,peng,
+                                pos=lambda sw,sh,bw,bh: (sw/2.+70,sh/2.-bh/2.),
+                                size=[100,24],
+                                label="Test Label",
+                                )
+    # No Actions
+    title.addWidget(testlabel)
+    
+    # Testinput
+    testinput = peng3d.gui.TextInput("testinput",title,peng.window,peng,
+                                pos=lambda sw,sh,bw,bh: (sw/2.+70,sh/2.-bh/2.+bh+20),
+                                size=[100,32],
+                                borderstyle="oldshadow",
+                                text="",
+                                default="Default",
+                                )
+    # No Actions
+    title.addWidget(testinput)
     
     main.addSubMenu(title)
     
