@@ -91,31 +91,34 @@ def createGUI(main,game):
                                 #    ]
                                 )
     # Debug Print
-    def f():print("Testbtn clicked!")
-    testbtn.addAction("click",f)
-    testbtn.addAction("click",setattr,testbtn,"enabled",False)
-    def f():testslider.value=200
+    def f():
+        print("Testbtn clicked!")
     testbtn.addAction("click",f)
     title.addWidget(testbtn)
     
     testslider = peng3d.gui.Slider("testslider",title,peng.window,peng,
-                                pos=lambda sw,sh,bw,bh: (sw/2.-70-bw,sh/2.-bh/2.),
+                                pos=[0,300],
                                 size=[255,24],
                                 borderstyle="oldshadow",
                                 nmin=0,nmax=255,
                                 n=0,
                                 )
     def f():
-        testlabel._label.color[3]=testslider.n
-        testlabel._label._update()
+        testcontainer.pos[0]=testslider.n
     testslider.addAction("progresschange",f)
-    def f():print(testslider.n)
-    #testslider.addAction("progresschange",f)
     title.addWidget(testslider)
-    def f(dt=0):
-        testslider.value+=1
-        testslider.value%=testslider.nmax
-    pyglet.clock.schedule_interval(f,1./30)
+    
+    vertslider = peng3d.gui.VerticalSlider("vertslider",title,peng.window,peng,
+                                pos=[300,0],
+                                size=[24,255],
+                                borderstyle="oldshadow",
+                                nmin=0,nmax=255,
+                                n=0,
+                                )
+    def f():
+        testcontainer.pos[1]=vertslider.n
+    vertslider.addAction("progresschange",f)
+    title.addWidget(vertslider)
     
     # Testlabel
     testlabel = peng3d.gui.Label("testlabel",title,peng.window,peng,
@@ -136,6 +139,51 @@ def createGUI(main,game):
                                 )
     # No Actions
     title.addWidget(testinput)
+    
+    # Testcontainer
+    testcontainer = peng3d.gui.ScrollableContainer("testcontainer",title,peng.window,peng,
+                                pos=[100,100],
+                                size=[300,300],
+                                borderstyle="oldshadow",
+                                content_height=200,
+                                )
+    testcontainer.setBackground([255,241,240,255])
+    title.addWidget(testcontainer)
+    
+    tc_label = peng3d.gui.Label("tc_label",testcontainer,peng.window,peng,
+                                pos=[0,0],
+                                size=[100,24],
+                                label="TC0"
+                                )
+    testcontainer.addWidget(tc_label)
+    
+    tc_label2 = peng3d.gui.Label("tc_label2",testcontainer,peng.window,peng,
+                                pos=[0,100],
+                                size=[100,24],
+                                label="TC100"
+                                )
+    testcontainer.addWidget(tc_label2)
+    
+    tc_label3 = peng3d.gui.Label("tc_label3",testcontainer,peng.window,peng,
+                                pos=[0,200],
+                                size=[100,24],
+                                label="TC200"
+                                )
+    testcontainer.addWidget(tc_label3)
+    
+    tc_label4 = peng3d.gui.Label("tc_label4",testcontainer,peng.window,peng,
+                                pos=[0,300],
+                                size=[100,24],
+                                label="TC300"
+                                )
+    testcontainer.addWidget(tc_label4)
+    
+    tc_label5 = peng3d.gui.Label("tc_label5",testcontainer,peng.window,peng,
+                                pos=[0,400],
+                                size=[100,24],
+                                label="TC400"
+                                )
+    testcontainer.addWidget(tc_label5)
     
     main.addSubMenu(title)
     
@@ -189,7 +237,7 @@ def createGUI(main,game):
 def main(args):
     global peng,esc_toggle
     # Peng engine instance creation and creating the window
-    peng = peng3d.Peng()
+    peng = peng3d.Peng({"graphics.stencil.enable":True})
     peng.createWindow(caption="Peng3d GUI Test Project",resizable=True,vsync=True)
     peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
     createTexBin()

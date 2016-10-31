@@ -42,6 +42,14 @@ def mouse_aabb(mpos,size,pos):
     """
     return pos[0]<=mpos[0]<=pos[0]+size[0] and pos[1]<=mpos[1]<=pos[1]+size[1]
 
+class _WatchingList(list):
+    def __init__(self,l,callback=lambda:None):
+        self.callback = callback
+        super(_WatchingList,self).__init__(l)
+    def __setitem__(self,*args):
+        super(_WatchingList,self).__setitem__(*args)
+        self.callback(self)
+
 class Background(object):
     """
     Class representing the background of a widget.
@@ -117,6 +125,8 @@ class BasicWidget(object):
         self.actions = {}
         
         self.vlists = []
+        # :deprecated: VBOs should be added to the batch2d of the submenu
+        # This feature will be removed in future versions
         
         self._pos = pos
         self._size = size
@@ -124,6 +134,7 @@ class BasicWidget(object):
         self.is_hovering = False
         self.pressed = False
         self._enabled = True
+        self._is_scrollbar = False
         
         self.registerEventHandlers()
     
@@ -147,11 +158,20 @@ class BasicWidget(object):
         Note that this method may call the method given as ``pos`` in the initializer.
         """
         if isinstance(self._pos,list) or isinstance(self._pos,tuple):
-            return self._pos
+            r = self._pos
         elif callable(self._pos):
-            return self._pos(self.window.width,self.window.height,*self.size)
+            r = self._pos(self.window.width,self.window.height,*self.size)
         else:
             raise TypeError("Invalid position type")
+        if isinstance(self.submenu,Container): # Widget is inside container
+            r = r[0]+self.submenu.pos[0],r[1]+self.submenu.pos[1]
+        if isinstance(self.submenu,ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
+            r = r[0],r[1]+self.submenu.offset_y
+        return _WatchingList(r,self._wlredraw_pos)
+    @pos.setter
+    def pos(self,value):
+        self._pos = value
+        self.redraw()
     
     @property
     def size(self):
@@ -159,11 +179,15 @@ class BasicWidget(object):
         Similiar to :py:attr:`pos` but for the size instead.
         """
         if isinstance(self._size,list) or isinstance(self._size,tuple):
-            return self._size
+            return _WatchingList(self._size,self._wlredraw_size)
         elif callable(self._size):
-            return self._size(self.window.width,self.window.height)
+            return _WatchingList(self._size(self.window.width,self.window.height),self._wlredraw_size)
         else:
             raise TypeError("Invalid size type")
+    @size.setter
+    def size(self,value):
+        self._size = value
+        self.redraw()
     
     @property
     def clickable(self):
@@ -174,7 +198,10 @@ class BasicWidget(object):
         
         The widget may be either disabled by setting this property or the :py:attr:`enabled` attribute.
         """
-        return self.submenu.name == self.submenu.menu.activeSubMenu and self.submenu.menu.name == self.window.activeMenu and self.enabled
+        if not isinstance(self.submenu,Container):
+            return self.submenu.name == self.submenu.menu.activeSubMenu and self.submenu.menu.name == self.window.activeMenu and self.enabled
+        else:
+            return self.submenu.clickable and self.enabled
     @clickable.setter
     def clickable(self,value):
         self._enabled=value
@@ -233,6 +260,13 @@ class BasicWidget(object):
         Callback to be overriden by subclasses called if redrawing the widget seems necessary.
         """
         pass
+    
+    def _wlredraw_pos(self,wl):
+        self._pos = wl[:]
+        self.redraw()
+    def _wlredraw_size(self,wl):
+        self._size = wl[:]
+        self.redraw()
     
     def on_mouse_press(self,x,y,button,modifiers):
         if not self.clickable:

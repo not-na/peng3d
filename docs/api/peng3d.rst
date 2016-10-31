@@ -23,6 +23,7 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    gui/widgets
    gui/button
    gui/text
+   gui/container
    gui/slider
    peng3d.camera
    peng3d.world

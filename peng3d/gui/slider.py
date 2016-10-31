@@ -25,6 +25,7 @@
 __all__ = [
     "Progressbar","ProgressbarBackground",
     "Slider","SliderBackground",
+    "VerticalSlider","VerticalSliderBackground",
 ]
 
 import pyglet
@@ -371,3 +372,129 @@ class Slider(Progressbar):
         """
         return (self.n-self.nmin)/(self.nmax-self.nmin)
 
+
+class VerticalSliderBackground(SliderBackground):
+    def redraw_bg(self):
+        # Convenience variables
+        #sx,sy = self.widget.size
+        #x,y = self.widget.pos
+        sx,sy = self.widget.handlesize
+        bx,by = self.border
+        x,y = self.widget.pos[0],self.widget.pos[1]+(self.widget.size[1]-by*2)*self.widget.p
+        
+        # Button background
+        
+        # Outer vertices
+        #    x          y
+        v1 = x,         y+sy
+        v2 = x+sx,      y+sy
+        v3 = x,         y
+        v4 = x+sx,      y
+        
+        # Inner vertices
+        #    x          y
+        v5 = x+bx,      y+sy-by
+        v6 = x+sx-bx,   y+sy-by
+        v7 = x+bx,      y+by
+        v8 = x+sx-bx,   y+by
+        
+        # 5 Quads, for edges and the center
+        qb1 = v5+v6+v2+v1
+        qb2 = v8+v4+v2+v6
+        qb3 = v3+v4+v8+v7
+        qb4 = v3+v7+v5+v1
+        qc  = v7+v8+v6+v5
+        
+        v = qb1+qb2+qb3+qb4+qc
+        
+        self.vlist.vertices = v
+        
+        bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
+        o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
+        s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
+        # Outer,Inner,Shadow,Highlight
+        
+        if self.borderstyle == "flat":
+            # Flat style makes no difference between normal,hover and pressed
+            cb1 = i+i+i+i
+            cb2 = i+i+i+i
+            cb3 = i+i+i+i
+            cb4 = i+i+i+i
+            cc  = i+i+i+i
+        elif self.borderstyle == "gradient":
+            if self.widget.pressed:
+                i = s
+            elif self.widget.is_hovering:
+                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+            cb1 = i+i+o+o
+            cb2 = i+o+o+i
+            cb3 = o+o+i+i
+            cb4 = o+i+i+o
+            cc  = i+i+i+i
+        elif self.borderstyle == "oldshadow":
+            if self.widget.pressed:
+                i = s
+                s,h = h,s
+            elif self.widget.is_hovering:
+                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+                s = [min(s[0]+6,255),min(s[1]+6,255),min(s[2]+6,255)]
+            cb1 = h+h+h+h
+            cb2 = s+s+s+s
+            cb3 = s+s+s+s
+            cb4 = h+h+h+h
+            cc  = i+i+i+i
+        elif self.borderstyle == "material":
+            if self.widget.pressed:
+                i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
+            elif self.widget.is_hovering:
+                i = [max(bg[0]-10,0),max(bg[1]-10,0),max(bg[2]-10,0)]
+            cb1 = s+s+o+o
+            cb2 = s+o+o+s
+            cb3 = o+o+s+s
+            cb4 = o+s+s+o
+            cc  = i+i+i+i
+        else:
+            raise ValueError("Invalid Border style")
+        
+        c = cb1+cb2+cb3+cb4+cc
+        
+        self.vlist.colors = c
+        
+        # Background
+        
+        sx,sy = self.widget.size
+        x,y = self.widget.pos
+        bx,by = self.border
+        
+        #    x          y
+        v5 = x+bx,      y+sy-by
+        v6 = x+sx-bx,   y+sy-by
+        v7 = x+bx,      y+by
+        v8 = x+sx-bx,   y+by
+        
+        qbg = v7+v8+v6+v5
+        
+        cbg = [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]*4
+        
+        self.vlist_bg.vertices = qbg
+        self.vlist_bg.colors=cbg
+
+class VerticalSlider(Slider):
+    def __init__(self,name,submenu,window,peng,
+                 pos=None, size=[24,100], bg=None,
+                 border=[4,4], borderstyle="flat",
+                 nmin=0,nmax=100,n=0,
+                 handlesize=[24,16],
+                 ):
+        if bg is None:
+            bg = VerticalSliderBackground(self,border,borderstyle)
+        super(VerticalSlider,self).__init__(name,submenu,window,peng,pos,size,bg,border,borderstyle,nmin,nmax,n,handlesize)
+    def on_mouse_drag(self,x,y,dx,dy,button,modifiers):
+        if not self.pressed:
+            return
+        toty = self.size[1]-self.bg.border[1]*2
+        y = y-self.pos[1]-self.bg.border[1]
+        y = min(max(y,0),toty)
+        n = int(((y/toty)*(self.nmax-self.nmin))+.5)+self.nmin
+        n = min(max(n,self.nmin),self.nmax)
+        self.n = n

@@ -42,6 +42,9 @@ class PengWindow(pyglet.window.Window):
     """
     
     def __init__(self,peng,*args,**kwargs):
+        if peng.cfg["graphics.stencil.enable"]:
+            glconfig = pyglet.gl.Config(stencil_size=peng.cfg["graphics.stencil.bits"])
+            kwargs["config"]=glconfig
         super(PengWindow,self).__init__(*args,**kwargs)
         self.peng = peng
         

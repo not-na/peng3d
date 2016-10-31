@@ -36,6 +36,7 @@ from .widgets import *
 from .button import *
 from .slider import *
 from .text import *
+from .container import *
 
 class GUIMenu(Menu):
     """
