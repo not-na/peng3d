@@ -41,7 +41,7 @@ class Label(Widget):
     
     This widget does not use any background by default.
     
-    The default font color is choosen to work on the default background color and may need to be changed if the background color is changed.
+    The default font color is chosen to work on the default background color and may need to be changed if the background color is changed.
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
@@ -218,7 +218,7 @@ class TextInput(Widget):
     
     The optional default text will only be displayed if the text is empty.
     
-    The ``allow_overflow`` flag determines if the text entered can be longer than the size of the textbox.
+    The ``allow_overflow`` flag determines if the text entered can be longer than the size of the :py:class:`TextInput`\ .
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,

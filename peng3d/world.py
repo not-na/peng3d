@@ -56,7 +56,7 @@ class World(object):
         """
         Add the camera to the internal registry.
         
-        Each camera name must be unique, or else only the most recent version will be used. This behaviour should not be relied on because some objects may cache objects.
+        Each camera name must be unique, or else only the most recent version will be used. This behavior should not be relied on because some objects may cache objects.
         
         Additionally, only instances of :py:class:`Camera() <peng3d.camera.Camera>` may be used, everything else raises a :py:exc:`TypeError`\ .
         """
@@ -129,7 +129,7 @@ class StaticWorld(World):
     ``quads`` is a list of 3d vertices, e.g. a single quad may be ``[-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]``\ , which represents a rectangle of size 2x2 centered around 0,0.
     It should also be noted that all quads have to be in a single list.
     
-    ``colors`` is a list of RGB Colors in a similiar format to ``quads`` but with colors instead. Note that there must be a color for every vertex in the vertice list.
+    ``colors`` is a list of RGB Colors in a similar format to ``quads`` but with colors instead. Note that there must be a color for every vertex in the vertex list.
     Every color is an integer between 0 and 255 using the internal pyglet scheme ``c3B/static``\ .
     
     You can modify the terrain via the ``terrain`` attribute, note that it is a pyglet vertex list, and not a python list.
@@ -240,7 +240,7 @@ class WorldViewMouseRotatable(WorldView):
     
     Moving the mouse cursor left or right will rotate the attached camera horizontally and moving the mouse cursor up or down will rotate the camera vertically.
     
-    By default, each pixel travelled changes the angle in degrees by 0.15, though this can be changed via the :confval:`controls.mouse.sensitivity` config value.
+    By default, each pixel traveled changes the angle in degrees by 0.15, though this can be changed via the :confval:`controls.mouse.sensitivity` config value.
     """
     def on_menu_enter(self,old):
         """

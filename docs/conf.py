@@ -195,6 +195,9 @@ sphinx.ext.autodoc.DataDocumenter.add_directive_header = add_directive_header
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
+spelling_show_suggestions = True
+spelling_ignore_pypi_package_names = True
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -208,6 +211,16 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
 ]
+
+try:
+    import pip
+    installed_packages = pip.get_installed_distributions()
+    flat_installed_packages = [package.project_name for package in installed_packages]
+    if "sphinxcontrib-spelling" in flat_installed_packages and "pyenchant" in flat_installed_packages:
+        extensions.append("sphinxcontrib.spelling")
+        print("Added spelling plugin")
+except ImportError:
+    pass # May happen if pip is not installed
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

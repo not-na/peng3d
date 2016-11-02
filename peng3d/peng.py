@@ -33,7 +33,7 @@ _pyglet_patched = sys.version_info.major == 2 or not world._have_pyglet
 
 class Peng(object):
     """
-    This Class should only be instatiated once per application, if you want to use multiple windows, see :py:meth:`createWindow()`\ .
+    This Class should only be instantiated once per application, if you want to use multiple windows, see :py:meth:`createWindow()`\ .
     
     An Instance of this class represents the whole Engine, with all accompanying state and window/world objects.
     
@@ -114,7 +114,7 @@ class Peng(object):
         """
         Registers an event handler.
         
-        The specified callable handler will be called everytime an event with the same ``event_type`` is encountered.
+        The specified callable handler will be called every time an event with the same ``event_type`` is encountered.
         
         All event arguments are passed as positional arguments.
         """

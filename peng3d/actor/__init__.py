@@ -30,7 +30,7 @@ class Controller(object):
     """
     Base class for all controllers.
     
-    Controllers define behaviour of Actors and can be used to control them via e.g. the keyboard or an AI.
+    Controllers define behavior of Actors and can be used to control them via e.g. the keyboard or an AI.
     
     Every controller is bound to its actor and can be enabled and disabled individually.
     You may also deactivate all controllers of an Actor by setting the ``enabled`` key of :py:attr:`Actor.controlleroptions` to False.

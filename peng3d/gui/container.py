@@ -32,6 +32,14 @@ from .slider import VerticalSlider
 from ..layer import Layer
 
 class Container(Widget):
+    """
+    Main class of the container system.
+    
+    This widget may contain other widgets, limiting the childs to only draw within the defined bounds.
+    Additionally, the given position will also act as a offset, making the child coordinates relative to the parent.
+    
+    This Class is a subclass of :py:class:`peng3d.gui.widgets.Widget` but also exhibits part of the API of :py:class:`peng3d.gui.SubMenu`\ .
+    """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
                 ):
@@ -57,14 +65,9 @@ class Container(Widget):
         
     def setBackground(self,bg):
         """
-        Sets the background of the submenu.
+        Sets the background of the Container.
         
-        The background may be a RGB or RGBA color to fill the background with.
-        
-        Alternatively, a :py:class:`peng3d.layer.Layer` instance or other object with a ``.draw()`` method may be supplied.
-        It is also possible to supply any other method or function that will get called.
-        
-        Lastly, the string ``"blank"`` may be passed to skip background drawing.
+        Similar to :py:meth:`peng3d.gui.SubMenu.setBackground()`\ , but only effects the region covered by the Container.
         """
         self.bg = bg
         if isinstance(bg,list) or isinstance(bg,tuple):
@@ -80,7 +83,9 @@ class Container(Widget):
     
     def addWidget(self,widget):
         """
-        Adds a widget to this submenu.
+        Adds a widget to this container.
+        
+        Note that trying to add the Container to itself will be ignored.
         """
         if self is widget: # Prevents being able to add the container to itself, causing a recursion loop on redraw
             return
@@ -148,6 +153,9 @@ class Container(Widget):
         glClear(GL_STENCIL_BUFFER_BIT)
     
     def redraw(self):
+        """
+        Redraws the background and any child widgets.
+        """
         x,y = self.pos
         sx,sy = self.size
         self.bg_vlist.vertices = [x,y, x+sx,y, x+sx,y+sy, x,y+sy]
@@ -156,11 +164,28 @@ class Container(Widget):
             widget.redraw()
     
     def on_enter(self,old):
+        """
+        Dummy method defined for compatibility with :py:class:`peng3d.gui.SubMenu`, simply does nothing.
+        """
         pass
     def on_exit(self,new):
+        """
+        Dummy method defined for compatibility with :py:class:`peng3d.gui.SubMenu`, simply does nothing.
+        """
         pass
 
 class ScrollableContainer(Container):
+    """
+    Subclass of :py:class:`Container` allowing for scrolling its content.
+    
+    The scrollbar currently is always on the right side and simply consists of a :py:class:`peng3d.gui.slider.VerticalSlider`\ .
+    
+    ``scrollbar_width`` and ``borderstyle`` will be passed to the scrollbar.
+    
+    ``content_height`` refers to the maximum offset the user can scroll to.
+    
+    The content height may be changed, but manually calling :py:meth:`redraw()` will be necessary.
+    """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
                  scrollbar_width=12,
@@ -185,6 +210,11 @@ class ScrollableContainer(Container):
         self.redraw()
     
     def redraw(self):
+        """
+        Redraws the background and contents, including scrollbar.
+        
+        This method will also check the scrollbar for any movement and will be automatically called on movement of the slider.
+        """
         n = self._scrollbar.n
         self.offset_y = -n # Causes the content to move in the opposite direction of the slider
         
@@ -193,7 +223,7 @@ class ScrollableContainer(Container):
         sy=self.size[1]
         # Pos of scrollbar
         x=self.size[0]-sx
-        y=0 # Currently constanct, TODO: add dynamic y-pos of scrollbar
+        y=0 # Currently constant, TODO: add dynamic y-pos of scrollbar
         
         # Dynamic pos/size may be added via align/lambda/etc.
         

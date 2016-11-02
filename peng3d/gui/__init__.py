@@ -77,7 +77,7 @@ class GUIMenu(Menu):
         """
         Draws each menu layer and the active submenu.
         
-        Note that the layers are drawn first and may be overriden by the submenu and widgets.
+        Note that the layers are drawn first and may be overridden by the submenu and widgets.
         """
         super(GUIMenu,self).draw()
         self.submenu.draw()

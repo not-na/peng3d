@@ -186,7 +186,7 @@ def patch_float2int():
     
     This patch is only needed with Python 3.x and will be applied automatically when initializing :py:class:`Peng()`\ .
     
-    The patches consist of simply converting some list indices, slices and other numbers to integers from floats with .0. These patches have not been tested thoroughly, but work with at least test.py
+    The patches consist of simply converting some list indices, slices and other numbers to integers from floats with .0. These patches have not been tested thoroughly, but work with at least ``test.py`` and ``test_gui.py``\ .
     
     Can be enabled and disabled via :confval:`pyglet.patch.patch_float2int`\ .
     """

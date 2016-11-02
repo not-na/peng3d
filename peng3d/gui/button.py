@@ -150,9 +150,9 @@ class Button(Widget):
     ``oldshadow``\ , which uses a simple fake shadow with the light from the top-left corner and
     ``material``\ , which imitates Google Material Design shadows.
     
-    Also, the label of the button may only be a single line of text, anything else may produce undocumented behaviour.
+    Also, the label of the button may only be a single line of text, anything else may produce undocumented behavior.
     
-    If neccessary, the font size of the Label may be changed via the global Constant :py:data:`LABEL_FONT_SIZE`\ , changes will only apply to Buttons created after change.
+    If necessary, the font size of the Label may be changed via the global Constant :py:data:`LABEL_FONT_SIZE`\ , changes will only apply to Buttons created after change.
     The text color used is ``[62,67,73,255]`` in RGBA and the font used is Arial, which should be available on most systems.
     """
     def __init__(self,name,submenu,window,peng,
@@ -308,7 +308,7 @@ class FramedImageBackground(ImageBackground):
     """
     Background for the :py:class:`FramedImageButton` Widget.
     
-    This background is similiar to :py:class:`ImageBackground`\ , but it attempts to scale smarter with less artifacts.
+    This background is similar to :py:class:`ImageBackground`\ , but it attempts to scale smarter with less artifacts.
     
     Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
     """

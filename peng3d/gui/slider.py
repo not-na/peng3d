@@ -38,7 +38,7 @@ class ProgressbarBackground(Background):
     """
     Background for the :py:class:`Progressbar` Widget.
     
-    This background displays a bar with a border similiar to :py:class:`ButtonBackground`\ .
+    This background displays a bar with a border similar to :py:class:`ButtonBackground`\ .
     Note that two colors may be given, one for the left and one for the right.
     """
     def __init__(self,widget,border,borderstyle,colors):
@@ -143,7 +143,7 @@ class Progressbar(Widget):
     The two colors given are for left and right, respectively. This may be used to create gradients.
     
     ``nmin``\ , ``nmax`` and ``n`` represent the minimal value, maximal value and current value, respectively.
-    Unexpected behaviour may occur if the minimal value is bigger then the maximum value.
+    Unexpected behavior may occur if the minimal value is bigger then the maximum value.
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
@@ -374,6 +374,11 @@ class Slider(Progressbar):
 
 
 class VerticalSliderBackground(SliderBackground):
+    """
+    Background for the :py:class:`VerticalSlider` Widget.
+    
+    This background uses the same technique as :py:class:`SliderBackground`\ , simply turned by 90 Degrees.
+    """
     def redraw_bg(self):
         # Convenience variables
         #sx,sy = self.widget.size
@@ -480,6 +485,15 @@ class VerticalSliderBackground(SliderBackground):
         self.vlist_bg.colors=cbg
 
 class VerticalSlider(Slider):
+    """
+    Vertical slider that can be used as a scrollbar or getting other input.
+    
+    By default, this Widget uses :py:class:`VerticalSliderBackground` as its Background class.
+    
+    This widget is essentially the same as :py:class:`Slider`\ , only vertical.
+    
+    Note that you may need to flip the x and y values of ``size``\ , ``handlesize`` and ``border`` compared to :py:class:`Slider`\ .
+    """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[24,100], bg=None,
                  border=[4,4], borderstyle="flat",

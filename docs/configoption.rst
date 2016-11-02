@@ -108,14 +108,14 @@ Controls
 --------
 
 Note that most of these config values are read when the appropriate objects are initialized,
-this means that you should consult the objects documentation for how to change the configvalue at runtime.
+this means that you should consult the objects documentation for how to change the option at runtime.
 
 Mouse
 ^^^^^
 
 .. confval:: controls.mouse.sensitivity
    
-   Degrees to move per pixel travelled by the mouse.
+   Degrees to move per pixel traveled by the mouse.
    
    This applies to both horizontal and vertical movement.
    

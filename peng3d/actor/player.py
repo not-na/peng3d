@@ -38,7 +38,7 @@ class FourDirectionalMoveController(Controller):
     Controller allowing the user to control the actor with the keyboard.
     
     You can configure the used keybinds with the :confval:`controls.controls.forward` etc.
-    The keybinds can also be changed with their keybindnames, e.g. ``peng3d:actor.player.controls.forward`` for forward.
+    The keybinds can also be changed with their ``keybindname``\ , e.g. ``peng3d:actor.player.controls.forward`` for forward.
     
     The movement speed may also be changed via the :py:attr:`movespeed` instance attribute, which defaults to :confval:`controls.controls.movespeed`\ .
     

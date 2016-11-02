@@ -27,7 +27,7 @@ __all__ = ["VERSION","RELEASE"]
 VERSION = "1.5.0a1"
 """
 Full version number of format ``MAJOR.MINOR.BUGFIX(a|b|pre)SUBRELEASE`` where major is increased only on very major feature changes.
-Minor is changed if a new feature is introduced or an API change is made, while bugfix only changes if an important bugfix needs to be provided before the next release.
+Minor is changed if a new feature is introduced or an API change is made, while bugfix only changes if an important fix for a bug needs to be provided before the next release.
 Either a, b, or pre follows depending on the type of release, e.g. a for alpha, b for beta and pre for prereleases.
 
 Used to display the version in the title of the documentation.

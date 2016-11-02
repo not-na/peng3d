@@ -106,11 +106,11 @@ class BasicWidget(object):
     """
     Basic Widget class.
     
-    Every widget must be registered with their appropriate submenus to work properly.
+    Every widget must be registered with their appropriate sub-menus to work properly.
     
     ``pos`` may be either a list or 2-tuple of ``(x,y)`` for static positions or a function with the signature ``window_width,window_height,widget_width,widget_height`` returning a tuple.
     
-    ``size`` is similiar to ``pos`` but will only get ``window_width,window_height`` as its arguments.
+    ``size`` is similar to ``pos`` but will only get ``window_width,window_height`` as its arguments.
     
     Commonly, the lambda ``lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.)`` is used to center the widget.
     
@@ -156,6 +156,12 @@ class BasicWidget(object):
         Property that will always be a 2-tuple representing the position of the widget.
         
         Note that this method may call the method given as ``pos`` in the initializer.
+        
+        The returned object will actually be an instance of a helper class to allow for setting only the x/y coordinate.
+        
+        This property also respects any :py:class:`Container` set as its parent, any offset will be added automatically.
+        
+        Note that setting this property will override any callable set permanently.
         """
         if isinstance(self._pos,list) or isinstance(self._pos,tuple):
             r = self._pos
@@ -176,7 +182,7 @@ class BasicWidget(object):
     @property
     def size(self):
         """
-        Similiar to :py:attr:`pos` but for the size instead.
+        Similar to :py:attr:`pos` but for the size instead.
         """
         if isinstance(self._size,list) or isinstance(self._size,tuple):
             return _WatchingList(self._size,self._wlredraw_size)
@@ -212,7 +218,7 @@ class BasicWidget(object):
         """
         Property used for storing whether or not this widget is enabled.
         
-        May influence rendering and behaviour.
+        May influence rendering and behavior.
         
         Note that the widget will be immediately redrawn if this property is changed.
         """
@@ -234,7 +240,7 @@ class BasicWidget(object):
         - ``click`` is called if the mouse is released on the widget while also having been pressed on it before, recommended for typical button callbacks
         - ``context`` is called upon right-clicking on the widget and may be used to display a context menu
         - ``hover_start`` signals that the cursor is now hovering over the widget
-        - ``hover`` is called everytime the cursor moves while still being over the widget
+        - ``hover`` is called every time the cursor moves while still being over the widget
         - ``hover_end`` is called after the cursor leaves the widget
         """
         if action not in self.actions:
@@ -257,7 +263,7 @@ class BasicWidget(object):
             vlist.draw(t)
     def redraw(self):
         """
-        Callback to be overriden by subclasses called if redrawing the widget seems necessary.
+        Callback to be overridden by subclasses called if redrawing the widget seems necessary.
         """
         pass
     

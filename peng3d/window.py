@@ -217,7 +217,7 @@ class PengWindow(pyglet.window.Window):
         """
         Internal event handling method.
         
-        This method extends the behaviour inherited from :py:meth:`pyglet.window.Window.dispatch_event()` by calling the various :py:meth:`handleEvent()` methods.
+        This method extends the behavior inherited from :py:meth:`pyglet.window.Window.dispatch_event()` by calling the various :py:meth:`handleEvent()` methods.
         
         By default, :py:meth:`Peng.handleEvent()`\ , :py:meth:`handleEvent()` and :py:meth:`Menu.handleEvent()` are called in this order to handle events.
         

@@ -35,7 +35,7 @@ class Layer(object):
     """
     Base layer class.
     
-    A Layer can be used to seperate background from foreground or the 3d world from a 2d HUD.
+    A Layer can be used to separate background from foreground or the 3d world from a 2d HUD.
     
     This class by itself does nothing, you will need to subclass it and override the :py:meth:`draw()` method.
     """
@@ -51,7 +51,7 @@ class Layer(object):
         """
         Called when this layer needs to be drawn.
         
-        Override this method in subclasses to redefine behaviour.
+        Override this method in subclasses to redefine behavior.
         """
         pass
     def predraw(self):
@@ -60,7 +60,7 @@ class Layer(object):
         
         This method is used in the :py:class:`Layer2D()` and :py:class:`Layer3D()` subclasses for setting OpenGL state.
         
-        Override this method in subclasses to redefine behaviour.
+        Override this method in subclasses to redefine behavior.
         """
         pass
     def postdraw(self):
@@ -69,7 +69,7 @@ class Layer(object):
         
         This method can be used to reset OpenGL state to avoid conflicts with other code.
         
-        Override this method in subclasses to redefine behaviour.
+        Override this method in subclasses to redefine behavior.
         """
         pass
     # End subclass overrides
@@ -164,7 +164,7 @@ class LayerGroup(Layer):
         self.group.set_state()
     def postdraw(self):
         """
-        Unsets the group state.
+        Re-sets the previous state.
         """
         self.group.unset_state()
 
@@ -174,7 +174,7 @@ class LayerWorld(Layer3D):
     
     All arguments passed to the constructor should be self-explanatory.
     
-    Note that you may not set any of the attributes directly, or crashes and bugs may appear indirectly within a certain timeframe.
+    Note that you may not set any of the attributes directly, or crashes and bugs may appear indirectly within a certain during future re-drawing of the screen.
     """
     def __init__(self,menu,window,peng,world,viewname):
         super(LayerWorld,self).__init__(menu,window,peng,world.getView(viewname).cam)
@@ -204,7 +204,7 @@ class LayerWorld(Layer3D):
         self.world.render3d(self.view)
     def on_menu_enter(self,old):
         """
-        Passes the event through to the WorldView to allow for custom behaviour.
+        Passes the event through to the WorldView to allow for custom behavior.
         """
         return self.view.on_menu_enter(old)
     def on_menu_exit(self,new):

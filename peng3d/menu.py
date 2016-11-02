@@ -50,7 +50,7 @@ class BasicMenu(object):
         """
         This method is called if it is time to render the menu.
         
-        Override this method in subclasses to cutomize behaviour and actually draw stuff.
+        Override this method in subclasses to customize behavior and actually draw stuff.
         """
         pass
     
@@ -79,14 +79,14 @@ class BasicMenu(object):
     
     def on_enter(self,old):
         """
-        This fake event handler will be called everytime this menu is entered via the :py:meth:`PengWindow.changeMenu()` method.
+        This fake event handler will be called every time this menu is entered via the :py:meth:`PengWindow.changeMenu()` method.
         
         This handler will not be called if this menu is already active.
         """
         pass # Custom fake event handler for entering the menu
     def on_exit(self,new):
         """
-        This fake event handler will be called everytime this menu is exited via the :py:meth:`PengWindow.changeMenu()` method.
+        This fake event handler will be called every time this menu is exited via the :py:meth:`PengWindow.changeMenu()` method.
         
         This handler will not be called if this menu is the same as the new menu.
         """

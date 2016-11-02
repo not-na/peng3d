@@ -7,3 +7,4 @@ https://bitbucket.org/pyglet/pyglet/get/f48574e6c61c.zip
 tox==2.3.1
 virtualenv==15.0.2
 pytest==2.9.2
+sphinxcontrib-spelling==2.2.0
