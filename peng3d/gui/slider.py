@@ -370,7 +370,7 @@ class Slider(Progressbar):
         
         This property is read-only.
         """
-        return (self.n-self.nmin)/(self.nmax-self.nmin)
+        return (self.n-self.nmin)/max((self.nmax-self.nmin),1)
 
 
 class VerticalSliderBackground(SliderBackground):
