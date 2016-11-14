@@ -102,29 +102,29 @@ class Container(Widget):
         
         Note that this leaves the OpenGL state set to 2d drawing and may modify the stencil settings and buffer.
         """
-        
-        # Stencil setup
-        glEnable(GL_STENCIL_TEST)
-        #mask = pyglet.image.get_buffer_manager().get_buffer_mask()
-        #glSetAttribute(GL_STENCIL_SIZE,8)
-        
-        # Set up the stencil for this container
-        glStencilFunc(GL_ALWAYS,1,0xFF)
-        glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE)
-        glStencilMask(0xFF)
-        glClear(GL_STENCIL_BUFFER_BIT)
-        
-        # Practically hides most drawing operations, should be redundant since the quad is fully transparent
-        glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE)
-        glDepthMask(GL_FALSE)
-        
-        self.stencil_vlist.draw(GL_QUADS)
-        
-        # Reset to proper state and set up the stencil func/mask
-        glStencilFunc(GL_EQUAL,1,0xFF)
-        glStencilMask(0x00)
-        glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE)
-        glDepthMask(GL_TRUE)
+        if not isinstance(self.submenu,Container):
+            # Stencil setup
+            glEnable(GL_STENCIL_TEST)
+            #mask = pyglet.image.get_buffer_manager().get_buffer_mask()
+            #glSetAttribute(GL_STENCIL_SIZE,8)
+            
+            # Set up the stencil for this container
+            glStencilFunc(GL_ALWAYS,1,0xFF)
+            glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE)
+            glStencilMask(0xFF)
+            glClear(GL_STENCIL_BUFFER_BIT)
+            
+            # Practically hides most drawing operations, should be redundant since the quad is fully transparent
+            glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE)
+            glDepthMask(GL_FALSE)
+            
+            self.stencil_vlist.draw(GL_QUADS)
+            
+            # Reset to proper state and set up the stencil func/mask
+            glStencilFunc(GL_EQUAL,1,0xFF)
+            glStencilMask(0x00)
+            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE)
+            glDepthMask(GL_TRUE)
         
         # Stenciled code
         self.window.set2d()
@@ -141,16 +141,18 @@ class Container(Widget):
         else:
             raise TypeError("Unknown background type")
         self.window.set2d() # In case the bg layer was in 3d
-        glStencilFunc(GL_EQUAL,1,0xFF)
-        glStencilMask(0x00)
+        if not isinstance(self.submenu,Container):
+            glStencilFunc(GL_EQUAL,1,0xFF)
+            glStencilMask(0x00)
         self.batch2d.draw()
         for widget in self.widgets.values():
             widget.draw()
         
-        # Stencil teardown
-        glDisable(GL_STENCIL_TEST)
-        # Make sure to disable the stencil test first, or the stencil buffer will only clear areas that are allowed to by glStencilFunc
-        glClear(GL_STENCIL_BUFFER_BIT)
+        if not isinstance(self.submenu,Container):
+            # Stencil teardown
+            glDisable(GL_STENCIL_TEST)
+            # Make sure to disable the stencil test first, or the stencil buffer will only clear areas that are allowed to by glStencilFunc
+            glClear(GL_STENCIL_BUFFER_BIT)
     
     def redraw(self):
         """
