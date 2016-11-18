@@ -212,7 +212,7 @@ class Container(Widget):
         if not isinstance(self.submenu,Container):
             # Much easier and probably faster than stenciling
             glEnable(GL_SCISSOR_TEST)
-            glScissor(*self.pos,*self.size)
+            glScissor(*self.pos+self.size)
         
         # Stenciled code
         SubMenu.draw(self)
