@@ -24,6 +24,8 @@
 
 __all__ = ["GUIMenu","SubMenu","GUILayer"]
 
+import collections
+
 try:
     import pyglet
     from pyglet.gl import *
@@ -101,7 +103,7 @@ class SubMenu(object):
         self.window = window
         self.peng = peng
         
-        self.widgets = {}
+        self.widgets = collections.OrderedDict()
         
         self.bg = [242,241,240,255]
         self.bg_vlist = pyglet.graphics.vertex_list(4,
@@ -128,6 +130,12 @@ class SubMenu(object):
             self.bg_vlist.draw(GL_QUADS)
         elif callable(self.bg):
             self.bg()
+        elif isinstance(self.bg,Background):
+            # The background will be drawn via the batch
+            if not self.bg.initialized:
+                self.bg.init_bg()
+                self.bg.redraw_bg()
+                self.bg.initialized=True
         elif self.bg=="blank":
             pass
         else:
@@ -157,6 +165,8 @@ class SubMenu(object):
         Alternatively, a :py:class:`peng3d.layer.Layer` instance or other object with a ``.draw()`` method may be supplied.
         It is also possible to supply any other method or function that will get called.
         
+        Also, the strings ``flat``\ , ``gradient``\ , ``oldshadow`` and ``material`` may be given, resulting in a background that looks similar to buttons. 
+        
         Lastly, the string ``"blank"`` may be passed to skip background drawing.
         """
         self.bg = bg
@@ -164,10 +174,18 @@ class SubMenu(object):
             if len(bg)==3 and isinstance(bg,list):
                 bg.append(255)
             self.bg_vlist.colors = bg*4
+        elif bg in ["flat","gradient","oldshadow","material"]:
+            self.bg = ContainerButtonBackground(self,borderstyle=bg)
+            self.on_resize(self.window.width,self.window.height)
     
     def on_resize(self,width,height):
         sx,sy = width,height
         self.bg_vlist.vertices = [0,0, sx,0, sx,sy, 0,sy]
+        if isinstance(self.bg,Background):
+            if not self.bg.initialized:
+                self.bg.init_bg()
+                self.bg.initialized=True
+            self.bg.redraw_bg()
     
     def on_enter(self,old):
         pass
@@ -191,3 +209,7 @@ class GUILayer(GUIMenu,Layer2D):
         self.predraw()
         GUIMenu.draw(self)
         self.postdraw()
+
+# Hack to allow Container to use the drawing method of SubMenu for itself
+from ..gui import container
+container.SubMenu = SubMenu

@@ -58,6 +58,7 @@ class Background(object):
     """
     def __init__(self,widget):
         self.widget = widget
+        self.initialized = False
     def init_bg(self):
         """
         Called just before the background will be drawn the first time.
@@ -325,7 +326,6 @@ class Widget(BasicWidget):
         if bg is None:
             bg = EmptyBackground(self)
         self.bg = bg
-        self.bg_initialized = False
         super(Widget,self).__init__(name,submenu,window,peng,pos,size)
     def setBackground(self,bg):
         """
@@ -343,8 +343,8 @@ class Widget(BasicWidget):
         Subclasses should use ``super()`` to call this method, or rendering may glitch out.
         """
         if self.bg is not None:
-            if not self.bg_initialized:
+            if not self.bg.initialized:
                 self.bg.init_bg()
-                self.bg_initialized=True
+                self.bg.initialized=True
             self.bg.redraw_bg()
         super(Widget,self).redraw()

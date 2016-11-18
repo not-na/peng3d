@@ -24,12 +24,94 @@
 
 __all__ = ["Container", "ScrollableContainer"]
 
+import collections
+
 import pyglet
 from pyglet.gl import *
 
-from .widgets import Widget, _WatchingList
+from .widgets import Widget, Background, _WatchingList
 from .slider import VerticalSlider
+from .button import ButtonBackground
 from ..layer import Layer
+
+class ContainerButtonBackground(ButtonBackground):
+    def init_bg(self):
+        self.vlist = self.widget.batch2d.add(20,GL_QUADS,None,
+            "v2f",
+            "c3B",
+            )
+    def redraw_bg(self):
+        # Convenience variables
+        sx,sy = self.widget.size
+        x,y = self.widget.pos
+        bx,by = self.border
+        
+        # Button background
+        
+        # Outer vertices
+        #    x          y
+        v1 = x,         y+sy
+        v2 = x+sx,      y+sy
+        v3 = x,         y
+        v4 = x+sx,      y
+        
+        # Inner vertices
+        #    x          y
+        v5 = x+bx,      y+sy-by
+        v6 = x+sx-bx,   y+sy-by
+        v7 = x+bx,      y+by
+        v8 = x+sx-bx,   y+by
+        
+        # 5 Quads, for edges and the center
+        qb1 = v5+v6+v2+v1
+        qb2 = v8+v4+v2+v6
+        qb3 = v3+v4+v8+v7
+        qb4 = v3+v7+v5+v1
+        qc  = v7+v8+v6+v5
+        
+        v = qb1+qb2+qb3+qb4+qc
+        
+        self.vlist.vertices = v
+        
+        bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
+        o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
+        s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
+        # Outer,Inner,Shadow,Highlight
+        
+        i = bg
+        
+        if self.borderstyle == "flat":
+            # Flat style makes no difference between normal,hover and pressed
+            cb1 = i+i+i+i
+            cb2 = i+i+i+i
+            cb3 = i+i+i+i
+            cb4 = i+i+i+i
+            cc  = i+i+i+i
+        elif self.borderstyle == "gradient":
+            cb1 = i+i+o+o
+            cb2 = i+o+o+i
+            cb3 = o+o+i+i
+            cb4 = o+i+i+o
+            cc  = i+i+i+i
+        elif self.borderstyle == "oldshadow":
+            # Flipped from default
+            cb1 = s+s+s+s
+            cb2 = h+h+h+h
+            cb3 = h+h+h+h
+            cb4 = s+s+s+s
+            cc  = i+i+i+i
+        elif self.borderstyle == "material":
+            cb1 = s+s+o+o
+            cb2 = s+o+o+s
+            cb3 = o+o+s+s
+            cb4 = o+s+s+o
+            cc  = i+i+i+i
+        else:
+            raise ValueError("Invalid Border style")
+        
+        c = cb1+cb2+cb3+cb4+cc
+        
+        self.vlist.colors = c
 
 class Container(Widget):
     """
@@ -47,7 +129,7 @@ class Container(Widget):
         
         self.menu = submenu
         
-        self.widgets = {}
+        self.widgets = collections.OrderedDict()
         
         self.bg = [242,241,240,255]
         self.bg_vlist = pyglet.graphics.vertex_list(4,
@@ -74,6 +156,9 @@ class Container(Widget):
             if len(bg)==3 and isinstance(bg,list):
                 bg.append(255)
             self.bg_vlist.colors = bg*4
+        elif bg in ["flat","gradient","oldshadow","material"]:
+            self.bg = ContainerButtonBackground(self,borderstyle=bg)
+            self.redraw()
     
     def on_resize(self,width,height):
         x,y = self.pos
@@ -102,57 +187,43 @@ class Container(Widget):
         
         Note that this leaves the OpenGL state set to 2d drawing and may modify the stencil settings and buffer.
         """
+        # TODO: Remove old stencil code completely in future version
+        #if not isinstance(self.submenu,Container):
+        #    # Stencil setup
+        #    glClear(GL_STENCIL_BUFFER_BIT)
+        #    glEnable(GL_STENCIL_TEST)
+        #    
+        #    # Set up the stencil for this container
+        #    glStencilFunc(GL_ALWAYS,1,0xFF)
+        #    glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE)
+        #    glStencilMask(0xFF)
+        #    
+        #    # Practically hides most drawing operations, should be redundant since the quad is fully transparent
+        #    glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE)
+        #    glDepthMask(GL_FALSE)
+        #    
+        #    self.stencil_vlist.draw(GL_QUADS)
+        #    
+        #    # Reset to proper state and set up the stencil func/mask
+        #    glStencilFunc(GL_EQUAL,1,0xFF)
+        #    glStencilMask(0x00)
+        #    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE)
+        #    glDepthMask(GL_TRUE)
         if not isinstance(self.submenu,Container):
-            # Stencil setup
-            glEnable(GL_STENCIL_TEST)
-            #mask = pyglet.image.get_buffer_manager().get_buffer_mask()
-            #glSetAttribute(GL_STENCIL_SIZE,8)
-            
-            # Set up the stencil for this container
-            glStencilFunc(GL_ALWAYS,1,0xFF)
-            glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE)
-            glStencilMask(0xFF)
-            glClear(GL_STENCIL_BUFFER_BIT)
-            
-            # Practically hides most drawing operations, should be redundant since the quad is fully transparent
-            glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE)
-            glDepthMask(GL_FALSE)
-            
-            self.stencil_vlist.draw(GL_QUADS)
-            
-            # Reset to proper state and set up the stencil func/mask
-            glStencilFunc(GL_EQUAL,1,0xFF)
-            glStencilMask(0x00)
-            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE)
-            glDepthMask(GL_TRUE)
+            # Much easier and probably faster than stenciling
+            glEnable(GL_SCISSOR_TEST)
+            glScissor(*self.pos,*self.size)
         
         # Stenciled code
-        self.window.set2d()
-        if isinstance(self.bg,Layer):
-            self.bg._draw()
-        elif hasattr(self.bg,"draw") and callable(self.bg.draw):
-            self.bg.draw()
-        elif isinstance(self.bg,list) or isinstance(self.bg,tuple):
-            self.bg_vlist.draw(GL_QUADS)
-        elif callable(self.bg):
-            self.bg()
-        elif self.bg=="blank":
-            pass
-        else:
-            raise TypeError("Unknown background type")
-        self.window.set2d() # In case the bg layer was in 3d
-        if not isinstance(self.submenu,Container):
-            glStencilFunc(GL_EQUAL,1,0xFF)
-            glStencilMask(0x00)
-        self.batch2d.draw()
-        for widget in self.widgets.values():
-            widget.draw()
+        SubMenu.draw(self)
         
+        #if not isinstance(self.submenu,Container):
+        #    # Stencil teardown
+        #    glDisable(GL_STENCIL_TEST)
+        #    # Make sure to disable the stencil test first, or the stencil buffer will only clear areas that are allowed to by glStencilFunc
+        #    glClear(GL_STENCIL_BUFFER_BIT)
         if not isinstance(self.submenu,Container):
-            # Stencil teardown
-            glDisable(GL_STENCIL_TEST)
-            # Make sure to disable the stencil test first, or the stencil buffer will only clear areas that are allowed to by glStencilFunc
-            glClear(GL_STENCIL_BUFFER_BIT)
+            glDisable(GL_SCISSOR_TEST)
     
     def redraw(self):
         """
@@ -162,6 +233,11 @@ class Container(Widget):
         sx,sy = self.size
         self.bg_vlist.vertices = [x,y, x+sx,y, x+sx,y+sy, x,y+sy]
         self.stencil_vlist.vertices = [x,y, x+sx,y, x+sx,y+sy, x,y+sy]
+        if isinstance(self.bg,Background):
+            if not self.bg.initialized:
+                self.bg.init_bg()
+                self.bg.initialized=True
+            self.bg.redraw_bg()
         for widget in self.widgets.values():
             widget.redraw()
     

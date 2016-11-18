@@ -47,7 +47,7 @@ class ProgressbarBackground(Background):
         self.borderstyle = borderstyle
         self.colors = colors
     def init_bg(self):
-        self.vlist = self.submenu.batch2d.add(24,GL_QUADS,None,
+        self.vlist = self.submenu.batch2d.add(24,GL_QUADS,pyglet.graphics.OrderedGroup(1),
             "v2f",
             "c3B",
             )
@@ -223,7 +223,7 @@ class SliderBackground(ButtonBackground):
     All given parameters will affect the handle.
     """
     def init_bg(self):
-        self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,None,
+        self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,pyglet.graphics.OrderedGroup(0),
             "v2f",
             "c3B",
             )

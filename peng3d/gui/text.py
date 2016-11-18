@@ -58,6 +58,7 @@ class Label(Widget):
                 x=0,y=0,
                 batch=self.submenu.batch2d,
                 anchor_x="center", anchor_y="center",
+                group=pyglet.graphics.OrderedGroup(1),
                 width=self.size[0],height=self.size[1]
                 )
         self.redraw()

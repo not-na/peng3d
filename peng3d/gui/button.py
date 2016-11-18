@@ -44,12 +44,12 @@ class ButtonBackground(Background):
     
     This background renders the button and its border, but not the label.
     """
-    def __init__(self,widget,border,borderstyle="flat"):
+    def __init__(self,widget,border=[4,4],borderstyle="flat"):
         self.border = border
         self.borderstyle = borderstyle
         super(ButtonBackground,self).__init__(widget)
     def init_bg(self):
-        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,None,
+        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,pyglet.graphics.OrderedGroup(0),
             "v2f",
             "c3B",
             )
@@ -168,19 +168,13 @@ class Button(Widget):
                 color=[62,67,73,255],
                 x=0,y=0,
                 batch=self.submenu.batch2d,
+                group=pyglet.graphics.OrderedGroup(1),
                 anchor_x="center", anchor_y="center"
                 )
         self.redraw()
         
         # Redraws the button every 2 seconds to prevent glitched graphics
         pyglet.clock.schedule_interval(self.redraw,2)
-    
-    def draw(self):
-        """
-        Draws the button and its Label.
-        """
-        super(Button,self).draw()
-        self._label.draw()
     
     def redraw(self,dt=None):
         super(Button,self).redraw()

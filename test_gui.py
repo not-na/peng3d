@@ -147,7 +147,8 @@ def createGUI(main,game):
                                 borderstyle="oldshadow",
                                 content_height=200,
                                 )
-    testcontainer.setBackground([255,241,240,255])
+    #testcontainer.setBackground([255,241,240,255])
+    testcontainer.setBackground("oldshadow")
     title.addWidget(testcontainer)
     
     tc_label = peng3d.gui.Label("tc_label",testcontainer,peng.window,peng,
@@ -237,7 +238,7 @@ def createGUI(main,game):
 def main(args):
     global peng,esc_toggle
     # Peng engine instance creation and creating the window
-    peng = peng3d.Peng({"graphics.stencil.enable":True})
+    peng = peng3d.Peng()
     peng.createWindow(caption="Peng3d GUI Test Project",resizable=True,vsync=True)
     peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
     createTexBin()
