@@ -126,7 +126,7 @@ class PengWindow(pyglet.window.Window):
         """
         raise NotImplementedError("Currently not implemented")
     
-    def run(self):
+    def run(self,evloop=None):
         """
         Runs the application in the current thread.
         
@@ -134,8 +134,12 @@ class PengWindow(pyglet.window.Window):
         
         Note that this method is blocking as rendering needs to happen in the main thread.
         It is thus recommendable to run your game logic in another thread that should be started before calling this method.
+        
+        ``evloop`` may optionally be a subclass of :py:class:`pyglet.app.base.EventLoop` to replace the default event loop.
         """
         self.setup()
+        if evloop is not None:
+            pyglet.app.event_loop = evloop
         pyglet.app.run() # This currently just calls the basic pyglet main loop, maybe implement custom main loop for more control
     """def cleanConfig(self):
         ########## Reset quotation marks if uncommenting

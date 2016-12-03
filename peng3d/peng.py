@@ -86,13 +86,15 @@ class Peng(object):
             self.resourceMgr = resource.ResourceManager(self,self.cfg["rsrc.basepath"])
         return self.window
     
-    def run(self):
+    def run(self,evloop=None):
         """
         Runs the application main loop.
         
         This method is blocking and needs to be called from the main thread to avoid OpenGL bugs that can occur.
+        
+        ``evloop`` may optionally be a subclass of :py:class:`pyglet.app.base.EventLoop` to replace the default event loop.
         """
-        self.window.run()
+        self.window.run(evloop)
     
     def handleEvent(self,event_type,args,window=None):
         """
