@@ -23,6 +23,7 @@
 #  
 
 import window
+import graphics
 
 class Mock(object):
     def __init__(self, *args,**kwargs):

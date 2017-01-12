@@ -27,10 +27,16 @@ import time
 import math
 from math import sqrt,cos,sin
 
-from itertools import zip_longest
+try:
+    from itertools import zip_longest
+except ImportError:
+    pass # probably on readthedocs
 
-import pyglet
-from pyglet.gl import *
+try:
+    import pyglet
+    from pyglet.gl import *
+except ImportError:
+    pass # probably headless
 
 def grouper(iterable, n, fillvalue=None):
     args = [iter(iterable)] * n
