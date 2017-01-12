@@ -22,23 +22,4 @@
 #  
 #  
 
-# These imports are here for convenience
-
-from .peng import *
-#from .window import *
-from .layer import *
-from .menu import *
-from .camera import *
-from .config import *
-from .version import *
-from .world import *
-from .actor.player import *
-from .actor import *
-from .gui import *
-from .gui.widgets import *
-from .gui.button import *
-from .gui.slider import *
-from .gui.text import *
-from .gui.container import *
-from .resource import *
-from .model import *
+# Just a placeholder to make this a package

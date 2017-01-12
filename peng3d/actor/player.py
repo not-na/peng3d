@@ -38,7 +38,7 @@ class FourDirectionalMoveController(Controller):
     Controller allowing the user to control the actor with the keyboard.
     
     You can configure the used keybinds with the :confval:`controls.controls.forward` etc.
-    The keybinds can also be changed with their ``keybindname``\ , e.g. ``peng3d:actor.player.controls.forward`` for forward.
+    The keybinds can also be changed with their ``keybindname``\ , e.g. ``peng3d:actor.<actor uuid>.player.controls.forward`` for forward.
     
     The movement speed may also be changed via the :py:attr:`movespeed` instance attribute, which defaults to :confval:`controls.controls.movespeed`\ .
     
@@ -55,13 +55,13 @@ class FourDirectionalMoveController(Controller):
         You can control what keybinds are used via the :confval:`controls.controls.forward` etc. Configuration Values.
         """
         # Forward
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.forward"],"peng3d:actor.player.controls.forward",self.on_fwd_down,False)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.forward"],"peng3d:actor.%s.player.controls.forward"%self.actor.uuid,self.on_fwd_down,False)
         # Backward
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.backward"],"peng3d:actor.player.controls.backward",self.on_bwd_down,False)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.backward"],"peng3d:actor.%s.player.controls.backward"%self.actor.uuid,self.on_bwd_down,False)
         # Strafe Left
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.strafeleft"],"peng3d:actor.player.controls.strafeleft",self.on_left_down,False)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.strafeleft"],"peng3d:actor.%s.player.controls.strafeleft"%self.actor.uuid,self.on_left_down,False)
         # Strafe Right
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.straferight"],"peng3d:actor.player.controls.straferight",self.on_right_down,False)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.straferight"],"peng3d:actor.%s.player.controls.straferight"%self.actor.uuid,self.on_right_down,False)
         pyglet.clock.schedule_interval(self.update,1.0/60)
     def update(self,dt):
         """
@@ -159,9 +159,9 @@ class BasicFlightController(Controller):
         Also registers a scheduled function every 60th of a second, causing pyglet to redraw your window with 60fps.
         """
         # Crouch/fly down
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.crouch"],"peng3d:actor.player.controls.crouch",self.on_crouch_down,False)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.crouch"],"peng3d:actor.%s.player.controls.crouch"%self.actor.uuid,self.on_crouch_down,False)
         # Jump/fly up
-        self.peng.keybinds.add(self.peng.cfg["controls.controls.jump"],"peng3d:actor.player.controls.jump",self.on_jump_down,False)
+        self.peng.keybinds.add(self.peng.cfg["controls.controls.jump"],"peng3d:actor.%s.player.controls.jump"%self.actor.uuid,self.on_jump_down,False)
         pyglet.clock.schedule_interval(self.update,1.0/60)
     def update(self,dt):
         """

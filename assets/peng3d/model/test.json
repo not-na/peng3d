@@ -1,0 +1,155 @@
+{
+    "version":1,
+    "materials":{
+        "body":{
+            "tex":"test_model:body",
+            "texcat":"block",
+            },
+        "head":{
+            "tex":"test_model:head",
+            "texcat":"block",
+            },
+        },
+    "default_material":"body",
+    "bones":{
+        "center":{
+            "parent":"__root__",
+            "start_rot":[-45,0],
+            "length":0.7071,
+            },
+        "body":{
+            "parent":"center",
+            "start_rot":[45,90],
+            // Straight up
+            "length":1,
+            // important for the right position of the body
+            },
+        "skull":{
+            "parent":"body",
+            "start_rot":[0,90],
+            // Straight up
+            "length":1,
+            // important for the right position of the head
+            },
+        },
+    "regions":{
+        "body":{
+            "material":"body",
+            "bone":"body",
+            "geometry_type":"quads",
+            "vertices":[
+                // x-axis: left-right
+                // y-axis: top-bottom
+                // z-axis: front-back
+                // Front quad
+                0,0,0, 1,0,0, 1,1,0, 0,1,0,
+                // Bottom quad
+                0,0,0, 1,0,0, 1,0,1, 0,0,1,
+                // Left quad
+                0,0,0, 0,1,0, 0,1,1, 0,0,1,
+                // Back quad
+                0,0,1, 1,0,1, 1,1,1, 0,1,1,
+                // Top quad
+                0,1,0, 1,1,0, 1,1,1, 0,1,1,
+                // Right quad
+                1,0,0, 1,1,0, 1,1,1, 1,0,1,
+                ],
+            "tex_coords":[
+                // Front tex
+                0,0,   1,0,   1,1,   0,1,
+                // Bottom tex
+                0,0,   1,0,   1,1,   0,1,
+                // Left tex
+                0,0,   1,0,   1,1,   0,1,
+                // Back tex
+                0,0,   1,0,   1,1,   0,1,
+                // Top tex
+                0,0,   1,0,   1,1,   0,1,
+                // Right tex
+                0,0,   1,0,   1,1,   0,1,
+                ],
+            },
+        "head":{
+            "material":"head",
+            "bone":"skull",
+            "geometry_type":"quads",
+            "vertices":[
+                // x-axis: left-right
+                // y-axis: top-bottom
+                // z-axis: front-back
+                // Front quad
+                0.1,1.0,0.1, 0.9,1.0,0.1, 0.9,1.8,0.1, 0.1,1.8,0.1,
+                // Bottom quad
+                0.1,1.01,0.1, 0.9,1.01,0.1, 0.9,1.01,0.9, 0.1,1.01,0.9,
+                // Left quad
+                0.1,1.0,0.1, 0.1,1.8,0.1, 0.1,1.8,0.9, 0.1,1.0,0.9,
+                // Back quad
+                0.1,1.0,0.9, 0.9,1.0,0.9, 0.9,1.8,0.9, 0.1,1.8,0.9,
+                // Top quad
+                0.1,1.8,0.1, 0.9,1.8,0.1, 0.9,1.8,0.9, 0.1,1.8,0.9,
+                // Right quad
+                0.9,1.0,0.1, 0.9,1.8,0.1, 0.9,1.8,0.9, 0.9,1.0,0.9,
+                ],
+            "tex_coords":[
+                // Front tex
+                0,0,   1,0,   1,1,   0,1,
+                // Bottom tex
+                0,0,   1,0,   1,1,   0,1,
+                // Left tex
+                0,0,   1,0,   1,1,   0,1,
+                // Back tex
+                0,0,   1,0,   1,1,   0,1,
+                // Top tex
+                0,0,   1,0,   1,1,   0,1,
+                // Right tex
+                0,0,   1,0,   1,1,   0,1,
+                ],
+            },
+        },
+    "animations":{
+        "idle":{
+            "type":"static",
+            "default_jumptype":"jump",
+            "transition_length":20,
+            "transition_speed":60,
+            "bones":{
+                "skull":{"rot":[0,0],"length":1},
+                "body":{"rot":[0,0],"length":1},
+                },
+            },
+        "test1":{
+            // rotates the head only
+            "type":"keyframes",
+            "default_jumptype":"jump",
+            "transition_length":20,
+            "transition_speed":60,
+            "repeat":"jump",
+            // ^ could also be animate
+            "interpolation":"linear",
+            // ^ could also be jump
+            "keyframespersecond":60,
+            "length":120,
+            "keyframes":{
+                    "0":{
+                        "bones":{
+                            "skull":{"rot":[0,90],"length":1},
+                            "body":{"rot":[0,90],"length":1},
+                            },
+                        },
+                    // features required are currently not implemented
+                    //"60":{
+                    //    "bones":{
+                    //        "skull":{"rot":[180,180],"length":1},
+                    //        },
+                    //    },
+                    "120":{
+                        "bones":{
+                            "skull":{"rot":[360,90],"length":1},
+                            "body":{"rot":[0,90],"length":1},
+                            },
+                        },
+                },
+            },
+        },
+    "default_animation":"test1",
+}

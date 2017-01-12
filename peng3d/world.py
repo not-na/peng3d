@@ -98,7 +98,8 @@ class World(object):
         
         If you want to render custom terrain, you may override this method. Be careful that you still call the original method or else actors may not be rendered.
         """
-        pass
+        for actor in self.actors.values():
+            actor.render(view)
     
     # Event Handlers
     def handle_event(self,event_type,args,window=None):

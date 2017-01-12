@@ -25,6 +25,8 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    gui/text
    gui/container
    gui/slider
+   peng3d.resource
+   peng3d.model
    peng3d.camera
    peng3d.world
    actor/index

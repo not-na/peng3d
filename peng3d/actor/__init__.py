@@ -86,6 +86,8 @@ class Actor(object):
             }
         
         self._pos = pos
+        
+        self.model = None
     
     def addController(self,controller):
         """
@@ -96,6 +98,21 @@ class Actor(object):
         Controllers may be added anytime during the lifetime of an actor.
         """
         self.controllers.append(controller)
+    
+    def setModel(self,model):
+        if self.model is not None:
+            self.model.cleanup(self)
+        self.model = model
+        model.create(self)
+    
+    def setAnimation(self,animation,transition=None,force=False):
+        if self.model is None:
+            raise RuntimeError("Can only set animation if a model is set")
+        self.model.setAnimation(self,animation,transition,force)
+    
+    def render(self,view=None):
+        if self.model is not None:
+            self.model.draw(self)
     
     # Event handlers
     def on_move(self,old):
@@ -186,3 +203,5 @@ class RotatableActor(Actor):
         x %= 360
         self._rot = x,y
         self.on_rotate(old)
+
+RotateableActor = RotatableActor # for people that spell it right
