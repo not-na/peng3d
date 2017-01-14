@@ -192,14 +192,15 @@ class Bone(object):
         #rot_vec = px-ppx,py-ppy,pz-ppz
         #print([px,py,pz],[ppx,ppy,ppz],rot_vec,[x,y],self.getLength(data))
         #norm = v_normalize(rot_vec,self.name) if v_magnitude(rot_vec)==0 else [0,1,0] # prevents a zero divison error
-        norm = [0,1,0] # currently fixed to the up vector, should be changed in the future for proper rotation that is not along the y axis
+        normx = [0,1,0] # currently fixed to the up vector, should be changed in the future for proper rotation that is not along the y or z axis
+        normy = [0,0,1]
         
         #offset = -px,-py,-pz
         
         glTranslatef(px,py,pz)#-offset[0],-offset[1],-offset[2])
-        glRotatef(x, norm[0],norm[1],norm[2])
+        glRotatef(x-self.start_rot[0], normx[0],normx[1],normx[2])
+        glRotatef(y-self.start_rot[1], normy[0],normy[1],normy[2])
         glTranslatef(-px,-py,-pz)#offset[0],offset[1],offset[2])
-        #glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x))) # does not work, only one rotational axis for now
     def unsetRotate(self,data):
         glPopMatrix()
         self.parent.unsetRotate(data)

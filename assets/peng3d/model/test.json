@@ -130,18 +130,46 @@
             "keyframespersecond":60,
             "length":120,
             "keyframes":{
+                    // Head should bow/un-bow and stay at the resulting bow for a part of the animation, and not go back immediately
+                    // head bow diagram
+                    // _    _Repeat
+                    //  \__/
+                    // UP-UP-DOWN-DOWN-DOWN-UP
+                    // UP=90
+                    // DOWN=0
+                    
+                    // 0
                     "0":{
                         "bones":{
                             "skull":{"rot":[0,90],"length":1},
                             "body":{"rot":[0,90],"length":1},
                             },
                         },
-                    // features required are currently not implemented
-                    //"60":{
-                    //    "bones":{
-                    //        "skull":{"rot":[180,180],"length":1},
-                    //        },
-                    //    },
+                    // 1
+                    "24":{
+                        "bones":{
+                            "skull":{"rot":[72,90],"length":1},
+                            },
+                        },
+                    // 2
+                    "48":{
+                        "bones":{
+                            "skull":{"rot":[144,0],"length":1},
+                            },
+                        },
+                    // 3
+                    "72":{
+                        "bones":{
+                            "skull":{"rot":[216,0],"length":1},
+                            },
+                        },
+                    // 4
+                    "96":{
+                        "bones":{
+                            "skull":{"rot":[288,0],"length":1},
+                            },
+                        },
+                    // 5
                     "120":{
                         "bones":{
                             "skull":{"rot":[360,90],"length":1},
