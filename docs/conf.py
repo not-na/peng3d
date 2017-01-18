@@ -218,7 +218,6 @@ try:
     flat_installed_packages = [package.project_name for package in installed_packages]
     if "sphinxcontrib-spelling" in flat_installed_packages and "pyenchant" in flat_installed_packages:
         extensions.append("sphinxcontrib.spelling")
-        print("Added spelling plugin")
 except ImportError:
     pass # May happen if pip is not installed
 

@@ -22,6 +22,8 @@
 #  
 #  
 
+__all__ = ["ResourceManager"]
+
 import os
 
 try:
@@ -49,6 +51,15 @@ except ImportError:
 from . import model
 
 class ResourceManager(object):
+    """
+    Manager that allows for efficient and simple loading and management of different kinds of resources.
+    
+    Currently supports textures and models out of the box, but extension is possible.
+    
+    Textures can be queried by any part of the application, they are only loaded on the first request and then cached for every request following it.
+    
+    The same caching and lazy-loading principle applies to models loaded via this system.
+    """
     def __init__(self,peng,basepath):
         self.basepath = basepath
         self.peng = peng
@@ -65,28 +76,73 @@ class ResourceManager(object):
         self.missingTexture = None
         
         self.modelcache = {}
+        self.modelobjcache = {}
         
     def resourceNameToPath(self,name,ext=""):
+        """
+        Converts the given resource name to a file path.
+        
+        A resource path is of the format ``<app>:<cat1>.<cat2>.<name>`` where cat1 and cat2 can be repeated as often as desired.
+        
+        ``ext`` is the file extension to use, e.g. ``.png`` or similar.
+        
+        As an example, the resource name ``peng3d:some.category.foo`` with the extension ``.png`` results in the path ``<basepath>/assets/peng3d/some/category/foo.png``\ .
+        
+        This resource naming scheme is used by most other methods of this class.
+        
+        Note that it is currently not possible to define multiple base paths to search through.
+        """
         nsplit = name.split(":")[1].split(".")
         return os.path.join(self.basepath,"assets",name.split(":")[0],*nsplit)+ext
     def resourceExists(self,name,ext=""):
+        """
+        Returns whether or not the resource with the given name and extension exists.
+        
+        This must not mean that the resource is meaningful, it simply signals that the file exists.
+        """
         return os.path.exists(self.resourceNameToPath(name,ext))
     def addCategory(self,name):
+        """
+        Adds a new texture category with the given name.
+        
+        If the category already exists, it will be overridden.
+        """
         self.categories[name]={}
         self.categoriesTexCache[name]={}
         self.categoriesTexBin[name]=pyglet.image.atlas.TextureBin(self.texsize,self.texsize)
     def getTex(self,name,category):
+        """
+        Gets the texture associated with the given name and category.
+        
+        ``category`` must have been created using :py:meth:`addCategory()` before.
+        
+        If it was loaded previously, a cached version will be returned.
+        If it was not loaded, it will be loaded and inserted into the cache.
+        
+        See :py:meth:`loadTex()` for more information.
+        """
         if name not in self.categoriesTexCache[category]:
             self.loadTex(name,category)
         return self.categoriesTexCache[category][name]
     def loadTex(self,name,category):
+        """
+        Loads the texture of the given name and category.
+        
+        All textures currently must be PNG files, although support for more formats may be added soon.
+        
+        If the texture cannot be found, a missing texture will instead be returned. See :py:meth:`getMissingTexture()` for more information.
+        
+        Currently, all texture mipmaps will be generated and the filters will be set to
+        :py:const:`GL_NEAREST` for the magnification filter and :py:const:`GL_NEAREST_MIPMAP_LINEAR` for the minification filter.
+        This results in a pixelated texture and not  a blurry one.
+        """
         try:
             img = pyglet.image.load(self.resourceNameToPath(name,".png"))
         except FileNotFoundError:
             img = self.getMissingTexture()
         texreg = self.categoriesTexBin[category].add(img)
         #texreg = texreg.get_transform(True,True) # Mirrors the image due to how pyglets coordinate system works
-        # Strange behaviour, sometimes needed and sometimes not
+        # Strange behavior, sometimes needed and sometimes not
         self.categories[category][name]=texreg
         target = texreg.target
         texid = texreg.id
@@ -102,6 +158,16 @@ class ResourceManager(object):
         self.categoriesTexCache[category][name]=out
         return out
     def getMissingTexture(self):
+        """
+        Returns a texture to be used as a placeholder for missing textures.
+        
+        A default missing texture file is provided in the assets folder of the source distribution.
+        It consists of a simple checkerboard pattern of purple and black, this image may be copied to any project using peng3d for similar behavior.
+        
+        If this texture cannot be found, a pattern is created in-memory, simply a solid square of purple.
+        
+        This texture will also be cached separately from other textures.
+        """
         if self.missingTexture is None:
             if self.resourceExists("peng3d:missingtexture",".png"):
                 self.missingTexture = pyglet.image.load(self.resourceNameToPath("peng3d:missingtexture",".png"))
@@ -112,6 +178,13 @@ class ResourceManager(object):
         else:
             return self.missingTexture
     def addFromTex(self,name,img,category):
+        """
+        Adds a new texture from the given image.
+        
+        ``img`` may be any object that supports Pyglet-style copying in form of the ``blit_to_texture()`` method.
+        
+        This can be used to add textures that come from non-file sources, e.g. Render-to-texture.
+        """
         texreg = self.categoriesTexBin[category].add(img)
         #texreg = texreg.get_transform(True,True) # Mirrors the image due to how pyglets coordinate system works
         # Strange behaviour, sometimes needed and sometimes not
@@ -132,16 +205,49 @@ class ResourceManager(object):
         self.categoriesTexCache[category][name]=out
         return out
     
+    def getModel(self,name):
+        """
+        Gets the model object by the given name.
+        
+        If it was loaded previously, a cached version will be returned.
+        If it was not loaded, it will be loaded and inserted into the cache.
+        """
+        if name in self.modelobjcache:
+            return self.modelobjcache[name]
+        return self.loadModel(name)
+    def loadModel(self,name):
+        """
+        Loads the model of the given name.
+        
+        The model will also be inserted into the cache.
+        """
+        m = model.Model(self.peng,self,name)
+        self.modelobjcache[name]=m
+        return m
+    
     def getModelData(self,name):
+        """
+        Gets the model data associated with the given name.
+        
+        If it was loaded, a cached copy will be returned.
+        It it was not loaded, it will be loaded and cached.
+        """
         if name in self.modelcache:
             return self.modelcache[name]
         return self.loadModelData(name)
     def loadModelData(self,name):
+        """
+        Loads the model data of the given name.
+        
+        The model file must always be a .json file.
+        """
         path = self.resourceNameToPath(name,".json")
         try:
             data = json.load(open(path,"r"))
         except Exception:
-            self.od.exception("Exception during parsing of model %s"%name)
+            # Temporary
+            print("Exception during model load: ")
+            import traceback;traceback.print_exc()
             return {}# will probably cause other exceptions later on, TODO
         
         out = {}

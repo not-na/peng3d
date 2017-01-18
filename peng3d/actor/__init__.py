@@ -22,7 +22,7 @@
 #  
 #  
 
-__all__ = ["Actor","RotatableActor","Controller"]
+__all__ = ["Actor","RotatableActor","RotateableActor","Controller"]
 
 import uuid as uuidm
 
@@ -100,17 +100,40 @@ class Actor(object):
         self.controllers.append(controller)
     
     def setModel(self,model):
+        """
+        Sets the model this actor should use when drawing.
+        
+        This method also automatically initializes the new model and removes the old, if any.
+        """
         if self.model is not None:
             self.model.cleanup(self)
         self.model = model
         model.create(self)
     
     def setAnimation(self,animation,transition=None,force=False):
+        """
+        Sets the animation the model of this actor should show.
+        
+        ``animation`` is the name of the animation to switch to.
+        
+        ``transition`` can be used to override the transition between the animations.
+        
+        ``force`` can be used to force reset the animation even if it is already running.
+        
+        If there is no model set for this actor, a :py:exc:`RuntimeError` will be raised.
+        """
         if self.model is None:
             raise RuntimeError("Can only set animation if a model is set")
         self.model.setAnimation(self,animation,transition,force)
     
     def render(self,view=None):
+        """
+        Called by :py:meth:`World.render3d()` to render this actor.
+        
+        By default, this method calls the draw method of its model, if any.
+        
+        For custom render behavior, it is recommended to extend this method or modify the model.
+        """
         if self.model is not None:
             self.model.draw(self)
     
@@ -171,6 +194,7 @@ class RotatableActor(Actor):
         x,y,z = self._pos
         self.pos = x+dx,y+dy,z+dz
         return dx,dy,dz
+    move.__noautodoc__ = True
     
     # Event handlers
     def on_rotate(self,old):

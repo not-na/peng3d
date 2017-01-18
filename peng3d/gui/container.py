@@ -22,7 +22,7 @@
 #  
 #  
 
-__all__ = ["Container", "ScrollableContainer"]
+__all__ = ["Container", "ScrollableContainer", "ContainerButtonBackground"]
 
 import collections
 
@@ -35,6 +35,11 @@ from .button import ButtonBackground
 from ..layer import Layer
 
 class ContainerButtonBackground(ButtonBackground):
+    """
+    Background class used to render the background of containers using a button style.
+    
+    Mostly identical with :py:class:`ButtonBackground` with added compatibility for containers.
+    """
     def init_bg(self):
         self.vlist = self.widget.batch2d.add(20,GL_QUADS,None,
             "v2f",

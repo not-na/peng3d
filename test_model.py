@@ -127,7 +127,8 @@ def createGUI(main,game):
 
 def loadModel():
     global model
-    model = peng3d.model.Model(peng,peng.resourceMgr,"peng3d:model.test")
+    #model = peng3d.model.Model(peng,peng.resourceMgr,"peng3d:model.test")
+    model = peng.resourceMgr.getModel("peng3d:model.test")
 
 def createTestEntity():
     global testactor

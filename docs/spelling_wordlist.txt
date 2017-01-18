@@ -39,3 +39,10 @@ indices
 bugfix
 vertices
 catched
+Unsets
+keyframes
+json
+JSON
+minification
+pixelated
+mipmaps
