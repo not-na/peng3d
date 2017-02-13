@@ -150,6 +150,8 @@ class Container(Widget):
         
         self.batch2d = pyglet.graphics.Batch()
         
+        self.visible = True
+        
     def setBackground(self,bg):
         """
         Sets the background of the Container.
@@ -166,10 +168,8 @@ class Container(Widget):
             self.redraw()
     
     def on_resize(self,width,height):
-        x,y = self.pos
-        sx,sy = self.size
-        self.bg_vlist.vertices = [x,y, x+sx,y, x+sx,y+sy, x,y+sy]
-        self.stencil_vlist.vertices = [x,y, x+sx,y, x+sx,y+sy, x,y+sy]
+        # Stencil/BG Vlist are updated by redraw()
+        self.redraw()
     
     def addWidget(self,widget):
         """
@@ -192,41 +192,16 @@ class Container(Widget):
         
         Note that this leaves the OpenGL state set to 2d drawing and may modify the stencil settings and buffer.
         """
-        # TODO: Remove old stencil code completely in future version
-        #if not isinstance(self.submenu,Container):
-        #    # Stencil setup
-        #    glClear(GL_STENCIL_BUFFER_BIT)
-        #    glEnable(GL_STENCIL_TEST)
-        #    
-        #    # Set up the stencil for this container
-        #    glStencilFunc(GL_ALWAYS,1,0xFF)
-        #    glStencilOp(GL_KEEP,GL_KEEP,GL_REPLACE)
-        #    glStencilMask(0xFF)
-        #    
-        #    # Practically hides most drawing operations, should be redundant since the quad is fully transparent
-        #    glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE)
-        #    glDepthMask(GL_FALSE)
-        #    
-        #    self.stencil_vlist.draw(GL_QUADS)
-        #    
-        #    # Reset to proper state and set up the stencil func/mask
-        #    glStencilFunc(GL_EQUAL,1,0xFF)
-        #    glStencilMask(0x00)
-        #    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE)
-        #    glDepthMask(GL_TRUE)
+        if not self.visible:
+            # Simple visibility check, has to be tested to see if it works properly
+            return
+        
         if not isinstance(self.submenu,Container):
-            # Much easier and probably faster than stenciling
             glEnable(GL_SCISSOR_TEST)
             glScissor(*self.pos+self.size)
         
-        # Stenciled code
         SubMenu.draw(self)
         
-        #if not isinstance(self.submenu,Container):
-        #    # Stencil teardown
-        #    glDisable(GL_STENCIL_TEST)
-        #    # Make sure to disable the stencil test first, or the stencil buffer will only clear areas that are allowed to by glStencilFunc
-        #    glClear(GL_STENCIL_BUFFER_BIT)
         if not isinstance(self.submenu,Container):
             glDisable(GL_SCISSOR_TEST)
     
