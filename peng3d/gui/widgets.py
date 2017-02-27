@@ -167,11 +167,14 @@ class BasicWidget(object):
         if isinstance(self._pos,list) or isinstance(self._pos,tuple):
             r = self._pos
         elif callable(self._pos):
-            r = self._pos(self.window.width,self.window.height,*self.size)
+            w,h = self.submenu.size[:]
+            r = self._pos(w,h,*self.size)
         else:
             raise TypeError("Invalid position type")
-        if isinstance(self.submenu,Container): # Widget is inside container
-            r = r[0]+self.submenu.pos[0],r[1]+self.submenu.pos[1]
+        
+        ox,oy = self.submenu.pos
+        r = r[0]+ox,r[1]+oy
+        
         if isinstance(self.submenu,ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
             r = r[0],r[1]+self.submenu.offset_y
         return _WatchingList(r,self._wlredraw_pos)
@@ -188,7 +191,8 @@ class BasicWidget(object):
         if isinstance(self._size,list) or isinstance(self._size,tuple):
             return _WatchingList(self._size,self._wlredraw_size)
         elif callable(self._size):
-            return _WatchingList(self._size(self.window.width,self.window.height),self._wlredraw_size)
+            w,h = self.submenu.size[:]
+            return _WatchingList(self._size(w,h),self._wlredraw_size)
         else:
             raise TypeError("Invalid size type")
     @size.setter

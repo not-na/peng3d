@@ -146,7 +146,7 @@ class Container(Widget):
             ("c4B",[0,0,0,0]*4),
             )
         self.peng.registerEventHandler("on_resize",self.on_resize)
-        self.on_resize(self.window.width,self.window.height)
+        self.on_resize(*self.submenu.size)
         
         self.batch2d = pyglet.graphics.Batch()
         

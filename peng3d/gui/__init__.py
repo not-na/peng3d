@@ -111,7 +111,7 @@ class SubMenu(object):
             "c4B",
             )
         self.peng.registerEventHandler("on_resize",self.on_resize)
-        self.on_resize(self.window.width,self.window.height)
+        self.on_resize(*self.size)
         
         self.batch2d = pyglet.graphics.Batch()
     
@@ -177,6 +177,14 @@ class SubMenu(object):
         elif bg in ["flat","gradient","oldshadow","material"]:
             self.bg = ContainerButtonBackground(self,borderstyle=bg)
             self.on_resize(self.window.width,self.window.height)
+    
+    @property
+    def pos(self):
+        return [0,0] # As property to prevent bug with accidental manipulation
+    
+    @property
+    def size(self):
+        return self.window.width,self.window.height
     
     def on_resize(self,width,height):
         sx,sy = width,height
