@@ -49,6 +49,7 @@ class Label(Widget):
                  label="Label",
                  font_size=16,font="Arial",
                  font_color=[62,67,73,255],
+                 multiline=False,
                 ):
         super(Label,self).__init__(name,submenu,window,peng,pos,size,bg)
         self._label = pyglet.text.Label(label,
@@ -59,7 +60,8 @@ class Label(Widget):
                 batch=self.submenu.batch2d,
                 anchor_x="center", anchor_y="center",
                 group=pyglet.graphics.OrderedGroup(1),
-                width=self.size[0],height=self.size[1]
+                width=self.size[0],height=self.size[1],
+                multiline=multiline,
                 )
         self.redraw()
     
@@ -367,6 +369,7 @@ class TextInput(Widget):
         self._text._update()
         if not self.allow_overflow and self.size[0]-self.bg.border[0]*2<=self._text.content_width if len(self.text)!=0 else 0:
             self._text.text=otext
+        self.doAction("textchange")
     
     @property
     def default(self):
