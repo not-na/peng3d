@@ -181,7 +181,6 @@ class Container(Widget):
     def clickable(self,value):
         self._enabled=value
         self.redraw()
-    clickable.__noautodoc__=True
     
     def addWidget(self,widget):
         """
