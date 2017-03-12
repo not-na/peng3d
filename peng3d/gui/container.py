@@ -171,6 +171,18 @@ class Container(Widget):
         # Stencil/BG Vlist are updated by redraw()
         self.redraw()
     
+    @property
+    def clickable(self):
+        if not isinstance(self.submenu,Container):
+            return self.submenu.name == self.submenu.menu.activeSubMenu and self.submenu.menu.name == self.window.activeMenu and self.enabled and self.visible
+        else:
+            return self.submenu.clickable and self.enabled and self.visible
+    @clickable.setter
+    def clickable(self,value):
+        self._enabled=value
+        self.redraw()
+    clickable.__noautodoc__=True
+    
     def addWidget(self,widget):
         """
         Adds a widget to this container.
@@ -190,7 +202,7 @@ class Container(Widget):
         """
         Draws the submenu and its background.
         
-        Note that this leaves the OpenGL state set to 2d drawing and may modify the stencil settings and buffer.
+        Note that this leaves the OpenGL state set to 2d drawing and may modify the scissor settings.
         """
         if not self.visible:
             # Simple visibility check, has to be tested to see if it works properly
