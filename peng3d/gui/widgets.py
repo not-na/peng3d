@@ -196,12 +196,16 @@ class BasicWidget(object):
         Similar to :py:attr:`pos` but for the size instead.
         """
         if isinstance(self._size,list) or isinstance(self._size,tuple):
-            return _WatchingList(self._size,self._wlredraw_size)
+            s = self._size
         elif callable(self._size):
             w,h = self.submenu.size[:]
-            return _WatchingList(self._size(w,h),self._wlredraw_size)
+            s = self._size(w,h)
         else:
             raise TypeError("Invalid size type")
+        
+        # Prevents crashes with negative size
+        s = [max(s[0],0),max(s[1],0)]
+        return _WatchingList(s,self._wlredraw_size)
     @size.setter
     def size(self,value):
         self._size = value
