@@ -66,10 +66,9 @@ class Label(Widget):
                 )
         self.redraw()
     
-    def redraw(self,dt=None):
-        super(Label,self).redraw()
+    def on_redraw(self,dt=None):
+        super(Label,self).on_redraw()
         self.redraw_label()
-    redraw.__noautodoc__ = True
     def redraw_label(self):
         """
         Re-draws the text by calculating its position.
@@ -190,12 +189,11 @@ class TextInput(Widget):
         self.peng.registerEventHandler("on_text_motion",self.on_text_motion)
         
         self.redraw()
-        pyglet.clock.schedule_interval(self.redraw,1./2.)
+        pyglet.clock.schedule_interval(lambda dt: self.redraw(),1./2.)
     
-    def redraw(self,dt=None):
-        super(TextInput,self).redraw()
+    def on_redraw(self):
+        super(TextInput,self).on_redraw()
         self.redraw_label()
-    redraw.__noautodoc__ = True
     def redraw_label(self):
         """
         Re-draws the label by calculating its position.

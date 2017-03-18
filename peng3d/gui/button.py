@@ -215,12 +215,11 @@ class Button(Widget):
         self.redraw()
         
         # Redraws the button every 2 seconds to prevent glitched graphics
-        pyglet.clock.schedule_interval(self.redraw,2)
+        pyglet.clock.schedule_interval(lambda dt:self.redraw(),2)
     
-    def redraw(self,dt=None):
-        super(Button,self).redraw()
+    def on_redraw(self):
+        super(Button,self).on_redraw()
         self.redraw_label()
-    redraw.__noautodoc__ = True
     def redraw_label(self):
         """
         Re-draws the label by calculating its position.

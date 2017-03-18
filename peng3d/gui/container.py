@@ -162,7 +162,7 @@ class Container(Widget):
         if not isinstance(self.submenu,Container):
             glDisable(GL_SCISSOR_TEST)
     
-    def redraw(self):
+    def on_redraw(self):
         """
         Redraws the background and any child widgets.
         """
@@ -175,6 +175,11 @@ class Container(Widget):
                 self.bg.init_bg()
                 self.bg.initialized=True
             self.bg.redraw_bg()
+    
+    def redraw(self):
+        super(Container,self).redraw()
+        
+        # Also schedules redraws for sub-widgets
         for widget in self.widgets.values():
             widget.redraw()
     
@@ -224,7 +229,7 @@ class ScrollableContainer(Container):
         
         self.redraw()
     
-    def redraw(self):
+    def on_redraw(self):
         """
         Redraws the background and contents, including scrollbar.
         
@@ -247,7 +252,7 @@ class ScrollableContainer(Container):
         self._scrollbar._pos = x,y
         self._scrollbar._nmax = self.content_height
         
-        super(ScrollableContainer,self).redraw() # Re-draws everything, including child widgets
+        super(ScrollableContainer,self).on_redraw() # Re-draws everything, including child widgets
 
 
 # Hack to allow BasicWidget to do isinstance of Container/ScrollableContainer for offset code

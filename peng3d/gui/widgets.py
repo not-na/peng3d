@@ -30,6 +30,9 @@ __all__ = [
 
 import time
 
+# Internal Debug/Performance monitor variable
+_num_saved_redraws = 0
+
 try:
     import pyglet
     from pyglet.gl import *
@@ -132,10 +135,6 @@ class BasicWidget(object):
         
         self.actions = {}
         
-        self.vlists = []
-        # :deprecated: VBOs should be added to the batch2d of the submenu
-        # This feature will be removed in future versions
-        
         self._pos = pos
         self._size = size
         
@@ -143,6 +142,7 @@ class BasicWidget(object):
         self.pressed = False
         self._enabled = True
         self._is_scrollbar = False
+        self.do_redraw = True
         
         self.registerEventHandlers()
     
@@ -268,14 +268,30 @@ class BasicWidget(object):
     def draw(self):
         """
         Draws all vertex lists associated with this widget.
-        
-        :deprecated: Add vertex lists to the submenu instead
         """
-        for vlist,t in self.vlists:
-            vlist.draw(t)
+        if self.do_redraw:
+            self.on_redraw()
+            self.do_redraw = False
     def redraw(self):
         """
+        Triggers a redraw of the widget.
+        
+        Note that the redraw may not be executed instantly, but rather batched together on the next frame.
+        If an instant and synchronous redraw is needed, use :py:meth:`on_redraw()` instead.
+        """
+        # Uncomment if you want to see how many unneccessary redraws have been prevented
+        # Warning: may cause lots of console spam and thus inaccurate results
+        #if self.do_redraw:
+        #    # Debug - not for production use
+        #    global _num_saved_redraws
+        #    _num_saved_redraws+=1
+        #    print("saved redraw #%s"%_num_saved_redraws)
+        self.do_redraw = True
+    def on_redraw(self):
+        """
         Callback to be overridden by subclasses called if redrawing the widget seems necessary.
+        
+        Note that this method should not be called manually, see :py:meth:`redraw()` instead.
         """
         pass
     
@@ -347,7 +363,7 @@ class Widget(BasicWidget):
         self.bg = bg
         self.redraw()
     
-    def redraw(self):
+    def on_redraw(self):
         """
         Draws the background and the widget itself.
         
@@ -358,4 +374,4 @@ class Widget(BasicWidget):
                 self.bg.init_bg()
                 self.bg.initialized=True
             self.bg.redraw_bg()
-        super(Widget,self).redraw()
+        super(Widget,self).on_redraw()

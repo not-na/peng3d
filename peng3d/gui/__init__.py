@@ -121,7 +121,10 @@ class SubMenu(object):
         
         Note that this leaves the OpenGL state set to 2d drawing.
         """
+        # Sets the OpenGL state for 2D-Drawing
         self.window.set2d()
+        
+        # Draws the background
         if isinstance(self.bg,Layer):
             self.bg._draw()
         elif hasattr(self.bg,"draw") and callable(self.bg.draw):
@@ -140,8 +143,20 @@ class SubMenu(object):
             pass
         else:
             raise TypeError("Unknown background type")
-        self.window.set2d() # In case the bg layer was in 3d
+        
+        # In case the background modified relevant state
+        self.window.set2d()
+        
+        # Check that all widgets that need redrawing have been redrawn
+        for widget in self.widgets.values():
+            if widget.do_redraw:
+                widget.on_redraw()
+                widget.do_redraw = False
+        
+        # Actually draw the content
         self.batch2d.draw()
+        
+        # Call custom draw methods where needed
         for widget in self.widgets.values():
             widget.draw()
     
