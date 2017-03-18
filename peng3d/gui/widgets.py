@@ -94,6 +94,13 @@ class Background(object):
         Property for accessing the parent widget's instance of :py:class:`peng3d.peng.Peng`\ .
         """
         return self.widget.peng
+    
+    @property
+    def pressed(self):
+        return self.widget.pressed
+    @property
+    def is_hovering(self):
+        return self.widget.is_hovering
 
 class EmptyBackground(Background):
     """

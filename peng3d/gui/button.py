@@ -44,20 +44,38 @@ class ButtonBackground(Background):
     
     This background renders the button and its border, but not the label.
     """
-    def __init__(self,widget,border=[4,4],borderstyle="flat"):
+    n_vertices = 20
+    change_on_press = True
+    vlist_layer = 0 # used as the first argument to OrderedGroup
+    
+    def __init__(self,widget,border=[4,4],borderstyle="flat",
+                 batch=None,change_on_press=None):
+        
+        super(ButtonBackground,self).__init__(widget)
+        
         self.border = border
         self.borderstyle = borderstyle
-        super(ButtonBackground,self).__init__(widget)
+        
+        self.batch = batch
+        
+        self.change_on_press = change_on_press if change_on_press is not None else self.change_on_press
+        
+        self.borderstyles = {}
+        self.addBorderstyle("flat",self.bs_flat)
+        self.addBorderstyle("gradient",self.bs_gradient)
+        self.addBorderstyle("oldshadow",self.bs_oldshadow)
+        self.addBorderstyle("material",self.bs_material)
     def init_bg(self):
-        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,pyglet.graphics.OrderedGroup(0),
+        # Can only be initialized here due to order of initialization
+        self.batch = self.batch if self.batch is not None else self.submenu.batch2d
+        
+        self.vlist = self.batch.add(self.n_vertices,GL_QUADS,pyglet.graphics.OrderedGroup(self.vlist_layer),
             "v2f",
             "c3B",
             )
     def redraw_bg(self):
         # Convenience variables
-        sx,sy = self.widget.size
-        x,y = self.widget.pos
-        bx,by = self.border
+        sx,sy,x,y,bx,by = self.getPosSize()
         
         # Button background
         
@@ -83,59 +101,82 @@ class ButtonBackground(Background):
         qc  = v7+v8+v6+v5
         
         v = qb1+qb2+qb3+qb4+qc
-        
         self.vlist.vertices = v
         
+        if self.borderstyle not in self.borderstyles:
+            raise ValueError("Invalid Border style")
+        c = self.borderstyles[self.borderstyle](*self.getColors())
+        self.vlist.colors = c
+    
+    def getPosSize(self):
+        sx,sy = self.widget.size
+        x,y = self.widget.pos
+        bx,by = self.border
+        return sx,sy,x,y,bx,by
+    def getColors(self):
         bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
         o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
         s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
         # Outer,Inner,Shadow,Highlight
+        return bg,o,i,s,h
+    
+    def addBorderstyle(self,name,func):
+        self.borderstyles[name]=func
+    
+    @property
+    def pressed(self):
+        return self.change_on_press and self.widget.pressed
+    @property
+    def is_hovering(self):
+        return self.change_on_press and self.widget.is_hovering
+    
+    def bs_flat(self,bg,o,i,s,h):
+        # Flat style makes no difference between normal,hover and pressed
+        cb1 = i+i+i+i
+        cb2 = i+i+i+i
+        cb3 = i+i+i+i
+        cb4 = i+i+i+i
+        cc  = i+i+i+i
         
-        if self.borderstyle == "flat":
-            # Flat style makes no difference between normal,hover and pressed
-            cb1 = i+i+i+i
-            cb2 = i+i+i+i
-            cb3 = i+i+i+i
-            cb4 = i+i+i+i
-            cc  = i+i+i+i
-        elif self.borderstyle == "gradient":
-            if self.widget.pressed:
-                i = s
-            elif self.widget.is_hovering:
-                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
-            cb1 = i+i+o+o
-            cb2 = i+o+o+i
-            cb3 = o+o+i+i
-            cb4 = o+i+i+o
-            cc  = i+i+i+i
-        elif self.borderstyle == "oldshadow":
-            if self.widget.pressed:
-                i = s
-                s,h = h,s
-            elif self.widget.is_hovering:
-                i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
-                s = [min(s[0]+6,255),min(s[1]+6,255),min(s[2]+6,255)]
-            cb1 = h+h+h+h
-            cb2 = s+s+s+s
-            cb3 = s+s+s+s
-            cb4 = h+h+h+h
-            cc  = i+i+i+i
-        elif self.borderstyle == "material":
-            if self.widget.pressed:
-                i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
-            elif self.widget.is_hovering:
-                i = [max(bg[0]-10,0),max(bg[1]-10,0),max(bg[2]-10,0)]
-            cb1 = s+s+o+o
-            cb2 = s+o+o+s
-            cb3 = o+o+s+s
-            cb4 = o+s+s+o
-            cc  = i+i+i+i
-        else:
-            raise ValueError("Invalid Border style")
+        return cb1+cb2+cb3+cb4+cc
+    def bs_gradient(self,bg,o,i,s,h):
+        if self.pressed:
+            i = s
+        elif self.is_hovering:
+            i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+        cb1 = i+i+o+o
+        cb2 = i+o+o+i
+        cb3 = o+o+i+i
+        cb4 = o+i+i+o
+        cc  = i+i+i+i
         
-        c = cb1+cb2+cb3+cb4+cc
+        return cb1+cb2+cb3+cb4+cc
+    def bs_oldshadow(self,bg,o,i,s,h):
+        if self.pressed:
+            i = s
+            s,h = h,s
+        elif self.is_hovering:
+            i = [min(i[0]+6,255),min(i[1]+6,255),min(i[2]+6,255)]
+            s = [min(s[0]+6,255),min(s[1]+6,255),min(s[2]+6,255)]
+        cb1 = h+h+h+h
+        cb2 = s+s+s+s
+        cb3 = s+s+s+s
+        cb4 = h+h+h+h
+        cc  = i+i+i+i
         
-        self.vlist.colors = c
+        return cb1+cb2+cb3+cb4+cc
+    def bs_material(self,bg,o,i,s,h):
+        if self.pressed:
+            i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
+        elif self.is_hovering:
+            i = [max(bg[0]-10,0),max(bg[1]-10,0),max(bg[2]-10,0)]
+        cb1 = s+s+o+o
+        cb2 = s+o+o+s
+        cb3 = o+o+s+s
+        cb4 = o+s+s+o
+        cc  = i+i+i+i
+        
+        return cb1+cb2+cb3+cb4+cc
 
 class Button(Widget):
     """
@@ -582,14 +623,13 @@ class CheckboxBackground(ButtonBackground):
     
     The color of the square defaults to a tone of orange commonly found in GTK GUIs on Ubuntu.
     """
-    def __init__(self,widget,borderstyle,checkcolor=[240,119,70]):
+    vlist_layer = 1
+    
+    def __init__(self,widget,borderstyle,checkcolor=[240,119,70],**kwargs):
         self.checkcolor = checkcolor
-        super(CheckboxBackground,self).__init__(widget,[3,3],borderstyle)
+        super(CheckboxBackground,self).__init__(widget,[3,3],borderstyle,**kwargs)
     def init_bg(self):
-        self.vlist = self.submenu.batch2d.add(20,GL_QUADS,pyglet.graphics.OrderedGroup(1),
-            "v2f",
-            "c3B",
-            )
+        super(CheckboxBackground,self).init_bg()
         self.vlist_check = self.submenu.batch2d.add(4,GL_QUADS,pyglet.graphics.OrderedGroup(10),
             "v2f",
             "c3B",
