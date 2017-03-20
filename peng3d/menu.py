@@ -24,6 +24,8 @@
 
 __all__ = ["BasicMenu","Menu"]
 
+import weakref
+
 from .layer import Layer
 
 class BasicMenu(object):
@@ -67,7 +69,11 @@ class BasicMenu(object):
     # Event handlers
     def handleEvent(self,event_type,args):
         if event_type in self.eventHandlers:
-            for handler in self.eventHandlers[event_type]:
+            for whandler in self.eventHandlers[event_type]:
+                # This allows for proper collection of deleted handler methods by using weak references
+                handler = whandler()
+                if handler is None:
+                    del self.eventHandlers[event_type][self.eventHandlers[event_type].index(whandler)]
                 handler(*args)
         for world in self.worlds:
             world.handle_event(event_type,args,self.window)
@@ -75,7 +81,8 @@ class BasicMenu(object):
     def registerEventHandler(self,event_type,handler):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
-        self.eventHandlers[event_type].append(handler)
+        # Only a weak reference is kept
+        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
     
     def on_enter(self,old):
         """

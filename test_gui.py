@@ -92,7 +92,10 @@ def createGUI(main,game):
                                 )
     # Debug Print
     def f():
+        global testbtn
         print("Testbtn clicked!")
+        title.delWidget(testbtn)
+        del testbtn
     testbtn.addAction("click",f)
     title.addWidget(testbtn)
     

@@ -26,6 +26,7 @@ __all__ = ["PengWindow"]
 
 import math
 import traceback
+import weakref
 
 import pyglet
 from pyglet.gl import *
@@ -246,7 +247,11 @@ class PengWindow(pyglet.window.Window):
         #if window is not None:
         #    args.append(window)
         if event_type in self.eventHandlers:
-            for handler in self.eventHandlers[event_type]:
+            for whandler in self.eventHandlers[event_type]:
+                # This allows for proper collection of deleted handler methods by using weak references
+                handler = whandler()
+                if handler is None:
+                    del self.eventHandlers[event_type][self.eventHandlers[event_type].index(whandler)]
                 handler(*args)
     handleEvent.__noautodoc__ = True
     
@@ -255,7 +260,8 @@ class PengWindow(pyglet.window.Window):
             print("Registered Event: %s Handler: %s"%(event_type,handler))
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
-        self.eventHandlers[event_type].append(handler)
+        # Only a weak reference is kept
+        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
     
     # Properties/Proxies for various things
     

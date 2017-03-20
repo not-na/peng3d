@@ -25,6 +25,8 @@
 __all__ = ["World","StaticWorld",
            "WorldView", "WorldViewMouseRotatable"]
 
+import weakref
+
 from .camera import Camera
 
 try:
@@ -111,7 +113,11 @@ class World(object):
         #if window is not None:
         #    args.append(window)
         if event_type in self.eventHandlers:
-            for handler in self.eventHandlers[event_type]:
+            for whandler in self.eventHandlers[event_type]:
+                # This allows for proper collection of deleted handler methods by using weak references
+                handler = whandler()
+                if handler is None:
+                    del self.eventHandlers[event_type][self.eventHandlers[event_type].index(whandler)]
                 handler(*args)
     handle_event.__noautodoc__ = True
     def registerEventHandler(self,event_type,handler):
@@ -119,7 +125,8 @@ class World(object):
             print("Registered Event: %s Handler: %s"%(event_type,handler))
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
-        self.eventHandlers[event_type].append(handler)
+        # Only a weak reference is kept
+        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
 
 class StaticWorld(World):
     """

@@ -24,6 +24,10 @@
 
 __all__ = ["GUIMenu","SubMenu","GUILayer"]
 
+#from pprint import pprint
+#import gc
+#import weakref
+#import sys
 import collections
 
 try:
@@ -170,6 +174,48 @@ class SubMenu(object):
         Returns the widget with the given name.
         """
         return self.widgets[name]
+    
+    def delWidget(self,widget):
+        # TODO: fix memory leak upon widget deletion
+        #print("*"*50)
+        #print("Start delWidget")
+        if isinstance(widget,BasicWidget):
+            widget = widget.name
+        
+        if widget not in self.widgets:
+            return
+        
+        w = self.widgets[widget]
+        
+        #print("refs: %s"%sys.getrefcount(w))
+        
+        w.delete()
+        del self.widgets[widget]
+        del widget
+        
+        #w_wref = weakref.ref(w)
+        
+        #print("GC: GARBAGE")
+        #print(gc.garbage)
+        #print("Widget Info")
+        #print(w_wref())
+        #import objgraph
+        #print("Objgraph")
+        #objgraph.show_refs([w], filename='./mem_widget.png')
+        #print("refs: %s"%sys.getrefcount(w))
+        #w_r = gc.get_referrers(w)
+        #print("GC: REFS")
+        #for w_ref in w_r:
+        #    print(repr(w_ref)[:512])
+        #print("GC: END")
+        #print("len: %s"%len(w_r))
+        #del w_ref,w_r
+        #print("after del %s"%w_wref())
+        #print("refs: %s"%sys.getrefcount(w))
+        del w
+        #print("Final WRef")
+        #print(w_wref())
+        
     
     def setBackground(self,bg):
         """

@@ -112,6 +112,7 @@ class TextInputBackground(ButtonBackground):
             "v2f",
             "c3B",
             )
+        self.reg_vlist(self.vlist_cursor)
     def redraw_bg(self):
         super(TextInputBackground,self).redraw_bg()
         

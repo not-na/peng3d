@@ -28,6 +28,7 @@ __all__ = [
     "Widget","EmptyBackground",
     ]
 
+import weakref
 import time
 
 # Internal Debug/Performance monitor variable
@@ -47,11 +48,11 @@ def mouse_aabb(mpos,size,pos):
 
 class _WatchingList(list):
     def __init__(self,l,callback=lambda:None):
-        self.callback = callback
+        self.callback = weakref.WeakMethod(callback)
         super(_WatchingList,self).__init__(l)
     def __setitem__(self,*args):
         super(_WatchingList,self).__setitem__(*args)
-        self.callback(self)
+        c = self.callback()(self)
 
 class Background(object):
     """
@@ -62,6 +63,7 @@ class Background(object):
     def __init__(self,widget):
         self.widget = widget
         self.initialized = False
+        self._vlists = []
     def init_bg(self):
         """
         Called just before the background will be drawn the first time.
@@ -76,6 +78,9 @@ class Background(object):
         Method called by the parent widget every time its :py:meth:`Widget.redraw()` method is called.
         """
         pass
+    
+    def reg_vlist(self,vlist):
+        self._vlists.append(vlist)
     
     @property
     def submenu(self):
@@ -104,6 +109,14 @@ class Background(object):
     @property
     def is_hovering(self):
         return self.widget.is_hovering
+    
+    def __del__(self):
+        for vlist in self._vlists:
+            try:
+                vlist.delete()
+            except Exception:
+                pass
+        self._vlists=[]
 
 class EmptyBackground(Background):
     """
@@ -343,6 +356,39 @@ class BasicWidget(object):
                 self.redraw()
     def on_resize(self,width,height):
         self.redraw()
+    
+    def delete(self):
+        # TODO: fix memory leak upon widget deletion
+        del self.bg.widget
+        del self.bg
+        
+        #self.clickable=False
+        
+        del self._pos
+        del self._size
+        
+        self.actions = {}
+        
+        for e_type,e_handlers in self.peng.eventHandlers.items():
+            if True or e_type in eh:
+                to_del = []
+                for e_handler in e_handlers:
+                    # Weird workaround due to implementation details of WeakMethod
+                    if super(weakref.WeakMethod,e_handler).__call__() is self:
+                        to_del.append(e_handler)
+                for d in to_del:
+                    try:
+                        #print("Deleting handler %s of type %s"%(d,e_type))
+                        del e_handlers[e_handlers.index(d)]
+                    except Exception:
+                        #print("Could not delete handler %s, memory leak may occur"%d)
+                        import traceback;traceback.print_exc()
+    #def __del__(self):
+    #    print("del %s"%self.name)
+    #    try:
+    #        del self.bg
+    #    except Exception:
+    #        pass
 
 class Widget(BasicWidget):
     """

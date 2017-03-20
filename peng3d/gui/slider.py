@@ -51,6 +51,7 @@ class ProgressbarBackground(Background):
             "v2f",
             "c3B",
             )
+        self.reg_vlist(self.vlist)
     def redraw_bg(self):
         x,y = self.widget.pos
         sx,sy = self.widget.size
@@ -227,6 +228,7 @@ class SliderBackground(ButtonBackground):
             "v2f",
             "c3B",
             )
+        self.reg_vlist(self.vlist_bg)
         super(SliderBackground,self).init_bg()
     def redraw_bg(self):
         super(SliderBackground,self).redraw_bg()

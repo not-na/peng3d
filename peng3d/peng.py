@@ -26,6 +26,8 @@ __all__ = ["Peng","HeadlessPeng"]
 
 import sys
 
+import weakref
+
 #from . import window, config, keybind, pyglet_patch
 from . import config, world, resource
 
@@ -110,7 +112,11 @@ class Peng(object):
         if event_type not in ["on_draw","on_mouse_motion"] and self.cfg["debug.events.dump"]:
             print("Event %s with args %s"%(event_type,args))
         if event_type in self.eventHandlers:
-            for handler in self.eventHandlers[event_type]:
+            for whandler in self.eventHandlers[event_type]:
+                # This allows for proper collection of deleted handler methods by using weak references
+                handler = whandler()
+                if handler is None:
+                    del self.eventHandlers[event_type][self.eventHandlers[event_type].index(whandler)]
                 handler(*args)
     def registerEventHandler(self,event_type,handler):
         """
@@ -124,7 +130,8 @@ class Peng(object):
             print("Registered Event: %s Handler: %s"%(event_type,handler))
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
-        self.eventHandlers[event_type].append(handler)
+        # Only a weak reference is kept
+        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
 
 class HeadlessPeng(object):
     """

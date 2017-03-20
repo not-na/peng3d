@@ -73,6 +73,7 @@ class ButtonBackground(Background):
             "v2f",
             "c3B",
             )
+        self.reg_vlist(self.vlist)
     def redraw_bg(self):
         # Convenience variables
         sx,sy,x,y,bx,by = self.getPosSize()
@@ -244,6 +245,11 @@ class Button(Widget):
     @label.setter
     def label(self,label):
         self._label.text = label
+    
+    def delete(self):
+        self._label.delete()
+        del self._label
+        super(Button,self).delete()
 
 
 class _FakeTexture(object):
@@ -288,6 +294,7 @@ class ImageBackground(Background):
             "v2f",
             ("t3f",self.bg_texinfo[2]),
             )
+        self.reg_vlist(self.vlist_bg)
     def redraw_bg(self):
         # Convenience variables
         sx,sy = self.widget.size
@@ -359,6 +366,7 @@ class FramedImageBackground(ImageBackground):
             "v2f",
             "t3f",
             )
+        self.reg_vlist(self.vlist_bg)
     def redraw_bg(self):
         # Convenience variables
         sx,sy = self.widget.size
@@ -633,6 +641,7 @@ class CheckboxBackground(ButtonBackground):
             "v2f",
             "c3B",
             )
+        self.reg_vlist(self.vlist_check)
     def redraw_bg(self):
         # Convenience variables
         sx,sy = self.widget.size
