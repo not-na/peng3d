@@ -25,6 +25,7 @@
 __all__ = ["BasicMenu","Menu"]
 
 import weakref
+import inspect
 
 from .layer import Layer
 
@@ -82,7 +83,11 @@ class BasicMenu(object):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
         # Only a weak reference is kept
-        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
+        if inspect.ismethod(handler):
+            handler = weakref.WeakMethod(handler)
+        else:
+            handler = weakref.ref(handler)
+        self.eventHandlers[event_type].append(handler)
     
     def on_enter(self,old):
         """

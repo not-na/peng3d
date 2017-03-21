@@ -27,6 +27,7 @@ __all__ = ["PengWindow"]
 import math
 import traceback
 import weakref
+import inspect
 
 import pyglet
 from pyglet.gl import *
@@ -261,7 +262,11 @@ class PengWindow(pyglet.window.Window):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
         # Only a weak reference is kept
-        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
+        if inspect.ismethod(handler):
+            handler = weakref.WeakMethod(handler)
+        else:
+            handler = weakref.ref(handler)
+        self.eventHandlers[event_type].append(handler)
     
     # Properties/Proxies for various things
     

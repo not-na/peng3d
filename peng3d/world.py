@@ -26,6 +26,7 @@ __all__ = ["World","StaticWorld",
            "WorldView", "WorldViewMouseRotatable"]
 
 import weakref
+import inspect
 
 from .camera import Camera
 
@@ -126,7 +127,11 @@ class World(object):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
         # Only a weak reference is kept
-        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
+        if inspect.ismethod(handler):
+            handler = weakref.WeakMethod(handler)
+        else:
+            handler = weakref.ref(handler)
+        self.eventHandlers[event_type].append(handler)
 
 class StaticWorld(World):
     """

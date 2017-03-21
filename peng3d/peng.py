@@ -27,6 +27,7 @@ __all__ = ["Peng","HeadlessPeng"]
 import sys
 
 import weakref
+import inspect
 
 #from . import window, config, keybind, pyglet_patch
 from . import config, world, resource
@@ -131,7 +132,11 @@ class Peng(object):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type]=[]
         # Only a weak reference is kept
-        self.eventHandlers[event_type].append(weakref.WeakMethod(handler))
+        if inspect.ismethod(handler):
+            handler = weakref.WeakMethod(handler)
+        else:
+            handler = weakref.ref(handler)
+        self.eventHandlers[event_type].append(handler)
 
 class HeadlessPeng(object):
     """
