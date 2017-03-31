@@ -161,6 +161,20 @@ These keys are all registered with the ``mod`` flag set to False, thus they will
    
    Defaults to ``lshift``\ .
 
+Commonly used Key Combination Configuration Values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. confval:: controls.keybinds.common.copy
+             controls.keybinds.common.paste
+             controls.keybinds.common.cut
+   
+   Key Combinations used to be used by various parts of the GUI.
+   
+   Currently used by the :py:class:`peng3d.gui.text.TextInput()` Widget for basic clipboard operations.
+   
+   By default, these are set to the commonly used values of ``Ctrl-C`` for Copy,
+   ``Ctrl-V`` for Paste and ``Ctrl-X`` for Cutting.
+
 General Controls Configuration Values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

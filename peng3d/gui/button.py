@@ -33,7 +33,7 @@ __all__ = [
 import pyglet
 from pyglet.gl import *
 
-from .widgets import Background,Widget
+from .widgets import Background,Widget,mouse_aabb
 
 LABEL_FONT_SIZE = 16
 
@@ -110,11 +110,35 @@ class ButtonBackground(Background):
         self.vlist.colors = c
     
     def getPosSize(self):
+        """
+        Helper function converting the actual widget position and size into a usable and offsetted form.
+        
+        This function should return a 6-tuple of ``(sx,sy,x,y,bx,by)`` where sx and sy are the size, x and y the position and bx and by are the border size.
+        
+        All values should be in pixels and already include all offsets, as they are used directly for generation of vertex data.
+        
+        This method can also be overridden to limit the background to a specific part of its widget.
+        """
         sx,sy = self.widget.size
         x,y = self.widget.pos
         bx,by = self.border
         return sx,sy,x,y,bx,by
     def getColors(self):
+        """
+        Overrideable function that generates the colors to be used by various borderstyles.
+        
+        Should return a 5-tuple of ``(bg,o,i,s,h)``\ .
+        
+        ``bg`` is the base color of the background.
+        
+        ``o`` is the outer color, it is usually the same as the background color.
+        
+        ``i`` is the inner color, it is usually lighter than the background color.
+        
+        ``s`` is the shadow color, it is usually quite a bit darker than the background.
+        
+        ``h`` is the highlight color, it is usually quite a bit lighter than the background.
+        """
         bg = self.submenu.bg[:3] if isinstance(self.submenu.bg,list) or isinstance(self.submenu.bg,tuple) else [242,241,240]
         o,i = bg, [min(bg[0]+8,255),min(bg[1]+8,255),min(bg[2]+8,255)]
         s,h = [max(bg[0]-40,0),max(bg[1]-40,0),max(bg[2]-40,0)], [min(bg[0]+12,255),min(bg[1]+12,255),min(bg[2]+12,255)]
@@ -122,13 +146,32 @@ class ButtonBackground(Background):
         return bg,o,i,s,h
     
     def addBorderstyle(self,name,func):
+        """
+        Adds a borderstyle to the background object.
+        
+        Note that borderstyles must be registered seperately for each background object.
+        
+        ``name`` is the (string) name of the borderstyle.
+        
+        ``func`` will be called with its arguments as ``(bg,o,i,s,h)``\ , see :py:meth:`getColors()` for more information.
+        """
         self.borderstyles[name]=func
     
     @property
     def pressed(self):
+        """
+        Read-only helper property to be used by borderstyles for determining if the widget should be rendered as pressed or not.
+        
+        Note that this property may not represent the actual pressed state, it will always be False if ``change_on_press`` is disabled.
+        """
         return self.change_on_press and self.widget.pressed
     @property
     def is_hovering(self):
+        """
+        Read-only helper property to be used by borderstyles for determining if the widget should be rendered as hovered or not.
+        
+        Note that this property may not represent the actual hovering state, it will always be False if ``change_on_press`` is disabled.
+        """
         return self.change_on_press and self.widget.is_hovering
     
     def bs_flat(self,bg,o,i,s,h):
@@ -140,6 +183,7 @@ class ButtonBackground(Background):
         cc  = i+i+i+i
         
         return cb1+cb2+cb3+cb4+cc
+    bs_flat.__noautodoc__ = True
     def bs_gradient(self,bg,o,i,s,h):
         if self.pressed:
             i = s
@@ -152,6 +196,7 @@ class ButtonBackground(Background):
         cc  = i+i+i+i
         
         return cb1+cb2+cb3+cb4+cc
+    bs_gradient.__noautodoc__ = True
     def bs_oldshadow(self,bg,o,i,s,h):
         if self.pressed:
             i = s
@@ -166,6 +211,7 @@ class ButtonBackground(Background):
         cc  = i+i+i+i
         
         return cb1+cb2+cb3+cb4+cc
+    bs_oldshadow.__noautodoc__ = True
     def bs_material(self,bg,o,i,s,h):
         if self.pressed:
             i = [max(bg[0]-20,0),max(bg[1]-20,0),max(bg[2]-20,0)]
@@ -178,6 +224,7 @@ class ButtonBackground(Background):
         cc  = i+i+i+i
         
         return cb1+cb2+cb3+cb4+cc
+    bs_material.__noautodoc__ = True
 
 class Button(Widget):
     """

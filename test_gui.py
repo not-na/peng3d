@@ -137,8 +137,9 @@ def createGUI(main,game):
                                 pos=lambda sw,sh,bw,bh: (sw/2.+70,sh/2.-bh/2.+bh+20),
                                 size=[100,32],
                                 borderstyle="oldshadow",
-                                text="",
+                                text="0123456789",
                                 default="Default",
+                                allow_copypaste="force"
                                 )
     # No Actions
     title.addWidget(testinput)

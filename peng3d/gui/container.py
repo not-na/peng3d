@@ -47,6 +47,7 @@ class ContainerButtonBackground(ButtonBackground):
         i = bg
         
         return bg,o,i,s,h
+    getColors.__noautodoc__ = getColors
     
     def bs_oldshadow(self,bg,o,i,s,h):
         if self.change_on_press and self.widget.pressed:
@@ -62,6 +63,7 @@ class ContainerButtonBackground(ButtonBackground):
         cc  = i+i+i+i
         
         return cb1+cb2+cb3+cb4+cc
+    bs_oldshadow.__noautodoc__ = getColors
 
 class Container(Widget):
     """
@@ -182,6 +184,7 @@ class Container(Widget):
         # Also schedules redraws for sub-widgets
         for widget in self.widgets.values():
             widget.redraw()
+    redraw.__noautodoc__ = True
     
     def on_enter(self,old):
         """

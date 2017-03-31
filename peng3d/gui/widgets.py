@@ -80,6 +80,11 @@ class Background(object):
         pass
     
     def reg_vlist(self,vlist):
+        """
+        Registers a vertex list to the internal list.
+        
+        This allows the class to clean itself up properly during deletion, as the background would still be visible after deletion otherwise.
+        """
         self._vlists.append(vlist)
     
     @property
@@ -105,9 +110,19 @@ class Background(object):
     
     @property
     def pressed(self):
+        """
+        Read-only helper property for easier access.
+        
+        Equivalent to ``widget.pressed``\ .
+        """
         return self.widget.pressed
     @property
     def is_hovering(self):
+        """
+        Read-only helper property for easier access.
+        
+        Equivalent to ``widget.is_hovering``\ .
+        """
         return self.widget.is_hovering
     
     def __del__(self):

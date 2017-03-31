@@ -33,6 +33,12 @@ import pyglet
 from pyglet.gl import *
 from pyglet.window import key
 
+try:
+    import pyperclip
+    HAVE_PYPERCLIP = True
+except ImportError:
+    HAVE_PYPERCLIP = False
+
 from .widgets import Background,Widget,mouse_aabb
 from .button import ButtonBackground
 
@@ -146,6 +152,13 @@ class TextInput(Widget):
     The optional default text will only be displayed if the text is empty.
     
     The ``allow_overflow`` flag determines if the text entered can be longer than the size of the :py:class:`TextInput`\ .
+    
+    The ``allow_copypaste`` flag controls whether or not the user can copy and paste the contents of the text box.
+    By default, copying and pasting is allowed. This flag can also be set to ``"force"`` to force a crash
+    with an appropriate error message if the :py:mod:`pyperclip` module is not available.
+    Currently, only copying, pasting and cutting the whole text box is supported, as there is no mechanism for text selection yet.
+    
+    The key combinations used by this widget can be configured in the config via the :confval:`controls.keybinds.common.*` config values.
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
@@ -155,8 +168,13 @@ class TextInput(Widget):
                  font_size=16,font="Arial",
                  font_color=[62,67,73,255],
                  font_color_default=[62,67,73,200],
-                 allow_overflow=False
+                 allow_overflow=False,
+                 allow_copypaste=True,
                  ):
+        
+        if allow_copypaste == "force" and not HAVE_PYPERCLIP:
+            raise ValueError("%s with name %s requires Clipboard support, but Pyperclip is not installed"%(self.__class__.__name__,name))
+        
         if bg is None:
             bg = TextInputBackground(self,border,borderstyle)
         super(TextInput,self).__init__(name,submenu,window,peng,pos,size,bg)
@@ -164,6 +182,8 @@ class TextInput(Widget):
         self.cursor_pos = 0
         self.focussed = False
         self.allow_overflow = allow_overflow
+        self.allow_copypaste = True if allow_copypaste is True or allow_copypaste=="force" else False
+        self.force_copypaste = True if allow_copypaste=="force" else False
         
         self._text = pyglet.text.Label(text,
                 font_name=font,
@@ -188,6 +208,10 @@ class TextInput(Widget):
         
         self.peng.registerEventHandler("on_text",self.on_text)
         self.peng.registerEventHandler("on_text_motion",self.on_text_motion)
+        if self.allow_copypaste:
+            self.peng.keybinds.add(self.window.cfg["controls.keybinds.common.copy"],"peng3d:gui.widget.textinput.%s.copy"%self.name,self.on_copy)
+            self.peng.keybinds.add(self.window.cfg["controls.keybinds.common.paste"],"peng3d:gui.widget.textinput.%s.paste"%self.name,self.on_paste)
+            self.peng.keybinds.add(self.window.cfg["controls.keybinds.common.cut"],"peng3d:gui.widget.textinput.%s.cut"%self.name,self.on_cut)
         
         self.redraw()
         pyglet.clock.schedule_interval(lambda dt: self.redraw(),1./2.)
@@ -232,10 +256,11 @@ class TextInput(Widget):
         if not (self.focussed and self.clickable):
             return
         
+        otext = self.text
         t = self.text
         t = t[:self.cursor_pos]+text+t[self.cursor_pos:]
         self.text = t
-        self.cursor_pos+=len(text)
+        self.cursor_pos+=len(self.text)-len(otext)
         self.cursor_pos = min(self.cursor_pos,len(self.text))
         self.redraw()
     
@@ -244,22 +269,41 @@ class TextInput(Widget):
             return
         
         if motion == key.MOTION_BACKSPACE:
-            self.text = self.text[:-1]
+            l = list(self.text)
+            try:
+                # Deletes the character in front of the cursor
+                del l[self.cursor_pos-1]
+            except Exception:
+                return
+            self.text = "".join(l)
             self.cursor_pos-=1
             self.cursor_pos = max(self.cursor_pos,0)
             self.redraw()
+        elif motion == key.MOTION_DELETE:
+            l = list(self.text)
+            try:
+                # Deletes the character after the cursor
+                del l[self.cursor_pos]
+            except Exception:
+                return
+            self.text = "".join(l)
+            self.redraw()
         elif motion == key.MOTION_LEFT:
+            # Moves the cursor to the left one character
             self.cursor_pos-=1
             self.cursor_pos = max(self.cursor_pos,0)
             self.redraw()
         elif motion == key.MOTION_RIGHT:
+            # Moves the cursor to the right one character
             self.cursor_pos+=1
             self.cursor_pos = min(self.cursor_pos,len(self.text))
             self.redraw()
-        elif motion == key.MOTION_BEGINNING_OF_LINE:
+        elif motion == key.MOTION_BEGINNING_OF_LINE or motion == key.MOTION_BEGINNING_OF_FILE:
+            # Moves the cursor to the beginning
             self.cursor_pos=0
             self.redraw()
-        elif motion == key.MOTION_END_OF_LINE:
+        elif motion == key.MOTION_END_OF_LINE or motion == key.MOTION_END_OF_FILE:
+            # Moves the cursor to the end
             self.cursor_pos = len(self.text)
             self.redraw()
     
@@ -279,6 +323,44 @@ class TextInput(Widget):
             self.focussed = False
             self.redraw()
     
+    def on_copy(self,symbol,modifiers,release):
+        if release:
+            return
+        
+        try:
+            pyperclip.copy(self.text)
+        except Exception:
+            if self.force_copypaste:
+                raise
+    def on_paste(self,symbol,modifiers,release):
+        if release:
+            return
+        
+        try:
+            t = pyperclip.paste()
+            
+            # Tries to copy as much as possible, until it does not fit
+            if not self.allow_overflow:
+                # TODO: implement more efficient algorithm
+                self.text = ""
+                for c in t:
+                    self.text+=c
+            else:
+                self.text=t
+        except Exception:
+            if self.force_copypaste:
+                raise
+    def on_cut(self,symbol,modifiers,release):
+        if release:
+            return
+        
+        try:
+            pyperclip.copy(self.text)
+            self.text = ""
+        except Exception:
+            if self.force_copypaste:
+                raise
+    
     @property
     def text(self):
         """
@@ -290,8 +372,14 @@ class TextInput(Widget):
         otext = self._text.text
         self._text.text = text
         self._text._update()
-        if not self.allow_overflow and self.size[0]-self.bg.border[0]*2<=self._text.content_width if len(self.text)!=0 else 0:
+        # Reverts the change if
+        # 1. the text length has NOT increased
+        # 2. and allow_overflow is False
+        # 3. and the text is wider than the widget size minus the border size
+        # 4. and the text is not empty
+        if len(otext)<len(text) and not self.allow_overflow and self.size[0]-self.bg.border[0]*2<=self._text.content_width if len(self.text)!=0 else 0:
             self._text.text=otext
+            self._text._update()
         self.doAction("textchange")
     
     @property

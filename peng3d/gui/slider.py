@@ -255,6 +255,7 @@ class SliderBackground(ButtonBackground):
         bx,by = self.border
         x,y = self.widget.pos[0]+(self.widget.size[0]-bx*2)*self.widget.p,self.widget.pos[1]
         return sx,sy,x,y,bx,by
+    getPosSize.__noautodoc__ = True
 
 class Slider(Progressbar):
     """
@@ -310,6 +311,7 @@ class VerticalSliderBackground(SliderBackground):
         bx,by = self.border
         x,y = self.widget.pos[0],self.widget.pos[1]+(self.widget.size[1]-by*2)*self.widget.p
         return sx,sy,x,y,bx,by
+    getPosSize.__noautodoc__ = True
 
 class VerticalSlider(Slider):
     """

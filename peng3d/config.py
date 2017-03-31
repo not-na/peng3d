@@ -136,6 +136,10 @@ DEFAULT_CONFIG = {
     "controls.keybinds.strict":False,
     "controls.keybinds.debug":False,
     
+    "controls.keybinds.common.copy":"Ctrl-C",
+    "controls.keybinds.common.paste":"Ctrl-V",
+    "controls.keybinds.common.cut":"Ctrl-X",
+    
     # debug.*
     # Debug config
     "debug.events.dump":False,
