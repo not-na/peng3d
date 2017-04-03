@@ -41,5 +41,6 @@ class Mock(object):
         pass
 
 lib = Mock()
+text = Mock()
 
 compat_platform = "linux"
