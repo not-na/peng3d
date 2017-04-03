@@ -42,6 +42,24 @@ except ImportError:
 from .widgets import Background,Widget,mouse_aabb
 from .button import ButtonBackground
 
+def _getHtmlFontSize(points):
+    # Approximation, always rounds down
+    if points<=8:
+        return 1
+    elif points<=10:
+        return 2
+    elif points<=12:
+        return 3
+    elif points<=14:
+        return 4
+    elif points<=18:
+        return 5
+    elif points<=24:
+        return 6
+    else:
+        # Inaccurate, represents everything above 24, but should equal 48
+        return 7
+
 class Label(Widget):
     """
     Simple widget that can display any single-line non-formatted string.
@@ -57,19 +75,40 @@ class Label(Widget):
                  font_size=16,font="Arial",
                  font_color=[62,67,73,255],
                  multiline=False,
+                 label_cls=pyglet.text.Label,
                 ):
         super(Label,self).__init__(name,submenu,window,peng,pos,size,bg)
-        self._label = pyglet.text.Label(label,
-                font_name=font,
-                font_size=font_size,
-                color=font_color,
-                x=0,y=0,
-                batch=self.submenu.batch2d,
-                anchor_x="center", anchor_y="center",
-                group=pyglet.graphics.OrderedGroup(1),
-                width=self.size[0],height=self.size[1],
-                multiline=multiline,
-                )
+        
+        self.font_name = font
+        self.font_size = font_size
+        self.font_color = font_color
+        
+        if label_cls == pyglet.text.HTMLLabel:
+            self._label = label_cls(label,
+                    # Font is changed later
+                    x=0,y=0,
+                    batch=self.submenu.batch2d,
+                    anchor_x="center", anchor_y="center",
+                    group=pyglet.graphics.OrderedGroup(1),
+                    width=self.size[0],height=self.size[1],
+                    multiline=multiline,
+                    )
+            self._label.font_name = font
+            self._label.font_size = font_size
+            self._label.font_color = font_color
+        else:
+            self._label = label_cls(label,
+                    font_name=font,
+                    font_size=font_size,
+                    color=font_color,
+                    x=0,y=0,
+                    batch=self.submenu.batch2d,
+                    anchor_x="center", anchor_y="center",
+                    group=pyglet.graphics.OrderedGroup(1),
+                    width=self.size[0],height=self.size[1],
+                    multiline=multiline,
+                    )
+        
         self.redraw()
     
     def on_redraw(self,dt=None):
@@ -86,8 +125,12 @@ class Label(Widget):
         x,y = self.pos
         
         # Label position
-        self._label.x = x+sx/2.
-        self._label.y = y+sy/2.
+        self._label.font_name = self.font_name
+        self._label.font_size = self.font_size
+        self._label.font_color = self.font_color
+        
+        self._label.x = int(x+sx/2.)
+        self._label.y = int(y+sy/2.)
         self._label.width = self.size[0]
         self._label.height = self.size[1]
         self._label._update() # Needed to prevent the label from drifting to the top-left after resizing by odd amounts
