@@ -121,6 +121,8 @@ class ResourceManager(object):
         
         See :py:meth:`loadTex()` for more information.
         """
+        if category not in self.categoriesTexCache:
+            return self.getMissingTexture()
         if name not in self.categoriesTexCache[category]:
             self.loadTex(name,category)
         return self.categoriesTexCache[category][name]

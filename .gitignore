@@ -11,6 +11,7 @@ peng3d-headless-py3.5/
 tests/screenshots/session/*.png
 
 button_scheme.xcf
+border_scheme.xcf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

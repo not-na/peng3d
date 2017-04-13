@@ -42,23 +42,6 @@ except ImportError:
 from .widgets import Background,Widget,mouse_aabb
 from .button import ButtonBackground
 
-def _getHtmlFontSize(points):
-    # Approximation, always rounds down
-    if points<=8:
-        return 1
-    elif points<=10:
-        return 2
-    elif points<=12:
-        return 3
-    elif points<=14:
-        return 4
-    elif points<=18:
-        return 5
-    elif points<=24:
-        return 6
-    else:
-        # Inaccurate, represents everything above 24, but should equal 48
-        return 7
 
 class Label(Widget):
     """

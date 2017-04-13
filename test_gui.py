@@ -38,10 +38,6 @@ TERRAIN = [-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]
 
 COLORS  = [255,0,0, 0,255,0, 0,0,255, 255,255,255]
 
-def createTexBin():
-    global texBin
-    texBin = pyglet.image.atlas.TextureBin(2048,2048)
-
 def createGUI(main,game):
     global title,playbtn,optionsbtn,testbtn,tex, options,backbtn
     global gamel
@@ -244,8 +240,6 @@ def main(args):
     # Peng engine instance creation and creating the window
     peng = peng3d.Peng()
     peng.createWindow(caption="Peng3d GUI Test Project",resizable=True,vsync=True)
-    peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
-    createTexBin()
     #peng.window.toggle_exclusivity()
     # Keybinds
     def esc_toggle(symbol,modifiers,release):

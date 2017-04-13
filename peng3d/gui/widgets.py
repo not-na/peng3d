@@ -23,7 +23,6 @@
 #  
 
 __all__ = [
-    "mouse_aabb",
     "BasicWidget","Background",
     "Widget","EmptyBackground",
     ]
@@ -40,19 +39,7 @@ try:
 except ImportError:
     pass # Headless mode
 
-def mouse_aabb(mpos,size,pos):
-    """
-    Simple AABB collision algorithm used for checking if a mouse click hit a widget.
-    """
-    return pos[0]<=mpos[0]<=pos[0]+size[0] and pos[1]<=mpos[1]<=pos[1]+size[1]
-
-class _WatchingList(list):
-    def __init__(self,l,callback=lambda:None):
-        self.callback = weakref.WeakMethod(callback)
-        super(_WatchingList,self).__init__(l)
-    def __setitem__(self,*args):
-        super(_WatchingList,self).__setitem__(*args)
-        c = self.callback()(self)
+from ..util import mouse_aabb, WatchingList as _WatchingList
 
 class Background(object):
     """
@@ -297,6 +284,17 @@ class BasicWidget(object):
         for f,args,kwargs in self.actions.get(action,[]):
             f(*args,**kwargs)
     
+    def getState(self):
+        # Does not convey all information, loses some
+        if self.pressed:
+            return "pressed"
+        elif self.is_hovering:
+            return "hover"
+        elif not self.enabled:
+            return "disabled"
+        else:
+            return "idle"
+    
     def draw(self):
         """
         Draws all vertex lists associated with this widget.
@@ -341,6 +339,7 @@ class BasicWidget(object):
             if button == pyglet.window.mouse.LEFT:
                 self.doAction("press")
                 self.pressed = True
+                self.doAction("statechanged")
             elif button == pyglet.window.mouse.RIGHT:
                 self.doAction("context")
             self.redraw()
@@ -351,6 +350,7 @@ class BasicWidget(object):
             if mouse_aabb([x,y],self.size,self.pos):
                 self.doAction("click")
             self.pressed = False
+            self.doAction("statechanged")
             self.redraw()
     def on_mouse_drag(self,x,y,dx,dy,button,modifiers):
         self.on_mouse_motion(x,y,dx,dy)
@@ -361,6 +361,7 @@ class BasicWidget(object):
             if not self.is_hovering:
                 self.is_hovering = True
                 self.doAction("hover_start")
+                self.doAction("statechanged")
                 self.redraw()
             else:
                 self.doAction("hover")
@@ -368,6 +369,7 @@ class BasicWidget(object):
             if self.is_hovering:
                 self.is_hovering = False
                 self.doAction("hover_end")
+                self.doAction("statechanged")
                 self.redraw()
     def on_resize(self,width,height):
         self.redraw()
