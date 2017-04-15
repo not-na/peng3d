@@ -297,6 +297,7 @@ class Button(Widget):
         self._label.delete()
         del self._label
         super(Button,self).delete()
+    delete.__noautodoc__ = True
 
 
 class _FakeTexture(object):

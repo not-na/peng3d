@@ -22,8 +22,9 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    gui/index
    gui/widgets
    gui/button
-   gui/text
+   gui/layered
    gui/container
+   gui/text
    gui/slider
    peng3d.resource
    peng3d.model
@@ -33,5 +34,7 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    actor/player
    peng3d.keybind
    peng3d.config
+   util/index
+   util/gui
    peng3d.pyglet_patch
    peng3d.version

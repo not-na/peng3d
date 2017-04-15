@@ -27,6 +27,14 @@ import weakref
 from .gui import *
 
 class WatchingList(list):
+    """
+    Subclass of :py:func:`list` implementing a watched list.
+    
+    A WatchingList will call the given callback with a reference to itself whenever it is modified.
+    Internally, the callback is stored as a weak reference, meaning that the creator should keep a reference around.
+    
+    This class is used in :py:class:`peng3d.gui.widgets.BasicWidget()` to allow for modifying single coordinates of the pos and size properties.
+    """
     def __init__(self,l,callback=lambda:None):
         self.callback = weakref.WeakMethod(callback)
         super(WatchingList,self).__init__(l)

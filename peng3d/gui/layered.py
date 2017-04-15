@@ -28,7 +28,8 @@ __all__ = [
     "GroupWidgetLayer",
     "ImageWidgetLayer","DynImageWidgetLayer",
     "ImageButtonWidgetLayer",
-    "LabelWidgetLayer","HTMLLabelWidgetLayer",
+    "LabelWidgetLayer",
+    "FormattedLabelWidgetLayer","HTMLLabelWidgetLayer",
     "BaseBorderWidgetLayer","ButtonBorderWidgetLayer",
     ]
 
@@ -41,6 +42,15 @@ from .widgets import Background, Widget
 from .. import util
 
 class LayeredWidget(Widget):
+    """
+    Layered Widget allowing for easy creation of custom widgets.
+    
+    A Layered Widget consists of (nearly) any amount of layers in a specific order.
+    
+    All Layers should be subclasses of :py:class:`BasicWidgetLayer` or :py:class:`WidgetLayer`\ .
+    
+    ``layers`` must be a list of 2-tuples of ``(layer,z_index)``\ .
+    """
     def __init__(self,name,submenu,window,peng,
                 pos=None,size=None,
                 bg=None,layers=[],
@@ -54,6 +64,11 @@ class LayeredWidget(Widget):
             # Does not use sort() to keep original order
             self.addLayer(l,z)
     def addLayer(self,layer,z_index=None):
+        """
+        Adds the given layer at the given Z Index.
+        
+        If ``z_index`` is not given, the Z Index specified by the layer will be used.
+        """
         if z_index is None:
             z_index = layer.z_index
         i = 0
@@ -64,26 +79,57 @@ class LayeredWidget(Widget):
         self._layers[layer.name]=layer
         self.layers.insert(i,[layer,z_index])
     def getLayer(self,name):
+        """
+        Returns the layer corresponding to the given name.
+        
+        :raises KeyError: If there is no Layer with the given name.
+        """
         return self._layers[name]
     def on_redraw(self):
         super(LayeredWidget,self).on_redraw()
         for layer,_ in self.layers:
             layer.on_redraw()
     def redraw_layer(self,name):
+        """
+        Redraws the given layer.
+        
+        :raises ValueError: If there is no Layer with the given name.
+        """
         if name not in self._layers:
             raise ValueError("Layer %s not part of widget, cannot redraw")
         self._layers[name].on_redraw()
     def draw(self):
+        """
+        Draws all layers of this LayeredWidget.
+        
+        This should normally be unneccessary, since it is recommended that layers use Vertex Lists instead of OpenGL Immediate Mode.
+        """
         super(LayeredWidget,self).draw()
         for layer,_ in self.layers:
             layer._draw()
     def delete(self):
+        """
+        Deletes all layers within this LayeredWidget before deleting itself.
+        
+        Recommended to call if you are removing the widget, but not yet exiting the interpreter.
+        """
         for layer,_ in self.layers:
             layer.delete()
         self.layers = []
         self._layers = {}
+        super(LayeredWidget,self).delete()
 
 class BasicWidgetLayer(object):
+    """
+    Base class for all Layers to be used with :py:class:`LayeredWidget()`\ .
+    
+    Not to be confused with :py:class:`peng3d.layer.Layer()`\ , these classes are not compatible.
+    
+    It is recommended to use :py:class:`WidgetLayer()` instead, since functionality is limited in this basic class.
+    
+    Note that the ``z_index`` will default to a reasonable value for most subclasses and thus is not required to be given explicitly.
+    The ``z_index`` for this Layer defaults to ``0``\ .
+    """
     z_index = 0
     def __init__(self,name,widget,
                 z_index=None,
@@ -98,6 +144,12 @@ class BasicWidgetLayer(object):
         self._vlists = []
     
     def on_redraw(self):
+        """
+        Called by the parent widget if this Layer should be redrawn.
+        
+        Note that it is recommended to call the Baseclass Variant of this Method first when overwriting it.
+        See :py:meth:`WidgetLayer.on_redraw` for more information.
+        """
         pass
     def _draw(self):
         self.predraw()
@@ -105,20 +157,57 @@ class BasicWidgetLayer(object):
         self.postdraw()
     
     def predraw(self):
+        """
+        Called before calling the :py:meth:`draw()` Method.
+        
+        Useful for setting up OpenGL state.
+        """
         pass
     def draw(self):
+        """
+        Called to draw the layer.
+        
+        Note that using this function is discouraged, use Pyglet Vertex Lists instead.
+        
+        If you want to call this method manually, call :py:meth:`_draw()` instead.
+        This will make sure that :py:meth:`predraw()` and :py:meth:`postdraw()` are called.
+        """
         pass
     def postdraw(self):
+        """
+        Called after calling the :py:meth:`draw()` Method.
+        
+        Useful for unsetting OpenGL state.
+        """
         pass
     
     def regVList(self,vlist):
+        """
+        Registers a vertex list for proper deletion once this Layer gets destroyed.
+        
+        This prevents visual artifacts from forming during deletion of a layer.
+        """
         self._vlists.append(vlist)
     def delete(self):
+        """
+        Deletes this Layer.
+        
+        Currently only deletes VertexLists registered with :py:meth:`regVList()`\ .
+        """
         for vlist in self._vlists:
             vlist.delete()
         self._vlists = []
 
 class WidgetLayer(BasicWidgetLayer):
+    """
+    Subclass of :py:class:`WidgetLayer()` adding commonly used utility features.
+    
+    This subclass adds a border and offset system.
+    
+    The ``border`` is a 2-tuple of ``(x_border,y_border)``\ . The border is applied to all sides, resulting in the size being decreased by two pixel per pixel border width.
+    
+    ``offset`` is relative to the bottom left corner of the screen.
+    """
     def __init__(self,name,widget,
                 z_index=None,
                 border=[0,0],offset=[0,0],
@@ -129,15 +218,28 @@ class WidgetLayer(BasicWidgetLayer):
         self._border = border
         self._offset = offset
     def on_redraw(self):
+        """
+        Called when the Layer should be redrawn.
+        
+        If a subclass uses the :py:meth:`initialize()` Method, it is very important to also call the Super Class Method to prevent crashes.
+        """
         super(WidgetLayer,self).on_redraw()
         if not self._initialized:
             self.initialize()
             self._initialized = True
     def initialize(self):
+        """
+        Called just before :py:meth:`on_redraw()` is called the first time.
+        """
         pass
     
     @property
     def border(self):
+        """
+        Property to be used for setting and getting the border of the layer.
+        
+        Note that setting this property causes an immediate redraw.
+        """
         if callable(self._border):
             return util.WatchingList(self._border(),self._wlredraw_border)
         else:
@@ -149,6 +251,11 @@ class WidgetLayer(BasicWidgetLayer):
     
     @property
     def offset(self):
+        """
+        Property to be used for setting and getting the offset of the layer.
+        
+        Note that setting this property causes an immediate redraw.
+        """
         if callable(self._offset):
             return util.WatchingList(self._offset(),self._wlredraw_offset)
         else:
@@ -164,6 +271,15 @@ class WidgetLayer(BasicWidgetLayer):
         self.offset = wl[:]
     
     def getPos(self):
+        """
+        Returns the absolute position and size of the layer.
+        
+        This method is intended for use in vertex position calculation, as the border and offset have already been applied.
+        
+        The returned value is a 4-tuple of ``(sx,sy,ex,ey)``\ .
+        The two values starting with are the "start" position, or the lower-left corner.
+        The second pair of values signify the "end" position, or upper-right corner.
+        """
         # Returns sx,sy,ex,ey
         # sx,sy are bottom-left/lowest
         # ex,ey are top-right/highest
@@ -171,9 +287,17 @@ class WidgetLayer(BasicWidgetLayer):
         ex,ey = self.widget.pos[0]+self.widget.size[0]-self.border[0]+self.offset[0],   self.widget.pos[1]+self.widget.size[1]-self.border[1]+self.offset[1]
         return sx,sy,ex,ey
     def getSize(self):
-        return self.widget.size[0]-self.border[0],self.widget.size[1]-self.border[1]
+        """
+        Returns the size of the layer, with the border size already subtracted.
+        """
+        return self.widget.size[0]-self.border[0]*2,self.widget.size[1]-self.border[1]*2
 
 class GroupWidgetLayer(WidgetLayer):
+    """
+    Subclass of :py:class:`WidgetLayer()` allowing for using a pyglet group to manage OpenGL state.
+    
+    If no pyglet group is given, :py:class:`pyglet.graphics.NullGroup()` will be used.
+    """
     def __init__(self,name,widget,
                 group=None,z_index=None,
                 border=[0,0],offset=[0,0],
@@ -183,10 +307,21 @@ class GroupWidgetLayer(WidgetLayer):
         self.group = group if group is not None else pyglet.graphics.NullGroup()
     def predraw(self):
         self.group.set_state()
+    predraw.__noautodoc__ = True
     def postdraw(self):
         self.group.unset_state()
+    postdraw.__noautodoc__ = True
 
 class ImageWidgetLayer(WidgetLayer):
+    """
+    Subclass of :py:class:`WidgetLayer()` implementing a simple static image view.
+    
+    This layer can display any resource representable by the :py:class:`ResourceManager()`\ .
+    
+    ``img`` is a 2-tuple of ``(resource_name,category)``\ .
+    
+    The ``z_index`` for this Layer defaults to ``1``\ .
+    """
     z_index = 1
     def __init__(self,name,widget,
                 z_index=None,
@@ -204,6 +339,7 @@ class ImageWidgetLayer(WidgetLayer):
                         ("t3f",self.img[2]),
                         )
         self.regVList(self.img_vlist)
+    initialize.__noautodoc__ = True
     def on_redraw(self):
         super(ImageWidgetLayer,self).on_redraw()
         sx,sy, ex,ey = self.getPos()
@@ -224,6 +360,16 @@ class _DynImageGroup(pyglet.graphics.Group):
         glDisable(tex_info[0])
 
 class DynImageWidgetLayer(WidgetLayer):
+    """
+    Subclass of :py:class:`WidgetLayer` allowing for dynamic images.
+    
+    ``imgs`` is a dictionary of names to 2-tuples of ``(resource_name,category)``\ .
+    
+    If no default image name is given, a semi-random one will be selected.
+    
+    The ``z_index`` for this Layer defaults to ``1``\ .
+    """
+    z_index = 1
     def __init__(self,name,widget,
                 z_index=None,
                 border=[0,0],offset=[0,0],
@@ -241,8 +387,18 @@ class DynImageWidgetLayer(WidgetLayer):
         self.default_img = default
     
     def addImage(self,name,rsrc):
+        """
+        Adds an image to the internal registry.
+        
+        ``rsrc`` should be a 2-tuple of ``(resource_name,category)``\ .
+        """
         self.imgs[name]=self.widget.peng.resourceMgr.getTex(*rsrc)
     def switchImage(self,name):
+        """
+        Switches the active image to the given name.
+        
+        :raises ValueError: If there is no such image
+        """
         if name not in self.imgs:
             raise ValueError("No image of name '%s'"%name)
         elif self.cur_img==name:
@@ -259,6 +415,7 @@ class DynImageWidgetLayer(WidgetLayer):
         self.regVList(self.img_vlist)
         
         self.cur_img = self.cur_img if self.cur_img is not None else (self.default_img if self.default_img is not None else list(self.imgs.keys())[0])
+    initialize.__noautodoc__ = True
     def on_redraw(self):
         super(DynImageWidgetLayer,self).on_redraw()
         sx,sy, ex,ey = self.getPos()
@@ -269,6 +426,13 @@ class DynImageWidgetLayer(WidgetLayer):
         self.img_vlist.tex_coords = self.imgs[self.cur_img][2]
 
 class ImageButtonWidgetLayer(DynImageWidgetLayer):
+    """
+    Subclass of :py:class:`DynImageWidgetLayer()` that acts like an :py:class:`ImageButton()`\ .
+    
+    The ``img_*`` arguments are of the same format as in :py:class:`DynImageWidgetLayer()`\ .
+    
+    This class internally uses the :py:meth:`BasicWidget.getState()` method for getting the state of the widget.
+    """
     def __init__(self,name,widget,
                 z_index=None,
                 border=[0,0],offset=[0,0],
@@ -285,6 +449,13 @@ class ImageButtonWidgetLayer(DynImageWidgetLayer):
         self.widget.addAction("statechanged",lambda:self.switchImage(self.widget.getState()))
 
 class LabelWidgetLayer(WidgetLayer):
+    """
+    Subclass of :py:class:`WidgetLayer()` displaying arbitrary plain text.
+    
+    Note that this method internally uses a pyglet Label that is centered on the Layer.
+    
+    The ``z_index`` for this Layer defaults to ``2``\ .
+    """
     z_index = 2
     def __init__(self,name,widget,
                 z_index=None,
@@ -317,7 +488,7 @@ class LabelWidgetLayer(WidgetLayer):
         """
         Re-draws the text by calculating its position.
         
-        Currently, the text will always be centered on the position of the label.
+        Currently, the text will always be centered on the position of the layer.
         """
         # Convenience variables
         x,y,_,_ = self.getPos()
@@ -341,6 +512,15 @@ class LabelWidgetLayer(WidgetLayer):
         self._label.text = label
 
 class FormattedLabelWidgetLayer(WidgetLayer):
+    """
+    Subclass of :py:class:`WidgetLayer()` serving as a base class for other formatted label layers.
+    
+    The Label Type can be set via the class attribute ``cls``\ , it should be set to any class that is compatible with :py:class:`pyglet.text.Label`\ .
+    
+    It is recommended to use one of the subclasses of this class instead of this class directly.
+    
+    The ``z_index`` for this Layer defaults to ``2``\ .
+    """
     z_index = 2
     cls = pyglet.text.HTMLLabel
     def __init__(self,name,widget,
@@ -375,7 +555,7 @@ class FormattedLabelWidgetLayer(WidgetLayer):
         """
         Re-draws the text by calculating its position.
         
-        Currently, the text will always be centered on the position of the label.
+        Currently, the text will always be centered on the position of the layer.
         """
         # Convenience variables
         x,y,_,_ = self.getPos()
@@ -399,6 +579,8 @@ class FormattedLabelWidgetLayer(WidgetLayer):
     def label(self):
         """
         Property for accessing the text of the label.
+        
+        Note that depending on the type of format, this property may not exactly represent the original text as it is converted internally.
         """
         return self._label.text
     @label.setter
@@ -406,11 +588,30 @@ class FormattedLabelWidgetLayer(WidgetLayer):
         self._label.text = label
 
 class HTMLLabelWidgetLayer(FormattedLabelWidgetLayer):
+    """
+    Subclass of :py:class:`FormattedLabelWidgetLayer` implementing a basic HTML Label.
+    
+    Note that not all tags are supported, see the docs for :py:class:`pyglet.text.HTMLLabel` for details.
+    """
     cls = pyglet.text.HTMLLabel
 
 # TODO: support other formats (Markdown, Pyglet-style Attributed Text, Maybe others?)
 
 class BaseBorderWidgetLayer(WidgetLayer):
+    """
+    Subclass of :py:class:`WidgetLayer` that displays a basic border around the layer.
+    
+    Note that not all styles will look good with this class, see :py:class:`ButtonBorderWidgetLayer()` for more information.
+    
+    Note that the ``border`` and ``offset`` arguments have been renamed to ``base_border`` and ``base_offset`` to prevent naming conflicts.
+    
+    Subclasses may set the :py:attr:`n_vertices` value to change the number of
+    vertices or :py:attr:`change_on_press` to change the default value for the
+    argument of the same name.
+    By default, 36 vertices are used and ``changed_on_press`` is set to ``True``\ .
+    
+    The ``z_index`` for this Layer defaults to ``0.5``\ .
+    """
     z_index = 0.5 # between default and image layer
     
     n_vertices = 36
@@ -464,7 +665,7 @@ class BaseBorderWidgetLayer(WidgetLayer):
         self.styles[name]=func
     def getColors(self):
         """
-        Overrideable function that generates the colors to be used by various borderstyles.
+        Overrideable function that generates the colors to be used by various styles.
         
         Should return a 5-tuple of ``(bg,o,i,s,h)``\ .
         
@@ -495,11 +696,6 @@ class BaseBorderWidgetLayer(WidgetLayer):
         # Outer,Inner,Shadow,Highlight
         return bg,o,i,s,h
     
-    def getPosSize(self):
-        sx,sy,ex,ey = self.getPos()
-        six,siy = self.widget.size
-        return sx,sy,ex,ey,six,siy
-    
     def initialize(self):
         self.batch = self.batch if self.batch is not None else self.widget.submenu.batch2d
         
@@ -508,6 +704,7 @@ class BaseBorderWidgetLayer(WidgetLayer):
             "c3B",
             )
         self.regVList(self.vlist)
+    initialize.__noautodoc__ = True
     def on_redraw(self):
         super(BaseBorderWidgetLayer,self).on_redraw()
         self.vlist.vertices = self.genVertices()
@@ -526,6 +723,13 @@ class BaseBorderWidgetLayer(WidgetLayer):
         
         self.vlist.colors = c
     def genVertices(self):
+        """
+        Called to generate the vertices used by this layer.
+        
+        The length of the output of this method should be three times the :py:attr:`n_vertices` attribute.
+        
+        See the source code of this method for more information about the order of the vertices.
+        """
         sx,sy,ex,ey = self.getPos()
         b = self.bborder
         
@@ -585,6 +789,11 @@ class BaseBorderWidgetLayer(WidgetLayer):
         
         return q1+q2+q3+q4+q5+q6+q7+q8+q9
     def stretchColors(self,c):
+        """
+        Method that is called to stretch the colors.
+        
+        Note that this should be implemented by subclasses if plausible and reasonable.
+        """
         # Subclasses should override this method to implement color stretching
         # Not possible here since the corners are implemented differently
         raise NotImplementedError("Color stretching is not supported on %s"%self.__class__.__name__)
@@ -668,6 +877,17 @@ class BaseBorderWidgetLayer(WidgetLayer):
     s_material.__noautodoc__ = True
 
 class ButtonBorderWidgetLayer(BaseBorderWidgetLayer):
+    """
+    Subclass of :py:class:`BaseBorderWidgetLayer()` implementing Button-Style borders.
+    
+    This class is based on the :py:class:`ButtonBackground` class.
+    This means that most styles are also available here and should look identical.
+    
+    Note that this class uses only 20 vertices and is thus not compatible with styles
+    created for use with :py:class:`BaseBorderWidgetLayer`\ .
+    
+    Also note that the ``border`` argument also only receives two values instead of eight.
+    """
     n_vertices = 20
     def __init__(self,name,widget,
                 z_index=None,
@@ -711,6 +931,7 @@ class ButtonBorderWidgetLayer(BaseBorderWidgetLayer):
         q5 = v7+v8+v6+v5
         
         return q1+q2+q3+q4+q5
+    genVertices.__noautodoc__ = True
     
     def s_flat(self,bg,o,i,s,h):
         # Flat style makes no difference between normal,hover and pressed
@@ -766,3 +987,4 @@ class ButtonBorderWidgetLayer(BaseBorderWidgetLayer):
     
     def stretchColors(self,c):
         return c
+    stretchColors.__noautodoc__ = True

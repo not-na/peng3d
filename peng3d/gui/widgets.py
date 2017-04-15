@@ -285,6 +285,15 @@ class BasicWidget(object):
             f(*args,**kwargs)
     
     def getState(self):
+        """
+        Returns the current state of the widget.
+        
+        One of ``"pressed"``\ , ``"hover"``\ , ``"disabled"`` or ``"idle"``\ .
+        Note that some information may be lost by getting this state, 
+        for example it is not possible to know if the widget is hovered or not
+        if ``"pressed"`` is returned. However, this should not be a problem for
+        most intended uses of this method.
+        """
         # Does not convey all information, loses some
         if self.pressed:
             return "pressed"
@@ -375,6 +384,15 @@ class BasicWidget(object):
         self.redraw()
     
     def delete(self):
+        """
+        Deletes resources of this widget that require manual cleanup.
+        
+        Currently removes all actions, event handlers and the background.
+        
+        The background itself should automatically remove all vertex lists to avoid visual artifacts.
+        
+        Note that this method is currently experimental, as it seems to have a memory leak.
+        """
         # TODO: fix memory leak upon widget deletion
         del self.bg.widget
         del self.bg

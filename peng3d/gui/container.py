@@ -72,6 +72,8 @@ class Container(Widget):
     This widget may contain other widgets, limiting the childs to only draw within the defined bounds.
     Additionally, the given position will also act as a offset, making the child coordinates relative to the parent.
     
+    The :py:attr:`visible` attribute may be set to control whether or not this container is visible.
+    
     This Class is a subclass of :py:class:`peng3d.gui.widgets.Widget` but also exhibits part of the API of :py:class:`peng3d.gui.SubMenu`\ .
     """
     def __init__(self,name,submenu,window,peng,

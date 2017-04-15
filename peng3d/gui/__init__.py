@@ -177,6 +177,11 @@ class SubMenu(object):
         return self.widgets[name]
     
     def delWidget(self,widget):
+        """
+        Deletes the widget by the given name.
+        
+        Note that this feature is currently experimental as there seems to be a memory leak with this method.
+        """
         # TODO: fix memory leak upon widget deletion
         #print("*"*50)
         #print("Start delWidget")

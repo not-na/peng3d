@@ -33,11 +33,19 @@ from pyglet.gl import *
 
 def mouse_aabb(mpos,size,pos):
     """
-    Simple AABB collision algorithm used for checking if a mouse click hit a widget.
+    AABB Collision checker that can be used for most axis-aligned collisions.
+    
+    Intended for use in widgets to check if the mouse is within the bounds of a particular widget.
     """
     return pos[0]<=mpos[0]<=pos[0]+size[0] and pos[1]<=mpos[1]<=pos[1]+size[1]
 
 def points2htmlfontsize(points):
+    """
+    Approximate font size converter, converts from Points to HTML ``<font>`` tag font sizes.
+    
+    Note that this method is very inaccurate, since there are only seven possible output values that represent at least 25 input values.
+    When in doubt, this function always rounds down, e.g. every input value less than eight is converted to HTML size 1.
+    """
     # Approximation, always rounds down
     if points<=8:
         return 1
@@ -56,6 +64,11 @@ def points2htmlfontsize(points):
         return 7
 
 class ResourceGroup(pyglet.graphics.Group):
+    """
+    Pyglet Group that represents a Resource as returned by the :py:class:`ResourceManager() <peng3d.resource.ResourceManager>`\ .
+    
+    This Group should automatically merge different groups with different resources that are on the same texture atlas.
+    """
     def __init__(self,data,parent=None):
         super(ResourceGroup, self).__init__(parent)
         self.data = data
@@ -63,9 +76,11 @@ class ResourceGroup(pyglet.graphics.Group):
     def set_state(self):
         glEnable(self.data[0])
         glBindTexture(self.data[0], self.data[1])
+    set_state.__noautodoc__ = True
 
     def unset_state(self):
         glDisable(self.data[0])
+    unset_state.__noautodoc__ = True
 
     def __hash__(self):
         return hash((self.data[0], self.data[1], self.parent))
