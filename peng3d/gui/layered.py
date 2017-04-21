@@ -241,7 +241,7 @@ class WidgetLayer(BasicWidgetLayer):
         Note that setting this property causes an immediate redraw.
         """
         if callable(self._border):
-            return util.WatchingList(self._border(),self._wlredraw_border)
+            return util.WatchingList(self._border(*self.widget.pos,*self.widget.size),self._wlredraw_border)
         else:
             return util.WatchingList(self._border,self._wlredraw_border)
     @border.setter
@@ -257,7 +257,7 @@ class WidgetLayer(BasicWidgetLayer):
         Note that setting this property causes an immediate redraw.
         """
         if callable(self._offset):
-            return util.WatchingList(self._offset(),self._wlredraw_offset)
+            return util.WatchingList(self._offset(*self.widget.pos,*self.widget.size),self._wlredraw_offset)
         else:
             return util.WatchingList(self._offset,self._wlredraw_offset)
     @offset.setter

@@ -344,7 +344,7 @@ class BasicWidget(object):
     def on_mouse_press(self,x,y,button,modifiers):
         if not self.clickable:
             return
-        elif mouse_aabb([x,y],self.size,self.pos):
+        elif mouse_aabb([x,y],self.size,self.pos) and mouse_aabb([x,y],self.submenu.size,self.submenu.pos):
             if button == pyglet.window.mouse.LEFT:
                 self.doAction("press")
                 self.pressed = True

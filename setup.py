@@ -71,7 +71,7 @@ setup(name='peng3d',
       setup_requires=['pytest-runner'],
       tests_require=['pytest'],
       classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         
         "Environment :: MacOS X",
         "Environment :: Win32 (MS Windows)",

@@ -60,6 +60,7 @@ class ResourceManager(object):
     
     The same caching and lazy-loading principle applies to models loaded via this system.
     """
+    missingtexturename = "peng3d:missingtexture"
     def __init__(self,peng,basepath):
         self.basepath = basepath
         self.peng = peng
@@ -122,7 +123,7 @@ class ResourceManager(object):
         See :py:meth:`loadTex()` for more information.
         """
         if category not in self.categoriesTexCache:
-            return self.getMissingTexture()
+            return self.getMissingTex(category)
         if name not in self.categoriesTexCache[category]:
             self.loadTex(name,category)
         return self.categoriesTexCache[category][name]
@@ -171,14 +172,18 @@ class ResourceManager(object):
         This texture will also be cached separately from other textures.
         """
         if self.missingTexture is None:
-            if self.resourceExists("peng3d:missingtexture",".png"):
-                self.missingTexture = pyglet.image.load(self.resourceNameToPath("peng3d:missingtexture",".png"))
+            if self.resourceExists(self.missingtexturename,".png"):
+                self.missingTexture = pyglet.image.load(self.resourceNameToPath(self.missingtexturename,".png"))
                 return self.missingTexture
             else: # Falls back to create pattern in-memory
                 self.missingTexture = pyglet.image.create(1,1,pyglet.image.SolidColorImagePattern([255,0,255,255]))
                 return self.missingTexture
         else:
             return self.missingTexture
+    def getMissingTex(self,cat):
+        if cat not in self.categories:
+            self.addCategory(cat)
+        return self.loadTex(self.missingtexturename,cat)
     def addFromTex(self,name,img,category):
         """
         Adds a new texture from the given image.

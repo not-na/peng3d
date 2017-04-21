@@ -85,7 +85,7 @@ class Peng(object):
         if self.window is not None:
             raise RuntimeError("Window already created!")
         self.window = cls(self,*args,**kwargs)
-        if self.cfg["rsrc.enable"]:
+        if self.cfg["rsrc.enable"] and self.resourceMgr is None:
             self.resourceMgr = resource.ResourceManager(self,self.cfg["rsrc.basepath"])
         return self.window
     
