@@ -210,6 +210,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'peng3d_ext',
 ]
 
 try:
@@ -237,7 +238,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Peng3d'
-copyright = u'2016, notna'
+copyright = u'2016-2017, notna'
 author = u'notna'
 
 # The version info for the project you're documenting, acts as replacement for

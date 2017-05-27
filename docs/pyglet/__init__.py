@@ -22,8 +22,9 @@
 #  
 #  
 
-import window
-import graphics
+from . import window
+from . import gl
+from . import graphics
 
 class Mock(object):
     def __init__(self, *args,**kwargs):

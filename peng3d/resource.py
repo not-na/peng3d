@@ -79,6 +79,8 @@ class ResourceManager(object):
         self.modelcache = {}
         self.modelobjcache = {}
         
+        self.peng.sendEvent("peng3d:rsrc.init",{"peng":self.peng,"rsrcMgr":self})
+        
     def resourceNameToPath(self,name,ext=""):
         """
         Converts the given resource name to a file path.
@@ -111,6 +113,7 @@ class ResourceManager(object):
         self.categories[name]={}
         self.categoriesTexCache[name]={}
         self.categoriesTexBin[name]=pyglet.image.atlas.TextureBin(self.texsize,self.texsize)
+        self.peng.sendEvent("peng3d:rsrc.category.add",{"peng":self.peng,"category":name})
     def getTex(self,name,category):
         """
         Gets the texture associated with the given name and category.
@@ -159,6 +162,7 @@ class ResourceManager(object):
         
         out = target,texid,texcoords
         self.categoriesTexCache[category][name]=out
+        self.peng.sendEvent("peng3d:rsrc.tex.load",{"peng":self.peng,"name":name,"category":category})
         return out
     def getMissingTexture(self):
         """
@@ -230,6 +234,7 @@ class ResourceManager(object):
         """
         m = model.Model(self.peng,self,name)
         self.modelobjcache[name]=m
+        self.peng.sendEvent("peng3d:rsrc.model.load",{"peng":self.peng,"name":name})
         return m
     
     def getModelData(self,name):

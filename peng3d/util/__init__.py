@@ -41,3 +41,6 @@ class WatchingList(list):
     def __setitem__(self,*args):
         super(WatchingList,self).__setitem__(*args)
         c = self.callback()(self)
+
+def register_pyglet_handler(peng,func,event,raiseErrors=False):
+    peng.addEventListener("pyglet:%s"%event,(lambda data:func(*data["args"])),raiseErrors)

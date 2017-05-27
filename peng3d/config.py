@@ -145,12 +145,18 @@ DEFAULT_CONFIG = {
     "debug.events.dump":False,
     "debug.events.logerr":False,
     "debug.events.register":False,
+    "debug.events.dumpfile":"events.txt",
     
     # rsrc.*
     # Resource config
     "rsrc.enable":True,
     "rsrc.basepath":_get_script_home(),
     "rsrc.maxtexsize":1024, # Actual limit may be less, will be adjusted based on GL Capabilities
+    
+    # events.*
+    # Event config
+    "events.removeonerror":True,
+    "events.maxignore":3,
     
     # Other config options
     "pyglet.patch.patch_float2int":True,

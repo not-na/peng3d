@@ -65,6 +65,8 @@ class PengWindow(pyglet.window.Window):
             if symbol == key.ESCAPE:
                 return pyglet.event.EVENT_HANDLED
         self.push_handlers(on_key_press) # to stop the auto-exit on escape
+        
+        self.peng.sendEvent("peng3d:window.create",{"peng":self.peng,"window":self})
     def setup(self):
         """
         Sets up the OpenGL state.
@@ -199,6 +201,7 @@ class PengWindow(pyglet.window.Window):
             self.menus[old].on_exit(menu)
             #self.pop_handlers()
         self.menu.on_enter(old)
+        self.peng.sendEvent("peng3d:window.menu.change",{"peng":self.peng,"window":self,"old":old,"menu":menu})
         #self.push_handlers(self.menu)
     def addMenu(self,menu):
         """
@@ -207,6 +210,7 @@ class PengWindow(pyglet.window.Window):
         # If there is no menu selected currently, this menu will automatically be made active.
         # Add the line above to the docstring if fixed
         self.menus[menu.name]=menu
+        self.peng.sendEvent("peng3d:window.menu.add",{"peng":self.peng,"window":self,"menu":menu})
         #if self.activeMenu is None:
         #    self.changeMenu(menu.name)
         # currently disabled because of a bug with adding layers
@@ -298,6 +302,7 @@ class PengWindow(pyglet.window.Window):
             new = not self.exclusive
         self.exclusive = new
         self.set_exclusive_mouse(self.exclusive)
+        self.peng.sendEvent("peng3d:window.toggle_exclusive",{"peng":self.peng,"window":self,"exclusive":self.exclusive})
     
     def set2d(self):
         """

@@ -209,6 +209,15 @@ All of these options are disabled by default.
    
    If enabled, all event handler registrations are printed.
 
+.. confval:: debug.events.dumpfile
+   
+   If not an empty string, this should point to a valid file path for dumping all event names.
+   
+   If enabled, all event handler registrations and event sends will be logged to this file.
+   Note that only the name of the event without data is stored and automatically deduplicated.
+   
+   Defaults to ``""``\ .
+
 Resource Options
 ----------------
 
@@ -231,6 +240,24 @@ Resource Options
    Limits the texture in size, useful if the graphics card has big textures (16kx16k) but only few textures will be needed.
    
    By default set to 1024.
+
+Event Options
+-------------
+
+.. confval:: events.removeonerror
+   
+   If True, automatically removes erroring event handlers.
+   Note that the ``raiseErrors`` parameter takes precedent over this setting.
+   
+   Defaults to ``True``\ .
+
+.. confval:: events.maxignore
+   
+   An integer number defining the maximum amount of ignored event messages to write to the log file.
+   
+   This setting is per event, not globally.
+   
+   Defaults to 3.
 
 Other Options
 -------------

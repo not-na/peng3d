@@ -25,6 +25,7 @@ Contents:
    
    api/peng3d
    
+   events
    configoption
 
 

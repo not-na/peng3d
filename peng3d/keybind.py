@@ -125,6 +125,7 @@ class KeybindHandler(object):
                 self.keybinds_nm[keybind]=[]
             self.keybinds_nm[keybind].append(kbname)
         self.kbname[kbname]=handler
+        self.peng.sendEvent("peng3d:keybind.add",{"peng":self.peng,"keybind":keybind,"kbname":kbname,"handler":handler,"mod":mod})
     def changeKeybind(self,kbname,combo):
         """
         Changes a keybind of a specific keybindname.
@@ -139,6 +140,7 @@ class KeybindHandler(object):
         if combo not in self.keybinds:
             self.keybinds[combo]=[]
         self.keybinds[combo].append(kbname)
+        self.peng.sendEvent("peng3d.keybind.change",{"peng":self.peng,"kbname":kbname,"combo":combo})
     def mod_is_held(self,modname,modifiers):
         """
         Helper method to simplify checking if a modifier is held.
@@ -173,7 +175,9 @@ class KeybindHandler(object):
         Handles a key combination and dispatches associated events.
         
         First, all keybind handlers registered via :py:meth:`add` will be handled,
-        then the event ``on_key_combo`` with params ``(combo,symbol,modifiers,release,mod)`` is sent to the :py:class:`Peng()` instance.
+        then the pyglet event :peng3d:pgevent:`on_key_combo` with params ``(combo,symbol,modifiers,release,mod)`` is sent to the :py:class:`Peng()` instance.
+        
+        Also sends the events :peng3d:event:`peng3d:keybind.combo`\, :peng3d:event:`peng3d:keybind.combo.press` and :peng3d:event`peng3d:keybind.combo.release`\ .
         
         :params str combo: Key combination pressed
         :params int symbol: Key pressed, passed from the same argument within pyglet
@@ -189,7 +193,12 @@ class KeybindHandler(object):
         else:
             for kbname in self.keybinds_nm.get(combo,[]):
                 self.kbname[kbname](symbol,modifiers,release)
-        self.peng.handleEvent("on_key_combo",(combo,symbol,modifiers,release,mod))
+        self.peng.sendPygletEvent("on_key_combo",(combo,symbol,modifiers,release,mod))
+        self.peng.sendEvent("peng3d:keybind.combo",{"peng":self.peng,"combo":combo,"symbol":symbol,"modifiers":modifiers,"release":release,"mod":mod})
+        if release:
+            self.peng.sendEvent("peng3d:keybind.combo.release",{"peng":self.peng,"combo":combo,"symbol":symbol,"modifiers":modifiers,"release":release,"mod":mod})
+        else:
+            self.peng.sendEvent("peng3d:keybind.combo.press",{"peng":self.peng,"combo":combo,"symbol":symbol,"modifiers":modifiers,"release":release,"mod":mod})
     def on_key_release(self,symbol,modifiers):
         #self.on_key_press(symbol,modifiers|MOD_RELEASE)
         self.on_key_press(symbol,modifiers,release=True)
