@@ -1,1 +1,2 @@
 bidict
+sphinxcontrib-domaintools==0.1
