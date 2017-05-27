@@ -210,7 +210,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'peng3d_ext',
+    'peng3d_sphinxext',
 ]
 
 try:

@@ -1,2 +1,3 @@
 bidict
 sphinxcontrib-domaintools==0.1
+peng3d_sphinxext==1.0post1
