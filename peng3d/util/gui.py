@@ -26,6 +26,7 @@ __all__ = [
     "mouse_aabb",
     "points2htmlfontsize",
     "ResourceGroup",
+    "BlitableTexture",
     ]
 
 import pyglet
@@ -93,3 +94,13 @@ class ResourceGroup(pyglet.graphics.Group):
 
     def __repr__(self):
         return '%s(id=%d)' % (self.__class__.__name__, self.data[1])
+
+class BlitableTexture(pyglet.image.Texture):
+    """
+    Texture subclass allowing :py:class:`pyglet.image.atlas.TextureBin()` to copy a texture to itself.
+    
+    This class simply implements the :py:meth:`blit_to_texture()` interface.
+    """
+    # Basic Texture subclass allowing pyglet.image.atlas.TextureBin to copy a texture to itself
+    def blit_to_texture(self,target,level,x,y,z=0):
+        glCopyTexSubImage2D(target, level, x,y, 0,0, self.width,self.height)
