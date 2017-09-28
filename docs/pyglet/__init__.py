@@ -43,5 +43,5 @@ class Mock(object):
 
 lib = Mock()
 text = Mock()
-
+image = Mock()
 compat_platform = "linux"
