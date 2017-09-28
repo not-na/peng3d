@@ -40,5 +40,6 @@ from .gui.button import *
 from .gui.slider import *
 from .gui.text import *
 from .gui.container import *
+from .gui.menus import *
 from .resource import *
 from .model import *

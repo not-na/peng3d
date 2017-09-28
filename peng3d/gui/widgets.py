@@ -261,7 +261,7 @@ class BasicWidget(object):
     
     def addAction(self,action,func,*args,**kwargs):
         """
-        Adds the a callback to the specified action.
+        Adds a callback to the specified action.
         
         All other positional and keyword arguments will be stored and passed to the function upon activation.
         

@@ -118,6 +118,8 @@ class SubMenu(object):
         self.peng.registerEventHandler("on_resize",self.on_resize)
         self.on_resize(*self.size)
         
+        self.actions = {}
+        
         self.batch2d = pyglet.graphics.Batch()
     
     def draw(self):
@@ -221,7 +223,22 @@ class SubMenu(object):
         del w
         #print("Final WRef")
         #print(w_wref())
+    
+    def addAction(self,action,func,*args,**kwargs):
+        """
+        Adds a callback to the specified action.
         
+        All other positional and keyword arguments will be stored and passed to the function upon activation.
+        """
+        if action not in self.actions:
+            self.actions[action] = []
+        self.actions[action].append((func,args,kwargs))
+    def doAction(self,action):
+        """
+        Helper method that calls all callbacks registered for the given action.
+        """
+        for f,args,kwargs in self.actions.get(action,[]):
+            f(*args,**kwargs)
     
     def setBackground(self,bg):
         """
@@ -288,3 +305,6 @@ class GUILayer(GUIMenu,Layer2D):
 # Hack to allow Container to use the drawing method of SubMenu for itself
 from ..gui import container
 container.SubMenu = SubMenu
+
+# To allow menus to subclass SubMenu
+from .menus import *

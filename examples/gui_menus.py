@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  template.py
+#  gui_menus.py
 #  
 #  Copyright 2017 notna <notna@apparat.org>
 #  
@@ -44,9 +44,70 @@ def createGUI():
     
     # Insert Widget Initialization Code here
     
+    ##### Basic Dialog
+    sm_basic = peng3d.gui.DialogSubMenu("test_dialog",m_main,peng.window,peng,)
+    sm_basic.setBackground([242,241,240])
+    sm_basic.addAction("click_ok",print,"OK")
+    sm_basic.addAction("enter",print,"Enter")
+    sm_basic.addAction("exit",print,"Exit")
+    
+    m_main.addSubMenu(sm_basic)
+    
+    # Trigger Confirm Dialog
+    ss_btn_basic = peng3d.gui.Button("btn_dialog",s_start,peng.window,peng,
+                            pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+bh*1.2),
+                            size=[200,50],
+                            label="Dialog",
+                            borderstyle="oldshadow",
+        )
+    ss_btn_basic.addAction("click",sm_basic.activate)
+    
+    s_start.addWidget(ss_btn_basic)
+    
+    ##### Confirm Dialog
+    sm_confirm = peng3d.gui.ConfirmSubMenu("test_confirm",m_main,peng.window,peng,)
+    sm_confirm.setBackground([242,241,240])
+    sm_confirm.addAction("confirm",print,"Confirmed")
+    sm_confirm.addAction("cancel",print,"Cancelled")
+    sm_confirm.addAction("enter",print,"Enter")
+    sm_confirm.addAction("exit",print,"Exit")
+    
+    m_main.addSubMenu(sm_confirm)
+    
+    # Trigger Confirm Dialog
+    ss_btn_confirm = peng3d.gui.Button("btn_confirm",s_start,peng.window,peng,
+                            pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.),
+                            size=[200,50],
+                            label="ConfirmDialog",
+                            borderstyle="oldshadow",
+        )
+    ss_btn_confirm.addAction("click",sm_confirm.activate)
+    
+    s_start.addWidget(ss_btn_confirm)
+    
+    ##### Text Dialog
+    sm_text = peng3d.gui.TextSubMenu("test_text",m_main,peng.window,peng)
+    sm_text.setBackground([242,241,240])
+    sm_text.addAction("enter",print,"Enter")
+    sm_text.addAction("exit",print,"Exit")
+    
+    m_main.addSubMenu(sm_text)
+    
+    # Trigger Confirm Dialog
+    ss_btn_text = peng3d.gui.Button("btn_text",s_start,peng.window,peng,
+                            pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-bh*1.2),
+                            size=[200,50],
+                            label="TextDialog",
+                            borderstyle="oldshadow",
+        )
+    ss_btn_text.addAction("click",sm_text.activate)
+    
+    s_start.addWidget(ss_btn_text)
+    
+    
     # Set SubMenu as selected at the end, to avoid premature rendering with widgets missing
     # Should not happen normally, but still a good practice
-    m_start.changeSubMenu("start")
+    m_main.changeSubMenu("start")
 
 def main(args):
     # Define these as global variables for easier access
