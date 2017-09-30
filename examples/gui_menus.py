@@ -87,6 +87,7 @@ def createGUI():
     
     ##### Text Dialog
     sm_text = peng3d.gui.TextSubMenu("test_text",m_main,peng.window,peng)
+    sm_text.timeout=5
     sm_text.setBackground([242,241,240])
     sm_text.addAction("enter",print,"Enter")
     sm_text.addAction("exit",print,"Exit")

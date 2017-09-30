@@ -199,8 +199,10 @@ class PengWindow(pyglet.window.Window):
         self.activeMenu = menu
         if old is not None:
             self.menus[old].on_exit(menu)
+            self.menus[old].doAction("exit")
             #self.pop_handlers()
         self.menu.on_enter(old)
+        self.menu.doAction("enter")
         self.peng.sendEvent("peng3d:window.menu.change",{"peng":self.peng,"window":self,"old":old,"menu":menu})
         #self.push_handlers(self.menu)
     def addMenu(self,menu):

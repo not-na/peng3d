@@ -28,12 +28,19 @@ import weakref
 import inspect
 
 from .layer import Layer
+from .util import ActionDispatcher
 
-class BasicMenu(object):
+class BasicMenu(ActionDispatcher):
     """
     Menu base class without layer support.
     
     Each menu is separated from the other menus and can be switched between at any time.
+    
+    Actions supported by default:
+    
+    ``enter`` is triggered everytime the :py:meth:`on_enter()` method has been called.
+    
+    ``exit`` is triggered everytime the :py:meth:`on_exit()` method has been called.
     
     .. seealso::
        

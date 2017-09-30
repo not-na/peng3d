@@ -44,3 +44,24 @@ class WatchingList(list):
 
 def register_pyglet_handler(peng,func,event,raiseErrors=False):
     peng.addEventListener("pyglet:%s"%event,(lambda data:func(*data["args"])),raiseErrors)
+
+class ActionDispatcher(object):
+    def addAction(self,action,func,*args,**kwargs):
+        """
+        Adds a callback to the specified action.
+        
+        All other positional and keyword arguments will be stored and passed to the function upon activation.
+        """
+        if not hasattr(self,"actions"):
+            self.actions = {}
+        if action not in self.actions:
+            self.actions[action] = []
+        self.actions[action].append((func,args,kwargs))
+    def doAction(self,action):
+        """
+        Helper method that calls all callbacks registered for the given action.
+        """
+        if not hasattr(self,"actions"):
+            return
+        for f,args,kwargs in self.actions.get(action,[]):
+            f(*args,**kwargs)

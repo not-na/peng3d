@@ -39,7 +39,7 @@ try:
 except ImportError:
     pass # Headless mode
 
-from ..util import mouse_aabb, WatchingList as _WatchingList
+from ..util import mouse_aabb, ActionDispatcher, WatchingList as _WatchingList
 
 class Background(object):
     """
@@ -128,7 +128,7 @@ class EmptyBackground(Background):
     """
     pass
 
-class BasicWidget(object):
+class BasicWidget(ActionDispatcher):
     """
     Basic Widget class.
     
@@ -140,6 +140,15 @@ class BasicWidget(object):
     
     Commonly, the lambda ``lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.)`` is used to center the widget.
     
+    The actions available may differ from widget to widget, by default these are used:
+    
+    - ``press`` is called upon starting to click on the widget
+    - ``click`` is called if the mouse is released on the widget while also having been pressed on it before, recommended for typical button callbacks
+    - ``context`` is called upon right-clicking on the widget and may be used to display a context menu
+    - ``hover_start`` signals that the cursor is now hovering over the widget
+    - ``hover`` is called every time the cursor moves while still being over the widget
+    - ``hover_end`` is called after the cursor leaves the widget
+
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None):
@@ -258,31 +267,6 @@ class BasicWidget(object):
     def enabled(self,value):
         self._enabled=value
         self.redraw()
-    
-    def addAction(self,action,func,*args,**kwargs):
-        """
-        Adds a callback to the specified action.
-        
-        All other positional and keyword arguments will be stored and passed to the function upon activation.
-        
-        The actions available may differ from widget to widget, by default these are used:
-        
-        - ``press`` is called upon starting to click on the widget
-        - ``click`` is called if the mouse is released on the widget while also having been pressed on it before, recommended for typical button callbacks
-        - ``context`` is called upon right-clicking on the widget and may be used to display a context menu
-        - ``hover_start`` signals that the cursor is now hovering over the widget
-        - ``hover`` is called every time the cursor moves while still being over the widget
-        - ``hover_end`` is called after the cursor leaves the widget
-        """
-        if action not in self.actions:
-            self.actions[action] = []
-        self.actions[action].append((func,args,kwargs))
-    def doAction(self,action):
-        """
-        Helper method that calls all callbacks registered for the given action.
-        """
-        for f,args,kwargs in self.actions.get(action,[]):
-            f(*args,**kwargs)
     
     def getState(self):
         """

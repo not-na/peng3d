@@ -44,6 +44,7 @@ from .slider import *
 from .text import *
 from .container import *
 from .layered import *
+from .. import util
 
 class GUIMenu(Menu):
     """
@@ -98,11 +99,17 @@ class GUIMenu(Menu):
         """
         return self.submenus[self.activeSubMenu]
 
-class SubMenu(object):
+class SubMenu(util.ActionDispatcher):
     """
     Sub Menu of the GUI system.
     
     Each instance must be registered with their menu to work properly, see :py:meth:`GUIMenu.addSubMenu()`\ .
+    
+    Actions supported by default:
+    
+    ``enter`` is triggered everytime the :py:meth:`on_enter()` method has been called.
+    
+    ``exit`` is triggered everytime the :py:meth:`on_exit()` method has been called.
     """
     def __init__(self,name,menu,window,peng):
         self.name = name
@@ -119,8 +126,6 @@ class SubMenu(object):
             )
         self.peng.registerEventHandler("on_resize",self.on_resize)
         self.on_resize(*self.size)
-        
-        self.actions = {}
         
         self.batch2d = pyglet.graphics.Batch()
     
@@ -225,22 +230,6 @@ class SubMenu(object):
         del w
         #print("Final WRef")
         #print(w_wref())
-    
-    def addAction(self,action,func,*args,**kwargs):
-        """
-        Adds a callback to the specified action.
-        
-        All other positional and keyword arguments will be stored and passed to the function upon activation.
-        """
-        if action not in self.actions:
-            self.actions[action] = []
-        self.actions[action].append((func,args,kwargs))
-    def doAction(self,action):
-        """
-        Helper method that calls all callbacks registered for the given action.
-        """
-        for f,args,kwargs in self.actions.get(action,[]):
-            f(*args,**kwargs)
     
     def setBackground(self,bg):
         """
