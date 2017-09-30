@@ -25,6 +25,7 @@
 __all__ = [
     "DialogSubMenu",
     "ConfirmSubMenu","TextSubMenu",
+    "ProgressSubMenu",
     ]
 
 import pyglet
@@ -32,6 +33,7 @@ import pyglet
 from . import SubMenu
 from . import text
 from . import button
+from . import slider
 
 class DialogSubMenu(SubMenu):
     DEFAULT_LABELS = {
@@ -50,6 +52,8 @@ class DialogSubMenu(SubMenu):
         labels = {}
         labels.update(self.DEFAULT_LABELS)
         labels.update(kwargs)
+        self.labels = kwargs
+        self.kwargs = kwargs
         
         self.add_widgets(**labels)
     
@@ -106,12 +110,9 @@ class DialogSubMenu(SubMenu):
     def on_enter(self,old):
         if self.menu.activeSubMenu==self.menu:
             raise RuntimeError("Cannot open a dialog twice")
-        self.doAction("enter")
         self.prev_submenu = old # name or None
     
     def exitDialog(self):
-        # to allow easy hooking
-        self.doAction("exit")
         if self.prev_submenu is not None:
             # change back to the previous submenu
             # could in theory form a stack if one dialog opens another
@@ -119,8 +120,7 @@ class DialogSubMenu(SubMenu):
         self.prev_submenu = None
     
     def activate(self):
-        if self.menu.activeSubMenu==self.name:
-            raise RuntimeError("Cannot open a dialog twice")
+        # error checking done indirectly by on_enter
         # on_enter will be called automatically to store previous submenu
         self.menu.changeSubMenu(self.name)
     
@@ -204,3 +204,86 @@ class TextSubMenu(DialogSubMenu):
         
         if self.timeout!=-1:
             pyglet.clock.schedule_once(lambda dt:self.exitDialog(),self.timeout)
+
+class ProgressSubMenu(DialogSubMenu):
+    DEFAULT_LABELS = {
+        "label_main":"Loading...",
+        "label_progressbar":"{percent}%",
+        "progress_n":0, # should be updated on-the-fly through property progress_n
+        "progress_nmin":0,
+        "progress_nmax":100, # basically equal to percentages
+        }
+    auto_exit = False
+    
+    def add_widgets(self,**kwargs):
+        super(ProgressSubMenu,self).add_widgets(**kwargs)
+        if "label_progressbar" in kwargs:
+            self.add_progressbar(kwargs["label_progressbar"])
+    
+    def add_progressbar(self,label_progressbar):
+        # Progressbar
+        self.wprogressbar = slider.Progressbar("progressbar",self,self.window,self.peng,
+                        pos=lambda sw,sh, bw,bh: (sw/2-bw/2,self.wlabel_main.pos[1]-bh*1.5),
+                        size=[0,0],
+                        #label=label_progressbar # TODO: add label
+                        borderstyle=self.borderstyle
+                        )
+        self.addWidget(self.wprogressbar)
+        
+        # Progress Label
+        self.wprogresslabel = text.Label("progresslabel",self,self.window,self.peng,
+                        pos=lambda sw,sh, bw,bh: (sw/2-bw/2,self.wprogressbar.pos[1]+8),
+                        size=[0,0],
+                        label="", # set by update_progressbar()
+                        )
+        self.wprogresslabel.size = lambda sw,sh: (sw,self.wprogresslabel._label.font_size)
+        self.addWidget(self.wprogresslabel)
+        
+        self.wprogressbar.size = lambda sw,sh: (sw*0.8,self.wprogresslabel._label.font_size+10)
+        
+        self._label_progressbar = label_progressbar
+        
+        self.update_progressbar()
+    
+    def update_progressbar(self):
+        n,nmin,nmax = self.wprogressbar.n,self.wprogressbar.nmin,self.wprogressbar.nmax
+        percent = max(min((n-nmin)/(nmax-nmin),1.),0.)*100
+        dat = {"value":round(n,4),"n":round(n,4),"nmin":round(nmin,4),"nmax":round(nmax,4),"percent":round(percent,4),"p":round(percent,4)}
+        txt = self._label_progressbar.format(**dat)
+        self.wprogresslabel.label = txt
+    
+    @property
+    def progress_n(self):
+        return self.wprogressbar.n
+    @progress_n.setter
+    def progress_n(self,value):
+        self.wprogressbar.n = value
+        self.update_progressbar()
+        if self.auto_exit:
+            if self.wprogressbar.n>=self.wprogressbar.nmax:
+                self.exitDialog()
+    
+    @property
+    def progress_nmin(self):
+        return self.wprogressbar.nmin
+    @progress_nmin.setter
+    def progress_nmin(self,value):
+        self.wprogressbar.nmin = value
+        self.update_progressbar()
+    
+    @property
+    def progress_nmax(self):
+        return self.wprogressbar.nmax
+    @progress_nmax.setter
+    def progress_nmax(self,value):
+        self.wprogressbar.nmax = value
+        self.update_progressbar()
+    
+    @property
+    def label_progressbar(self):
+        return self.wprogresslabel.label
+    @label_progressbar.setter
+    def label_progressbar(self,value):
+        self._label_progressbar = value
+        self.update_progressbar()
+    

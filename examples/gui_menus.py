@@ -53,7 +53,7 @@ def createGUI():
     
     m_main.addSubMenu(sm_basic)
     
-    # Trigger Confirm Dialog
+    # Trigger Basic Dialog
     ss_btn_basic = peng3d.gui.Button("btn_dialog",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+bh*1.2),
                             size=[200,50],
@@ -93,7 +93,7 @@ def createGUI():
     
     m_main.addSubMenu(sm_text)
     
-    # Trigger Confirm Dialog
+    # Trigger Text Dialog
     ss_btn_text = peng3d.gui.Button("btn_text",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-bh*1.2),
                             size=[200,50],
@@ -104,6 +104,31 @@ def createGUI():
     
     s_start.addWidget(ss_btn_text)
     
+    ##### Progress Dialog
+    sm_progress = peng3d.gui.ProgressSubMenu("test_progress",m_main,peng.window,peng)
+    sm_progress.setBackground([242,241,240])
+    sm_progress.addAction("enter",print,"Enter")
+    sm_progress.addAction("exit",print,"Exit")
+    sm_progress.addAction("enter",setattr,sm_progress,"progress_n",0)
+    sm_progress.auto_exit = True
+    
+    m_main.addSubMenu(sm_progress)
+    
+    # Trigger Text Dialog
+    ss_btn_progress = peng3d.gui.Button("btn_progress",s_start,peng.window,peng,
+                            pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-bh*2.4),
+                            size=[200,50],
+                            label="ProgressDialog",
+                            borderstyle="oldshadow",
+        )
+    ss_btn_progress.addAction("click",sm_progress.activate)
+    
+    s_start.addWidget(ss_btn_progress)
+    
+    def f(*args):
+        if m_main.activeSubMenu=="test_progress":
+            sm_progress.progress_n=(sm_progress.progress_n+0.2)
+    pyglet.clock.schedule_interval(f,1/60.)
     
     # Set SubMenu as selected at the end, to avoid premature rendering with widgets missing
     # Should not happen normally, but still a good practice

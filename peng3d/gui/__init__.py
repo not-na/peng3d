@@ -78,7 +78,9 @@ class GUIMenu(Menu):
         self.activeSubMenu = submenu
         if old is not None:
             self.submenus[old].on_exit(submenu)
+            self.submenus[old].doAction("exit")
         self.submenu.on_enter(old)
+        self.submenu.doAction("enter")
     
     def draw(self):
         """
