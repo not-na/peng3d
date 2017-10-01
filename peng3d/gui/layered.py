@@ -277,7 +277,7 @@ class WidgetLayer(BasicWidgetLayer):
         This method is intended for use in vertex position calculation, as the border and offset have already been applied.
         
         The returned value is a 4-tuple of ``(sx,sy,ex,ey)``\ .
-        The two values starting with are the "start" position, or the lower-left corner.
+        The two values starting with an s are the "start" position, or the lower-left corner.
         The second pair of values signify the "end" position, or upper-right corner.
         """
         # Returns sx,sy,ex,ey

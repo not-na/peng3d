@@ -393,7 +393,10 @@ class BasicWidget(ActionDispatcher):
                 to_del = []
                 for e_handler in e_handlers:
                     # Weird workaround due to implementation details of WeakMethod
-                    if super(weakref.WeakMethod,e_handler).__call__() is self:
+                    if isinstance(e_handler,weakref.ref): 
+                        if super(weakref.WeakMethod,e_handler).__call__() is self: 
+                            to_del.append(e_handler) 
+                    elif e_handler is self: 
                         to_del.append(e_handler)
                 for d in to_del:
                     try:
