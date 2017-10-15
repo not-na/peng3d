@@ -22,6 +22,25 @@
 #  
 #  
 
+# needed for py27 compat
+import weakref as _weakref
+
+class _WeakMethod(object):
+    """A callable object. Takes one argument to init: 'object.method'.
+    Once created, call this object -- MyWeakMethod() -- 
+    and pass args/kwargs as you normally would.
+    """
+    def __init__(self, object_dot_method):
+        self.target = _weakref.proxy(object_dot_method.__self__)
+        self.method = _weakref.proxy(object_dot_method.__func__)
+        ###Older versions of Python can use 'im_self' and 'im_func' in place of '__self__' and '__func__' respectively
+
+    def __call__(self):
+        def f(*args,**kwargs):
+            return self.method(self.target, *args, **kwargs)
+        return f
+_weakref.WeakMethod = _WeakMethod
+
 # These imports are here for convenience
 
 from .peng import *

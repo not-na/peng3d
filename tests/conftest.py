@@ -65,4 +65,8 @@ def window(peng,xdisplay):
     os.environ["DISPLAY"]=xdisplay
     return peng.createWindow() if peng.window is None else peng.window
 
+@pytest.fixture
+def dispatcher():
+    return peng3d.util.ActionDispatcher()
+
 from graphicalhelpers import *
