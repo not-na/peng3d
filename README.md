@@ -2,7 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/peng3d/badge/?version=latest)](http://peng3d.readthedocs.io/en/latest/?badge=latest)
 
-[![PyPI](https://img.shields.io/pypi/dm/peng3d.svg)](https://pypi.python.org/pypi/peng3d)
+[![PyPI](https://img.shields.io/pypi/v/peng3d.svg)](https://pypi.python.org/pypi/peng3d)
 
 [![CircleCI](https://circleci.com/gh/not-na/peng3d.svg?style=svg)](https://circleci.com/gh/not-na/peng3d)
 
