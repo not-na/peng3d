@@ -116,3 +116,12 @@ def test_registry_normalize_name():
     
     with pytest.raises(TypeError):
         reg.normalizeName(100.1)
+
+def test_registry_contains():
+    reg = peng3d.util.SmartRegistry(reuse_ids=False,default_reg={10:"obj1",20:"obj2",30:"obj3"})
+    
+    assert 10 in reg
+    assert 100 not in reg
+    
+    assert "obj1" in reg
+    assert "obj100" not in reg

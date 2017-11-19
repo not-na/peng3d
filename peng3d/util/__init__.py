@@ -263,5 +263,5 @@ class SmartRegistry(object):
         # to access registry as reg[name]=id
         self.register(key,value)
     
-    def __in__(self,value):
+    def __contains__(self,value):
         return value in self._data["reg"] or value in self._data["reg"].inv
