@@ -22,6 +22,8 @@
 #  
 #  
 
+import warnings
+
 # needed for py27 compat
 import weakref as _weakref
 
@@ -40,6 +42,14 @@ class _WeakMethod(object):
             return self.method(self.target, *args, **kwargs)
         return f
 _weakref.WeakMethod = _WeakMethod
+
+# needed for bidict<0.14.0 compat
+import bidict
+
+if not hasattr(bidict,"OrderedBidict"):
+    bidict.OrderedBidict = bidict.orderedbidict
+    warnings.warn("Support for bidict<0.14.0 will be dropped in a future version",warnings.DeprecationWarning)
+
 
 # These imports are here for convenience
 

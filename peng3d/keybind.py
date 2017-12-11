@@ -36,7 +36,7 @@ This modifier internally has the value of ``1<<15`` and should thus be safe from
 Note that this modifier is only applied within keybinds, not in regular ``on_key_down`` and ``on_key_up`` handlers.
 """
 
-MODNAME2MODIFIER = bidict.orderedbidict([
+MODNAME2MODIFIER = bidict.OrderedBidict([
     ("ctrl",key.MOD_ACCEL), # For compat between MacOSX and everything else, equals to MOD_COMMAND on OSX and MOD_CTRL everywhere else
     ("alt",key.MOD_ALT),
     ("shift",key.MOD_SHIFT),

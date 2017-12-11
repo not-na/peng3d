@@ -1,3 +1,4 @@
-bidict
+bidict==0.14.2
 sphinxcontrib-domaintools==0.1
+sphinx_rtd_theme==0.2.4
 peng3d_sphinxext==1.0post1

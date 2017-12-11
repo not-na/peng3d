@@ -1,4 +1,4 @@
-bidict>=0.12.0
+bidict==0.14.2
 future==0.15.2
 #pyglet==1.3.0a1
 https://bitbucket.org/pyglet/pyglet/get/f48574e6c61c.zip
