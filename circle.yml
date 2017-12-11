@@ -7,5 +7,5 @@ test:
      - tox -- --junitxml=$CIRCLE_TEST_REPORTS/junit/junit.xml --x-display=$DISPLAY -v -m "'not graphical'"
 
 machine:
-   python:
-      version: 3.6.0
+   post:
+      version: 2.7.12 3.5.3 3.6.2
