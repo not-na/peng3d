@@ -6,4 +6,3 @@ tox==2.3.1
 virtualenv==15.0.2
 pytest==3.2.3
 py>=1.4.33
-sphinxcontrib-spelling==2.2.0
