@@ -24,6 +24,7 @@
 
 __all__ = [
     "Progressbar","ProgressbarBackground",
+    "AdvancedProgressbar",
     "Slider","SliderBackground",
     "VerticalSlider","VerticalSliderBackground",
 ]
@@ -33,6 +34,8 @@ from pyglet.gl import *
 
 from .widgets import Background,Widget
 from .button import ButtonBackground
+
+basestring = str # for py2 compat, may get dropped at a later release
 
 class ProgressbarBackground(Background):
     """
@@ -152,7 +155,7 @@ class Progressbar(Widget):
                  nmin=0,nmax=100,n=0,
                  border=[4,4],
                  borderstyle="flat",
-                 colors=[[240,119,70],[240,119,70]]
+                 colors=[[240,119,70],[240,119,70]],
                  ):
         self._nmin = nmin
         self._nmax = nmax
@@ -205,15 +208,101 @@ class Progressbar(Widget):
         """
         Alias to the :py:attr:`n` property.
         """
-        return self._n
+        return self.n
     @value.setter
     def value(self,value):
-        value = min(max(value,self.nmin),self.nmax)
-        if self._n != value:
-            self.doAction("progresschange")
+        # May be a tiny bit slower, but safer if n is changed
+        self.n = value
+
+class AdvancedProgressbar(Progressbar):
+    """
+    
+    """
+    def __init__(self,name,submenu,window,peng,
+                 pos=None,size=None,
+                 bg=None,
+                 categories={},
+                 offset_nmin=0,offset_nmax=0,offset_n=0,
+                 border=[4,4],
+                 borderstyle="flat",
+                 colors=[[240,119,70],[240,119,70]],
+                 ):
+        super(AdvancedProgressbar,self).__init__(name,submenu,window,peng,pos,size,bg,offset_nmin,offset_nmax,offset_n,border,borderstyle,colors)
+        
+        self.categories = categories
+        for cname,cdat in self.categories.items():
+            assert len(cdat)==3 # nmin,n,nmax
+    
+    @property
+    def nmin(self):
+        return self._nmin+sum(map(self.categories.values(),lambda cdat:cdat[0]))
+    @nmin.setter
+    def nmin(self,value):
+        # may confuse users if base_nmax is very low but the categories nmax is high
+        # may also prevent the expected behavior that if n is set to nmin, p is equal to 0%
+        self._nmin = value
+        self.redraw()
+    
+    @property
+    def n(self):
+        return self._n+sum(map(self.categories.values(),lambda cdat:cdat[1]))
+    @n.setter
+    def n(self,value):
+        # see nmin for information about some of the implications of this behavior
         self._n = value
         self.redraw()
-
+    
+    @property
+    def nmax(self):
+        return self._nmax+sum(map(self.categories.values(),lambda cdat:cdat[2]))
+    @nmax.setter
+    def nmax(self,value):
+        # see nmin for information about some of the implications of this behavior
+        self._nmax = value
+        self.redraw()
+    
+    def __getitem__(self,key):
+        # returns the 3-tuple associated with the category
+        if key not in self.categories:
+            raise KeyError("No Category with name '%s'"%key)
+        return self.categories[key]
+        # TODO: automatically redraw if list returned here is modified
+    def __setitem__(self,key,value):
+        # sets the 3-tuple associated with the category
+        # mostly used for category creation, since expressions of the form
+        # widget[category][0]=1 will only use __getitem__ and modify data in-place
+        assert isinstance(key,basestring) # py2 compat is done at the top
+        assert len(value)==3 # nmin,n,nmax
+        self.categories[key]=list(value) # conversion to list allows in-place modification if a tuple was passed
+        self.redraw()
+    def __delitem__(self,key):
+        if key not in self.categories:
+            raise KeyError("No Category with name '%s'"%name)
+        del self.categories[key]
+        self.redraw()
+    
+    def addCategory(self,name,nmin=0,n=0,nmax=100):
+        assert isinstance(key,basestring) # py2 compat is done at the top
+        if name in self.categories:
+            raise KeyError("Category with name '%s' already exists"%name)
+        self.categories[name]=[nmin,n,nmax]
+        self.redraw()
+    def updateCategory(self,name,nmin=None,n=None,nmax=None):
+        # smart update, only stuff that was given
+        if name not in self.categories:
+            raise KeyError("No Category with name '%s'"%name)
+        if nmin is not None:
+            self.categories[name][0]=nmin
+        if n is not None:
+            self.categories[name][1]=n
+        if nmax is not None:
+            self.categories[name][2]=nmax
+        self.redraw()
+    def deleteCategory(self,name):
+        if name not in self.categories:
+            raise KeyError("No Category with name '%s'"%name)
+        del self.categories[name]
+        self.redraw()
 
 class SliderBackground(ButtonBackground):
     """
