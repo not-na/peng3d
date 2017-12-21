@@ -216,7 +216,24 @@ class Progressbar(Widget):
 
 class AdvancedProgressbar(Progressbar):
     """
+    Advanced Progressbar displaying the combined progress through multiple actions.
     
+    Visually, this widget is identical to :py:class:`Progressbar` with the only difference
+    being the way the progress percentage is calculated.
+    
+    The ``offset_nmin``\ , ``offset_n`` and ``offset_nmax`` parameters are equivalent
+    to the parameters of the same name minus the ``offset_`` prefix.
+    
+    ``categories`` may be any dictionary mapping category names to 3-tuples of
+    format ``(nmin,n,nmax)``\ .
+    
+    It is possible to read, write and delete categories through the ``widget[cat]`` syntax.
+    Note however, that modifying categoris in-place, e.g. like ``widget[cat][1]=100``\ , 
+    requires a manual call to :py:meth:`redraw()`\ .
+    
+    When setting the :py:attr:`nmin`\ , :py:attr:`n` or :py:attr:`nmax` properties, only
+    an internal offset value will be modified. This may result in otherwise unexpected behavior
+    if setting e.g. ``n`` to ``nmax`` because the categories may influence the total percentage calculation.
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
@@ -282,12 +299,26 @@ class AdvancedProgressbar(Progressbar):
         self.redraw()
     
     def addCategory(self,name,nmin=0,n=0,nmax=100):
+        """
+        Adds a category with the given name.
+        
+        If the category already exists, a :py:exc:`KeyError` will be thrown. Use
+        :py:meth:`updateCategory()` instead if you want to update a category.
+        """
         assert isinstance(key,basestring) # py2 compat is done at the top
         if name in self.categories:
             raise KeyError("Category with name '%s' already exists"%name)
         self.categories[name]=[nmin,n,nmax]
         self.redraw()
     def updateCategory(self,name,nmin=None,n=None,nmax=None):
+        """
+        Smartly updates the given category.
+        
+        Only values that are given will be updated, others will be left unchanged.
+        
+        If the category does not exist, a :py:exc:`KeyError` will be thrown. Use
+        :py:meth:`addCategory()` instead if you want to add a category.
+        """
         # smart update, only stuff that was given
         if name not in self.categories:
             raise KeyError("No Category with name '%s'"%name)
@@ -299,6 +330,11 @@ class AdvancedProgressbar(Progressbar):
             self.categories[name][2]=nmax
         self.redraw()
     def deleteCategory(self,name):
+        """
+        Deletes the category with the given name.
+        
+        If the category does not exist, a :py:exc:`KeyError` will be thrown.
+        """
         if name not in self.categories:
             raise KeyError("No Category with name '%s'"%name)
         del self.categories[name]
