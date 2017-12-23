@@ -61,7 +61,10 @@ class ProgressbarBackground(Background):
         bx,by = self.border
         
         nmin,nmax,n = self.widget.nmin,self.widget.nmax,float(self.widget.n)
-        p = min((n-nmin)/(nmax-nmin),1.)
+        if (nmax-nmin)==0:
+            p = 0 # prevents ZeroDivisionError
+        else:
+            p = min((n-nmin)/(nmax-nmin),1.)
         
         # Outer vertices
         #    x          y
@@ -252,7 +255,7 @@ class AdvancedProgressbar(Progressbar):
     
     @property
     def nmin(self):
-        return self._nmin+sum(map(self.categories.values(),lambda cdat:cdat[0]))
+        return self._nmin+sum(map(lambda cdat:cdat[0],self.categories.values()))
     @nmin.setter
     def nmin(self,value):
         # may confuse users if base_nmax is very low but the categories nmax is high
@@ -262,7 +265,7 @@ class AdvancedProgressbar(Progressbar):
     
     @property
     def n(self):
-        return self._n+sum(map(self.categories.values(),lambda cdat:cdat[1]))
+        return self._n+sum(map(lambda cdat:cdat[1],self.categories.values()))
     @n.setter
     def n(self,value):
         # see nmin for information about some of the implications of this behavior
@@ -271,7 +274,7 @@ class AdvancedProgressbar(Progressbar):
     
     @property
     def nmax(self):
-        return self._nmax+sum(map(self.categories.values(),lambda cdat:cdat[2]))
+        return self._nmax+sum(map(lambda cdat:cdat[2],self.categories.values()))
     @nmax.setter
     def nmax(self,value):
         # see nmin for information about some of the implications of this behavior
@@ -305,7 +308,7 @@ class AdvancedProgressbar(Progressbar):
         If the category already exists, a :py:exc:`KeyError` will be thrown. Use
         :py:meth:`updateCategory()` instead if you want to update a category.
         """
-        assert isinstance(key,basestring) # py2 compat is done at the top
+        assert isinstance(name,basestring) # py2 compat is done at the top
         if name in self.categories:
             raise KeyError("Category with name '%s' already exists"%name)
         self.categories[name]=[nmin,n,nmax]

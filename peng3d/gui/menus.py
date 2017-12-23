@@ -64,7 +64,7 @@ includes labels that are not strictly text, like the maximum value of a progress
 __all__ = [
     "DialogSubMenu",
     "ConfirmSubMenu","TextSubMenu",
-    "ProgressSubMenu",
+    "ProgressSubMenu","AdvancedProgressSubMenu",
     ]
 
 import pyglet
@@ -471,7 +471,10 @@ class ProgressSubMenu(DialogSubMenu):
         properties of this class will automatically trigger a re-calculation.
         """
         n,nmin,nmax = self.wprogressbar.n,self.wprogressbar.nmin,self.wprogressbar.nmax
-        percent = max(min((n-nmin)/(nmax-nmin),1.),0.)*100
+        if (nmax-nmin)==0:
+            percent = 0 # prevents ZeroDivisionError
+        else:
+            percent = max(min((n-nmin)/(nmax-nmin),1.),0.)*100
         dat = {"value":round(n,4),"n":round(n,4),"nmin":round(nmin,4),"nmax":round(nmax,4),"percent":round(percent,4),"p":round(percent,4)}
         txt = self._label_progressbar.format(**dat)
         self.wprogresslabel.label = txt
@@ -543,3 +546,71 @@ class ProgressSubMenu(DialogSubMenu):
         self._label_progressbar = value
         self.update_progressbar()
     
+
+class AdvancedProgressSubMenu(ProgressSubMenu):
+    def add_progressbar(self,label_progressbar):
+        """
+        Adds a progressbar and label displaying the progress within a certain task.
+        
+        This widget can be triggered by setting the label ``label_progressbar`` to
+        a string.
+        
+        The progressbar will be displayed centered and below the main label.
+        The progress label will be displayed within the progressbar.
+        
+        The label of the progressbar may be a string containing formatting codes
+        which will be resolved via the ``format()`` method.
+        
+        Currently, there are six keys available:
+        
+        ``n`` and ``value`` are the current progress rounded to 4 decimal places.
+        
+        ``nmin`` is the minimum progress value rounded to 4 decimal places.
+        
+        ``nmax`` is the maximum progress value rounded to 4 decimal places.
+        
+        ``p`` and ``percent`` are the percentage value that the progressbar is completed
+        rounded to 4 decimal places.
+        
+        By default, the progressbar label will be ``{percent}%`` displaying the percentage
+        the progressbar is complete.
+        """
+        # Progressbar
+        self.wprogressbar = slider.AdvancedProgressbar("progressbar",self,self.window,self.peng,
+                        pos=lambda sw,sh, bw,bh: (sw/2-bw/2,self.wlabel_main.pos[1]-bh*1.5),
+                        size=[0,0],
+                        #label=label_progressbar # TODO: add label
+                        borderstyle=self.borderstyle
+                        )
+        self.addWidget(self.wprogressbar)
+        
+        # Progress Label
+        self.wprogresslabel = text.Label("progresslabel",self,self.window,self.peng,
+                        pos=lambda sw,sh, bw,bh: (sw/2-bw/2,self.wprogressbar.pos[1]+8),
+                        size=[0,0],
+                        label="", # set by update_progressbar()
+                        )
+        self.wprogresslabel.size = lambda sw,sh: (sw,self.wprogresslabel._label.font_size)
+        self.addWidget(self.wprogresslabel)
+        
+        self.wprogressbar.size = lambda sw,sh: (sw*0.8,self.wprogresslabel._label.font_size+10)
+        
+        self._label_progressbar = label_progressbar
+        
+        self.update_progressbar()
+    
+    def addCategory(self,*args,**kwargs):
+        """
+        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.addCategory()`\ .
+        """
+        return self.wprogressbar.addCategory(*args,**kwargs)
+    def updateCategory(self,*args,**kwargs):
+        """
+        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.updateCategory()`\ .
+        """
+        return self.wprogressbar.updateCategory(*args,**kwargs)
+    def deleteCategory(self,*args,**kwargs):
+        """
+        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.deleteCategory()`\ .
+        """
+        return self.wprogressbar.deleteCategory(*args,**kwargs)
