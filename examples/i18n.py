@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  gui_advprogress.py
+#  template.py
 #  
 #  Copyright 2017 notna <notna@apparat.org>
 #  
@@ -30,17 +30,9 @@ from pyglet.gl import *
 # Imports peng3d (obvious)
 import peng3d
 
-# Categories
-# fourth number is speed in units/frame
-categories = {
-    "1":[0,0,100,1],
-    "2":[0,0,1000,1],
-}
-
 langs=["en","de","__"]
 
 def createGUI():
-    global sma_bar
     # Adds a Resource Category for later use
     # Required to store Images for use in ImageButton, ImageWidgetLayer etc.
     # This creates a pyglet TextureBin internally, to bundle multiple images into one texture
@@ -52,26 +44,19 @@ def createGUI():
     
     s_start.setBackground([242,241,240])
     
-    # Advanced Progress Dialog
-    sm_advprog = peng3d.gui.AdvancedProgressSubMenu("sm_advprog",m_main,peng.window,peng,label_progressbar=tl("i18n:gui_adv.progress.label"))
-    sm_advprog.setBackground([242,241,240])
-    sm_advprog.addAction("enter",print,tl("i18n:common.enter"))
-    sm_advprog.addAction("exit",print,tl("i18n:common.exit"))
-    
-    m_main.addSubMenu(sm_advprog)
-    
-    sma_bar = sm_advprog.wprogressbar
-    
     # Trigger advprog dialog
-    ss_btn_advprog = peng3d.gui.Button("btn_advprog",s_start,peng.window,peng,
+    ss_btn_change = peng3d.gui.Button("btn_change",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+bh*1.2),
                             size=[200,50],
-                            label=tl("i18n:gui_adv.trigger.label"),
+                            label=tl("i18n:i18n.change.label"),
                             borderstyle="oldshadow",
         )
-    ss_btn_advprog.addAction("click",sm_advprog.activate)
     
-    s_start.addWidget(ss_btn_advprog)
+    def f():
+        peng.i18n.setLang(langs[(langs.index(peng.i18n.lang)+1)%len(langs)])
+    ss_btn_change.addAction("click",f)
+    
+    s_start.addWidget(ss_btn_change)
     
     # Set SubMenu as selected at the end, to avoid premature rendering with widgets missing
     # Should not happen normally, but still a good practice
@@ -88,7 +73,7 @@ def main(args):
     t,tl = peng.t,peng.tl
     
     # Create Window with caption
-    peng.createWindow(caption_t="i18n:common.window.caption",resizable=True,vsync=True)
+    peng.createWindow(caption_t="i18n:i18n.caption",resizable=True,vsync=True)
     # Create main GUI Menu and register it immediately
     m_main = peng3d.GUIMenu("main",peng.window,peng)
     peng.window.addMenu(m_main)
@@ -102,19 +87,6 @@ def main(args):
     # Actually creates the GUI
     # In a separate function for clarity and readability
     createGUI()
-    
-    for cname,cdat in categories.items():
-        sma_bar.addCategory(cname,cdat[0],cdat[1],cdat[2])
-    
-    def update(dt=None):
-        for cname,cdat in categories.items():
-            nmin,n,nmax = sma_bar[cname]
-            n+=cdat[3]
-            if n>=nmax:
-                print(tl("i18n:gui_adv.wraparound")%cname)
-            n%=nmax
-            sma_bar.updateCategory(cname,n=n)
-    pyglet.clock.schedule_interval(update,1./60)
     
     # Switch to the main menu and start the main loop
     peng.window.changeMenu("main")

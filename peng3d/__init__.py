@@ -71,4 +71,5 @@ from .gui.text import *
 from .gui.container import *
 from .gui.menus import *
 from .resource import *
+from .i18n import *
 from .model import *

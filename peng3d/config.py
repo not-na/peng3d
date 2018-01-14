@@ -153,6 +153,14 @@ DEFAULT_CONFIG = {
     "rsrc.basepath":_get_script_home(),
     "rsrc.maxtexsize":1024, # Actual limit may be less, will be adjusted based on GL Capabilities
     
+    # i18n.*
+    # Translation config
+    "i18n.enable":True,
+    "i18n.lang":"en", # currently ISO 639-1 code, but may change in the future
+    "i18n.lang.format":"{domain}:lang.{lang}", # format of resource that contains translations
+    "i18n.lang.ext":".lang", # file extension including dot
+    "i18n.discover_regex":r".*?/lang/(?P<lang>[a-zA-Z0-9_-]{2,5})\.lang",
+    
     # events.*
     # Event config
     "events.removeonerror":True,

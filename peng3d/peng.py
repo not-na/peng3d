@@ -30,7 +30,7 @@ import weakref
 import inspect
 
 #from . import window, config, keybind, pyglet_patch
-from . import config, world, resource
+from . import config, world, resource, i18n
 
 _pyglet_patched = sys.version_info.major == 2 or not world._have_pyglet
 
@@ -63,6 +63,10 @@ class Peng(object):
             self.keybinds = keybind.KeybindHandler(self)
         
         self.resourceMgr = None
+        self.i18n = None
+        
+        self.t = lambda *args,**kwargs:self._t(*args,**kwargs)
+        self.tl = lambda *args,**kwargs:self._tl(*args,**kwargs)
         
         self.addEventListener("peng3d:peng.exit",self.handler_exit)
         
@@ -70,7 +74,7 @@ class Peng(object):
             _pyglet_patched = True
             pyglet_patch.patch_float2int()
     
-    def createWindow(self,cls=None,*args,**kwargs):
+    def createWindow(self,cls=None,caption_t=None,*args,**kwargs):
         """
         createWindow(cls=window.PengWindow, *args, **kwargs)
         
@@ -92,12 +96,26 @@ class Peng(object):
         if self.window is not None:
             raise RuntimeError("Window already created!")
         self.sendEvent("peng3d:window.create.pre",{"peng":self,"cls":cls})
+        if caption_t is not None:
+            kwargs["caption"] = "Peng3d Application"
         self.window = cls(self,*args,**kwargs)
         self.sendEvent("peng3d:window.create.post",{"peng":self,"window":self.window})
         if self.cfg["rsrc.enable"] and self.resourceMgr is None:
             self.sendEvent("peng3d:rsrc.init.pre",{"peng":self,"basepath":self.cfg["rsrc.basepath"]})
             self.resourceMgr = resource.ResourceManager(self,self.cfg["rsrc.basepath"])
+            self.rsrcMgr = self.resourceMgr
             self.sendEvent("peng3d:rsrc.init.post",{"peng":self,"rsrcMgr":self.resourceMgr})
+            if self.cfg["i18n.enable"] and self.i18n is None:
+                self.sendEvent("peng3d:i18n.init.pre",{"peng":self})
+                self.i18n = i18n.TranslationManager(self)
+                self._t = self.i18n.t
+                self._tl = self.i18n.tl
+                self.sendEvent("peng3d:i18n.init.post",{"peng":self,"i18n":self.i18n})
+        if caption_t is not None:
+            self.window.set_caption(self.t(caption_t))
+            def f():
+                self.window.set_caption(self.t(caption_t))
+            self.i18n.addAction("setlang",f)
         return self.window
     
     def run(self,evloop=None):

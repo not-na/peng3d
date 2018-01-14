@@ -467,7 +467,7 @@ class LabelWidgetLayer(WidgetLayer):
                 ):
         super(LabelWidgetLayer,self).__init__(name,widget,z_index,border,offset)
         
-        self._label = pyglet.text.Label(label,
+        self._label = pyglet.text.Label(str(label),
                 font_name=font,
                 font_size=font_size,
                 color=font_color,
@@ -478,6 +478,10 @@ class LabelWidgetLayer(WidgetLayer):
                 width=self.getSize()[0],#height=self.getSize()[1],
                 multiline=multiline,
                 )
+        if getattr(label,"_dynamic",False):
+            def f():
+                self.label = str(label)
+            self.peng.i18n.addAction("setlang",f)
         
         self.on_redraw()
     
@@ -537,7 +541,7 @@ class FormattedLabelWidgetLayer(WidgetLayer):
         self.font_name = font
         self.font_color = font_color
         
-        self._label = self.cls(label,
+        self._label = self.cls(str(label),
                 x=0,y=0,
                 batch=self.widget.submenu.batch2d,
                 group=self.group,
@@ -545,6 +549,10 @@ class FormattedLabelWidgetLayer(WidgetLayer):
                 width=self.getSize()[0],#height=self.getSize()[1],
                 multiline=multiline,
                 )
+        if getattr(label,"_dynamic",False):
+            def f():
+                self.label = str(label)
+            self.peng.i18n.addAction("setlang",f)
         
         self.on_redraw()
     

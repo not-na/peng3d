@@ -251,7 +251,7 @@ class Button(Widget):
         if bg is None:
             bg = ButtonBackground(self,border,borderstyle)
         super(Button,self).__init__(name,submenu,window,peng,pos,size,bg)
-        self._label = pyglet.text.Label(label,
+        self._label = pyglet.text.Label(str(label),
                 font_name="Arial",
                 font_size=LABEL_FONT_SIZE,
                 color=[62,67,73,255],
@@ -260,6 +260,10 @@ class Button(Widget):
                 group=pyglet.graphics.OrderedGroup(1),
                 anchor_x="center", anchor_y="center"
                 )
+        if getattr(label,"_dynamic",False):
+            def f():
+                self.label = str(label)
+            self.peng.i18n.addAction("setlang",f)
         self.redraw()
         
         # Redraws the button every 2 seconds to prevent glitched graphics

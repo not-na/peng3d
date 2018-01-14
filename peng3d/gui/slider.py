@@ -231,7 +231,7 @@ class AdvancedProgressbar(Progressbar):
     format ``(nmin,n,nmax)``\ .
     
     It is possible to read, write and delete categories through the ``widget[cat]`` syntax.
-    Note however, that modifying categoris in-place, e.g. like ``widget[cat][1]=100``\ , 
+    Note however, that modifying categories in-place, e.g. like ``widget[cat][1]=100``\ , 
     requires a manual call to :py:meth:`redraw()`\ .
     
     When setting the :py:attr:`nmin`\ , :py:attr:`n` or :py:attr:`nmax` properties, only
@@ -332,6 +332,7 @@ class AdvancedProgressbar(Progressbar):
         if nmax is not None:
             self.categories[name][2]=nmax
         self.redraw()
+        self.doAction("progresschange")
     def deleteCategory(self,name):
         """
         Deletes the category with the given name.

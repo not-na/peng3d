@@ -30,6 +30,8 @@ from pyglet.gl import *
 # Imports peng3d (obvious)
 import peng3d
 
+langs=["en","de","__"]
+
 def createGUI():
     # Adds a Resource Category for later use
     # Required to store Images for use in ImageButton, ImageWidgetLayer etc.
@@ -54,11 +56,21 @@ def main(args):
     
     # Create Peng instance
     peng = peng3d.Peng()
+    
+    global t,tl
+    t,tl = peng.t,peng.tl
+    
     # Create Window with caption
-    peng.createWindow(caption="Peng3d Example",resizable=True,vsync=True)
+    peng.createWindow(caption_t="i18n:common.window.caption",resizable=True,vsync=True)
     # Create main GUI Menu and register it immediately
     m_main = peng3d.GUIMenu("main",peng.window,peng)
     peng.window.addMenu(m_main)
+    
+    def test_handler(symbol,modifiers,release):
+        if release:
+            return
+        peng.i18n.setLang(langs[(langs.index(peng.i18n.lang)+1)%len(langs)])
+    peng.keybinds.add("f3","testpy:handler.test",test_handler)
     
     # Actually creates the GUI
     # In a separate function for clarity and readability

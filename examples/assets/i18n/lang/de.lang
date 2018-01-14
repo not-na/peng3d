@@ -1,0 +1,23 @@
+# German translation file
+meta.lang=de
+meta.name.native=Deutsch
+meta.name.de=Deutsch
+meta.name.en=German
+
+common.enter=Betreten
+common.exit=Verlassen
+common.window.caption=Peng3d Beispiel
+common.back=Zurück
+common.continue=Fortfahren
+common.confirm=Akzeptieren
+common.confirmed=Bestätigt
+common.cancel=Abbrechen
+common.cancelled=Abgebrochen
+common.ok=OK
+
+i18n.change.label=Sprache ändern
+i18n.caption=Peng3d Übersetzungsbeispiel
+
+gui_adv.progress.label={percent:.2f} Prozent
+
+gui_menus.progress.plabel={percent} Prozent

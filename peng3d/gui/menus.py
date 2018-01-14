@@ -396,7 +396,7 @@ class ProgressSubMenu(DialogSubMenu):
     """
     DEFAULT_LABELS = {
         "label_main":"Loading...",
-        "label_progressbar":"{percent}%",
+        "label_progressbar":"{percent:.1}%",
         # TODO: actually implement the progress_* labels
         "progress_n":0, # should be updated on-the-fly through property progress_n
         "progress_nmin":0,
@@ -460,6 +460,13 @@ class ProgressSubMenu(DialogSubMenu):
         self.wprogressbar.size = lambda sw,sh: (sw*0.8,self.wprogresslabel._label.font_size+10)
         
         self._label_progressbar = label_progressbar
+        
+        if getattr(label_progressbar,"_dynamic",False):
+            def f():
+                self.label_progressbar = str(label_progressbar)
+            self.peng.i18n.addAction("setlang",f)
+        
+        self.wprogressbar.addAction("progresschange",self.update_progressbar)
         
         self.update_progressbar()
     
@@ -596,6 +603,13 @@ class AdvancedProgressSubMenu(ProgressSubMenu):
         self.wprogressbar.size = lambda sw,sh: (sw*0.8,self.wprogresslabel._label.font_size+10)
         
         self._label_progressbar = label_progressbar
+        
+        if getattr(label_progressbar,"_dynamic",False):
+            def f():
+                self.label_progressbar = str(label_progressbar)
+            self.peng.i18n.addAction("setlang",f)
+        
+        self.wprogressbar.addAction("progresschange",self.update_progressbar)
         
         self.update_progressbar()
     

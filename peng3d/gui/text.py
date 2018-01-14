@@ -67,7 +67,7 @@ class Label(Widget):
         self.font_color = font_color
         
         if label_cls == pyglet.text.HTMLLabel:
-            self._label = label_cls(label,
+            self._label = label_cls(str(label),
                     # Font is changed later
                     x=0,y=0,
                     batch=self.submenu.batch2d,
@@ -80,7 +80,7 @@ class Label(Widget):
             self._label.font_size = font_size
             self._label.font_color = font_color
         else:
-            self._label = label_cls(label,
+            self._label = label_cls(str(label),
                     font_name=font,
                     font_size=font_size,
                     color=font_color,
@@ -91,6 +91,10 @@ class Label(Widget):
                     width=self.size[0],height=self.size[1],
                     multiline=multiline,
                     )
+        if getattr(label,"_dynamic",False):
+            def f():
+                self.label = str(label)
+            self.peng.i18n.addAction("setlang",f)
         
         self.redraw()
     
@@ -211,7 +215,7 @@ class TextInput(Widget):
         self.allow_copypaste = True if allow_copypaste is True or allow_copypaste=="force" else False
         self.force_copypaste = True if allow_copypaste=="force" else False
         
-        self._text = pyglet.text.Label(text,
+        self._text = pyglet.text.Label(str(text),
                 font_name=font,
                 font_size=font_size,
                 color=font_color,
@@ -220,7 +224,7 @@ class TextInput(Widget):
                 anchor_x="left", anchor_y="center",
                 width=self.size[0],height=self.size[1]
                 )
-        self._default = pyglet.text.Label(default,
+        self._default = pyglet.text.Label(str(default),
                 font_name=font,
                 font_size=font_size,
                 color=font_color_default,
@@ -231,6 +235,15 @@ class TextInput(Widget):
                 )
         self.cursor_pos = 0
         self.focussed = False
+        
+        if getattr(text,"_dynamic",False):
+            def f():
+                self.text = str(text)
+            self.peng.i18n.addAction("setlang",f)
+        if getattr(default,"_dynamic",False):
+            def f():
+                self.default = str(default)
+            self.peng.i18n.addAction("setlang",f)
         
         self.peng.registerEventHandler("on_text",self.on_text)
         self.peng.registerEventHandler("on_text_motion",self.on_text_motion)
@@ -417,5 +430,3 @@ class TextInput(Widget):
     @default.setter
     def default(self,default):
         self._default.text = default
-
-

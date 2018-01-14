@@ -30,6 +30,8 @@ from pyglet.gl import *
 # Imports peng3d (obvious)
 import peng3d
 
+langs=["en","de","__"]
+
 def createGUI():
     # Adds a Resource Category for later use
     # Required to store Images for use in ImageButton, ImageWidgetLayer etc.
@@ -47,9 +49,9 @@ def createGUI():
     ##### Basic Dialog
     sm_basic = peng3d.gui.DialogSubMenu("test_dialog",m_main,peng.window,peng,)
     sm_basic.setBackground([242,241,240])
-    sm_basic.addAction("click_ok",print,"OK")
-    sm_basic.addAction("enter",print,"Enter")
-    sm_basic.addAction("exit",print,"Exit")
+    sm_basic.addAction("click_ok",print,tl("i18n:common.ok"))
+    sm_basic.addAction("enter",print,tl("i18n:common.enter"))
+    sm_basic.addAction("exit",print,tl("i18n:common.exit"))
     
     m_main.addSubMenu(sm_basic)
     
@@ -57,7 +59,7 @@ def createGUI():
     ss_btn_basic = peng3d.gui.Button("btn_dialog",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+bh*1.2),
                             size=[200,50],
-                            label="Dialog",
+                            label=tl("i18n:gui_menus.basic.label"),
                             borderstyle="oldshadow",
         )
     ss_btn_basic.addAction("click",sm_basic.activate)
@@ -67,10 +69,10 @@ def createGUI():
     ##### Confirm Dialog
     sm_confirm = peng3d.gui.ConfirmSubMenu("test_confirm",m_main,peng.window,peng,)
     sm_confirm.setBackground([242,241,240])
-    sm_confirm.addAction("confirm",print,"Confirmed")
-    sm_confirm.addAction("cancel",print,"Cancelled")
-    sm_confirm.addAction("enter",print,"Enter")
-    sm_confirm.addAction("exit",print,"Exit")
+    sm_confirm.addAction("confirm",print,tl("i18n:common.confirmed"))
+    sm_confirm.addAction("cancel",print,tl("i18n:common.cancelled"))
+    sm_confirm.addAction("enter",print,tl("i18n:common.enter"))
+    sm_confirm.addAction("exit",print,tl("i18n:common.exit"))
     
     m_main.addSubMenu(sm_confirm)
     
@@ -78,7 +80,7 @@ def createGUI():
     ss_btn_confirm = peng3d.gui.Button("btn_confirm",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.),
                             size=[200,50],
-                            label="ConfirmDialog",
+                            label=tl("i18n:gui_menus.confirm.label"),
                             borderstyle="oldshadow",
         )
     ss_btn_confirm.addAction("click",sm_confirm.activate)
@@ -89,8 +91,8 @@ def createGUI():
     sm_text = peng3d.gui.TextSubMenu("test_text",m_main,peng.window,peng)
     sm_text.timeout=5
     sm_text.setBackground([242,241,240])
-    sm_text.addAction("enter",print,"Enter")
-    sm_text.addAction("exit",print,"Exit")
+    sm_text.addAction("enter",print,tl("i18n:common.enter"))
+    sm_text.addAction("exit",print,tl("i18n:common.exit"))
     
     m_main.addSubMenu(sm_text)
     
@@ -98,7 +100,7 @@ def createGUI():
     ss_btn_text = peng3d.gui.Button("btn_text",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-bh*1.2),
                             size=[200,50],
-                            label="TextDialog",
+                            label=tl("i18n:gui_menus.text.label"),
                             borderstyle="oldshadow",
         )
     ss_btn_text.addAction("click",sm_text.activate)
@@ -106,20 +108,20 @@ def createGUI():
     s_start.addWidget(ss_btn_text)
     
     ##### Progress Dialog
-    sm_progress = peng3d.gui.ProgressSubMenu("test_progress",m_main,peng.window,peng)
+    sm_progress = peng3d.gui.ProgressSubMenu("test_progress",m_main,peng.window,peng,label_progressbar=tl("i18n:gui_menus.progress.plabel"))
     sm_progress.setBackground([242,241,240])
-    sm_progress.addAction("enter",print,"Enter")
-    sm_progress.addAction("exit",print,"Exit")
+    sm_progress.addAction("enter",print,tl("i18n:common.enter"))
+    sm_progress.addAction("exit",print,tl("i18n:common.exit"))
     sm_progress.addAction("enter",setattr,sm_progress,"progress_n",0)
     sm_progress.auto_exit = True
     
     m_main.addSubMenu(sm_progress)
     
-    # Trigger Text Dialog
+    # Trigger Progress Dialog
     ss_btn_progress = peng3d.gui.Button("btn_progress",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-bh*2.4),
                             size=[200,50],
-                            label="ProgressDialog",
+                            label=tl("i18n:gui_menus.progress.label"),
                             borderstyle="oldshadow",
         )
     ss_btn_progress.addAction("click",sm_progress.activate)
@@ -141,11 +143,21 @@ def main(args):
     
     # Create Peng instance
     peng = peng3d.Peng()
+    
+    global t,tl
+    t,tl = peng.t,peng.tl
+    
     # Create Window with caption
-    peng.createWindow(caption="Peng3d Example",resizable=True,vsync=True)
+    peng.createWindow(caption_t="i18n:common.window.caption",resizable=True,vsync=True)
     # Create main GUI Menu and register it immediately
     m_main = peng3d.GUIMenu("main",peng.window,peng)
     peng.window.addMenu(m_main)
+    
+    def test_handler(symbol,modifiers,release):
+        if release:
+            return
+        peng.i18n.setLang(langs[(langs.index(peng.i18n.lang)+1)%len(langs)])
+    peng.keybinds.add("f3","testpy:handler.test",test_handler)
     
     # Actually creates the GUI
     # In a separate function for clarity and readability

@@ -239,7 +239,7 @@ def main(args):
     global peng,esc_toggle
     # Peng engine instance creation and creating the window
     peng = peng3d.Peng()
-    peng.createWindow(caption="Peng3d GUI Test Project",resizable=True,vsync=True)
+    peng.createWindow(caption_t="i18n:gui_basic.caption",resizable=True,vsync=True)
     #peng.window.toggle_exclusivity()
     # Keybinds
     def esc_toggle(symbol,modifiers,release):

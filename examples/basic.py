@@ -38,7 +38,11 @@ COLORS  = [255,0,0, 0,255,0, 0,0,255, 255,255,255]
 def main(args):
     # Peng engine instance creation and creating the window
     peng = peng3d.Peng()
-    peng.createWindow(caption="Peng3d Test Project",resizable=True,vsync=True)
+    
+    global t,tl
+    t,tl = peng.t,peng.tl
+    
+    peng.createWindow(caption_t="i18n:basic.caption",resizable=True,vsync=True)
     peng.window.addMenu(peng3d.Menu("main",peng.window,peng))
     peng.window.toggle_exclusivity()
     # Keybinds

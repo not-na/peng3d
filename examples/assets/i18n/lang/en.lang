@@ -1,0 +1,38 @@
+# English translation file
+meta.lang=de
+meta.name.native=English
+meta.name.en=English
+meta.name.de=Englisch
+
+common.enter=Enter
+common.exit=Exit
+common.window.caption=Peng3d Example
+common.back=Back
+common.continue=Continue
+common.confirm=Confirm
+common.confirmed=Confirmed
+common.cancel=Cancel
+common.cancelled=Cancelled
+common.ok=OK
+
+basic.caption=Peng3d Test Project
+
+gui_adv.trigger.label=AdvProg Dialog
+gui_adv.wraparound=Wraparound for category %s
+gui_adv.progress.label={percent:.1f}%
+
+gui_basic.caption=Peng3d GUI Test Project
+gui_basic.play.label=Play
+gui_basic.options.label=Options
+gui_basic.test.label=Test
+gui_basic.input.default=Default
+gui_basic.input.text=0123456789
+
+gui_menus.basic.label=Dialog
+gui_menus.confirm.label=ConfirmDialog
+gui_menus.text.label=TextDialog
+gui_menus.progress.label=ProgressDialog
+gui_menus.progress.plabel={percent}%
+
+i18n.change.label=Change Language
+i18n.caption=Peng3d Translation Example
