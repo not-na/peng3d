@@ -48,7 +48,7 @@ import bidict
 
 if not hasattr(bidict,"OrderedBidict"):
     bidict.OrderedBidict = bidict.orderedbidict
-    warnings.warn("Support for bidict<0.14.0 will be dropped in a future version",warnings.DeprecationWarning)
+    warnings.warn("Support for bidict<0.14.0 will be dropped in a future version",DeprecationWarning)
 
 
 # These imports are here for convenience
