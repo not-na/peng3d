@@ -82,7 +82,7 @@ class TranslationManager(ActionDispatcher):
         
         if domain not in self.cache[lang]:
             self.loadDomain(domain,lang)
-        if name not in self.cache[lang][domain]:
+        if lang not in self.cache or domain not in self.cache[lang] or name not in self.cache[lang][domain]:
             return key # would just display the key to the user, good enough to be understood
         return self.cache[lang][domain][name]
     t = translate
