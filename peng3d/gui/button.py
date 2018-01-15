@@ -295,7 +295,8 @@ class Button(Widget):
         return self._label.text
     @label.setter
     def label(self,label):
-        self._label.text = label
+        # TODO: make this work with changing languages if previous label was not dynamic
+        self._label.text = str(label)
     
     def delete(self):
         self._label.delete()

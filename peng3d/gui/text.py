@@ -130,7 +130,7 @@ class Label(Widget):
         return self._label.text
     @label.setter
     def label(self,label):
-        self._label.text = label
+        self._label.text = str(label)
 
 
 class TextInputBackground(ButtonBackground):
@@ -408,6 +408,7 @@ class TextInput(Widget):
         return self._text.text
     @text.setter
     def text(self,text):
+        text = str(text)
         otext = self._text.text
         self._text.text = text
         self._text._update()
@@ -429,4 +430,4 @@ class TextInput(Widget):
         return self._default.text
     @default.setter
     def default(self,default):
-        self._default.text = default
+        self._default.text = str(default)
