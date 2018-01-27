@@ -37,6 +37,9 @@ def _get_script_home():
     elif frozen == 'macosx_app':
         # py2app
         return os.environ['RESOURCEPATH']
+    elif frozen:
+        # pyinstaller
+        return sys._MEIPASS
     else:
         main = sys.modules['__main__']
         if hasattr(main, '__file__'):
