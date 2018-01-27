@@ -21,3 +21,4 @@ i18n.caption=Peng3d Übersetzungsbeispiel
 gui_adv.progress.label={percent:.2f} Prozent
 
 gui_menus.progress.plabel={percent} Prozent
+gui_menus.basic.label=Noch eine andere Länge

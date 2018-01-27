@@ -247,10 +247,10 @@ class Button(Widget):
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  border=[4,4], borderstyle="flat",
-                 label="Button"):
+                 label="Button",min_size=None):
         if bg is None:
             bg = ButtonBackground(self,border,borderstyle)
-        super(Button,self).__init__(name,submenu,window,peng,pos,size,bg)
+        super(Button,self).__init__(name,submenu,window,peng,pos,size,bg,min_size)
         self._label = pyglet.text.Label(str(label),
                 font_name="Arial",
                 font_size=LABEL_FONT_SIZE,
@@ -264,6 +264,7 @@ class Button(Widget):
             def f():
                 self.label = str(label)
             self.peng.i18n.addAction("setlang",f)
+        self.peng.i18n.addAction("setlang",self.redraw) # for dynamic size
         self.redraw()
         
         # Redraws the button every 2 seconds to prevent glitched graphics
@@ -297,6 +298,12 @@ class Button(Widget):
     def label(self,label):
         # TODO: make this work with changing languages if previous label was not dynamic
         self._label.text = str(label)
+        self.redraw() # necessary for size/pos that depends on label size
+    
+    def getContentSize(self):
+        l = [self._label.content_width,self._label.content_height]
+        b = self.bg.border # TODO: make this work with borderless backgrounds
+        return [l[0]+b[0]*2,l[1]+b[1]*2]
     
     def delete(self):
         self._label.delete()

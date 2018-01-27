@@ -206,8 +206,8 @@ class BasicWidget(ActionDispatcher):
         ox,oy = self.submenu.pos
         r = r[0]+ox,r[1]+oy
         
-        if isinstance(self.submenu,ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
-            r = r[0],r[1]+self.submenu.offset_y
+        #if isinstance(self.submenu,ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
+        #    r = r[0],r[1]+self.submenu.offset_y
         return _WatchingList(r,self._wlredraw_pos)
     @pos.setter
     def pos(self,value):
@@ -227,6 +227,13 @@ class BasicWidget(ActionDispatcher):
         else:
             raise TypeError("Invalid size type")
         
+        s = s[:]
+        
+        if s[0]==-1:
+            s[0]=self.getMinSize()[0]
+        if s[1]==-1:
+            s[1]=self.getMinSize()[1]
+    
         # Prevents crashes with negative size
         s = [max(s[0],0),max(s[1],0)]
         return _WatchingList(s,self._wlredraw_size)
@@ -288,6 +295,8 @@ class BasicWidget(ActionDispatcher):
         else:
             return "idle"
     
+    def getMinSize(self):
+        raise NotImplementedError("%s does not support perfect-size widgets")
     def draw(self):
         """
         Draws all vertex lists associated with this widget.
@@ -420,11 +429,13 @@ class Widget(BasicWidget):
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
-                 bg=None
+                 bg=None,
+                 min_size=None,
                 ):
         if bg is None:
             bg = EmptyBackground(self)
         self.bg = bg
+        self.min_size = min_size
         super(Widget,self).__init__(name,submenu,window,peng,pos,size)
     def setBackground(self,bg):
         """
@@ -434,6 +445,13 @@ class Widget(BasicWidget):
         """
         self.bg = bg
         self.redraw()
+    
+    def getMinSize(self):
+        c = self.getContentSize()
+        m = self.min_size if self.min_size is not None else [0,0]
+        return [max(c[0],m[0]),max(c[1],m[1])]
+    def getContentSize(self):
+        return [0,0]
     
     def on_redraw(self):
         """

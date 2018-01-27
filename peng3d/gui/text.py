@@ -200,6 +200,7 @@ class TextInput(Widget):
                  font_color_default=[62,67,73,200],
                  allow_overflow=False,
                  allow_copypaste=True,
+                 min_size=None,
                  ):
         
         if allow_copypaste == "force" and not HAVE_PYPERCLIP:
@@ -207,7 +208,7 @@ class TextInput(Widget):
         
         if bg is None:
             bg = TextInputBackground(self,border,borderstyle)
-        super(TextInput,self).__init__(name,submenu,window,peng,pos,size,bg)
+        super(TextInput,self).__init__(name,submenu,window,peng,pos,size,bg,min_size)
         
         self.cursor_pos = 0
         self.focussed = False
@@ -244,6 +245,8 @@ class TextInput(Widget):
             def f():
                 self.default = str(default)
             self.peng.i18n.addAction("setlang",f)
+        
+        self.peng.i18n.addAction("setlang",self.redraw) # for dynamic size
         
         self.peng.registerEventHandler("on_text",self.on_text)
         self.peng.registerEventHandler("on_text_motion",self.on_text_motion)
@@ -421,6 +424,12 @@ class TextInput(Widget):
             self._text.text=otext
             self._text._update()
         self.doAction("textchange")
+        self.redraw() # necessary for size/pos that depends on label size
+
+    def getContentSize(self):
+        l = [max(self._text.content_width,self._default.content_width),max(self._text.content_height,self._default.content_height)]
+        b = self.bg.border # TODO: make this work with borderless backgrounds
+        return [l[0]+b[0]*2,l[1]+b[1]*2]
     
     @property
     def default(self):

@@ -58,7 +58,8 @@ def createGUI():
     # Trigger Basic Dialog
     ss_btn_basic = peng3d.gui.Button("btn_dialog",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.+bh*1.2),
-                            size=[200,50],
+                            size=[-1,50],
+                            min_size=[200,50],
                             label=tl("i18n:gui_menus.basic.label"),
                             borderstyle="oldshadow",
         )
@@ -79,7 +80,8 @@ def createGUI():
     # Trigger Confirm Dialog
     ss_btn_confirm = peng3d.gui.Button("btn_confirm",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.),
-                            size=[200,50],
+                            size=[-1,50],
+                            min_size=[200,50],
                             label=tl("i18n:gui_menus.confirm.label"),
                             borderstyle="oldshadow",
         )
@@ -99,7 +101,8 @@ def createGUI():
     # Trigger Text Dialog
     ss_btn_text = peng3d.gui.Button("btn_text",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-bh*1.2),
-                            size=[200,50],
+                            size=[-1,50],
+                            min_size=[200,50],
                             label=tl("i18n:gui_menus.text.label"),
                             borderstyle="oldshadow",
         )
@@ -120,7 +123,8 @@ def createGUI():
     # Trigger Progress Dialog
     ss_btn_progress = peng3d.gui.Button("btn_progress",s_start,peng.window,peng,
                             pos=lambda sw,sh, bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.-bh*2.4),
-                            size=[200,50],
+                            size=[-1,50],
+                            min_size=[200,50],
                             label=tl("i18n:gui_menus.progress.label"),
                             borderstyle="oldshadow",
         )
