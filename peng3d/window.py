@@ -35,6 +35,7 @@ from pyglet.window import key
 
 from . import config, camera
 
+ICON_SIZES = [16,24,32,48,64,128,256,512]
 
 class PengWindow(pyglet.window.Window):
     """
@@ -82,6 +83,12 @@ class PengWindow(pyglet.window.Window):
         
         # Ensures that default values are supplied
         #self.cleanConfig()
+        
+        # Sets min/max window size, if specified
+        if self.cfg["graphics.min_size"] is not None:
+            self.set_minimum_size(*self.cfg["graphics.min_size"])
+        if self.cfg["graphics.max_size"] is not None:
+            self.set_maximum_size(*self.cfg["graphics.max_size"])
         
         # Sets up basic OpenGL state
         glClearColor(*self.cfg["graphics.clearColor"])
@@ -216,6 +223,26 @@ class PengWindow(pyglet.window.Window):
         #if self.activeMenu is None:
         #    self.changeMenu(menu.name)
         # currently disabled because of a bug with adding layers
+    
+    def setIcons(self,icons):
+        if isinstance(icons,list) or isinstance(icons,tuple):
+            # should be a list of resource names
+            rlist = icons
+        else:
+            # We were given a string, need to expand it first
+            rlist = []
+            for isize in ICON_SIZES:
+                rname = icons.format(size=isize)
+                if self.peng.rsrcMgr.resourceExists(rname,".png"):
+                    # Resource exists, add it to list
+                    rlist.append(rname)
+        
+        ilist = []
+        for rname in rlist:
+            ilist.append(pyglet.image.load(self.peng.rsrcMgr.resourceNameToPath(rname,".png")))
+        
+        if len(ilist)!=0:
+            self.set_icon(*ilist)
     
     # Event handlers
     def on_draw(self):

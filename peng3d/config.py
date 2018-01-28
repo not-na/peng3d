@@ -119,6 +119,8 @@ DEFAULT_CONFIG = {
     "graphics.fieldofview":65.0,
     "graphics.nearclip":0.1,
     "graphics.farclip":10000, # It's over 9000!
+    "graphics.min_size":None,
+    "graphics.max_size":None,
     "graphics.stencil.enable":False,
     "graphics.stencil.bits":8,
     "graphics.fogSettings":Config({},defaults=CFG_FOG_DEFAULT),
