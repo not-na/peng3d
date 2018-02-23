@@ -150,7 +150,7 @@ DEFAULT_CONFIG = {
     "debug.events.dump":False,
     "debug.events.logerr":False,
     "debug.events.register":False,
-    "debug.events.dumpfile":"events.txt",
+    "debug.events.dumpfile":"",#"events.txt",
     
     # rsrc.*
     # Resource config

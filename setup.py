@@ -25,6 +25,9 @@
 # Distribution command:
 # sudo python setup.py install sdist bdist register upload
 
+# Test command:
+# tox -- --x-display=$DISPLAY -v -m "'not graphical'"
+
 #import peng3d.version as ver
 
 import imp
