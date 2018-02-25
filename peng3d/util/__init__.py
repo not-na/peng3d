@@ -51,12 +51,16 @@ class WatchingList(list):
     
     This class is used in :py:class:`peng3d.gui.widgets.BasicWidget()` to allow for modifying single coordinates of the pos and size properties.
     """
-    def __init__(self,l,callback=lambda:None):
-        self.callback = weakref.WeakMethod(callback)
+    def __init__(self,l,callback=None):
+        if callback is not None:
+            self.callback = weakref.WeakMethod(callback)
+        else:
+            self.callback = None
         super(WatchingList,self).__init__(l)
     def __setitem__(self,*args):
         super(WatchingList,self).__setitem__(*args)
-        c = self.callback()(self)
+        if self.callback is not None:
+            c = self.callback()(self)
 
 def register_pyglet_handler(peng,func,event,raiseErrors=False):
     peng.addEventListener("pyglet:%s"%event,(lambda data:func(*data["args"])),raiseErrors)
