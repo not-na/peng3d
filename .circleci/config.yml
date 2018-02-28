@@ -34,13 +34,9 @@ jobs:
         - v1-dep-master-
         # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
         - v1-dep-
-    # This is based on your 1.0 configuration file or project settings
     - run: pip install tox
-    # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
-    # You can remove the conditional and simply install the requirements file you use
-    - run: if [ -e requirements.txt ]; then pip install -r requirements.txt; else pip install -r requirements.pip; fi
+    - run: pip install -r requirements.txt
     - run: python setup.py install
-    - run: pip install tox
     # Save dependency cache
     - save_cache:
         key: v1-dep-{{ .Branch }}-{{ epoch }}
@@ -55,9 +51,7 @@ jobs:
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
     # This is based on your 1.0 configuration file or project settings
-    - run:
-      name: run tests
-      command: tox -- --junitxml=test-reports/junit.xml --x-display=$DISPLAY -v -m "'not graphical'"
+    - run: tox -- --junitxml=test-reports/junit.xml --x-display=$DISPLAY -v -m "'not graphical'"
     # Teardown
     - store_test_results:
       path: test-reports
