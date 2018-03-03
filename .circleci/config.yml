@@ -1,6 +1,13 @@
 version: 2
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test-3.6
+      - test-3.5
+      - test-2.7
 jobs:
-  build:
+  test-3.6: &test-template
     working_directory: ~/not-na/peng3d
     parallelism: 1
     shell: /bin/bash --login
@@ -13,16 +20,12 @@ jobs:
     # To see the list of pre-built images that CircleCI provides for most common languages see
     # https://circleci.com/docs/2.0/circleci-images/
     docker:
-      - image: circleci/python:3.6.3
+      - image: circleci/python:3.6
     steps:
       # Machine Setup
       #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
       # The following `checkout` command checks out your code to your working directory. In 1.0 we did this implicitly. In 2.0 you can choose where in the course of a job your code should be checked out.
       - checkout
-      # This is based on your 1.0 configuration file or project settings
-      - run:
-          working_directory: ~/not-na/peng3d
-          command: pyenv global 2.7.12 3.5.3 3.6.3
       # Dependencies
       #   This would typically go in either a build or a build-and-test job when using workflows
       # Restore the dependency cache
@@ -34,7 +37,6 @@ jobs:
             - v1-dep-master-
               # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
             - v1-dep-
-      - run: pip install tox
       - run: pip install -r requirements.txt
       - run: python setup.py install
       # Save dependency cache
@@ -52,3 +54,11 @@ jobs:
       #   This would typically be a build job when using workflows, possibly combined with build
       # This is based on your 1.0 configuration file or project settings
       - run: tox -- --junitxml=test-reports/junit.xml --x-display=$DISPLAY -v -m "'not graphical'"
+  test-3.5:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.5
+  test-2.7:
+    <<: *test-template
+    docker:
+      - image: circleci/python:2.7
