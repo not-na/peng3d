@@ -163,6 +163,25 @@ signal that either the manager itself was modified or a resource was changed.
    
    Additional parameters are ``name`` set to the name of the model.
 
+.. _events-i18n:
+
+``peng3d:i18n.*`` Events Category
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. seealso::
+   
+   See :py:class:`~peng3d.i18n.TranslationManager()` for more information about the translation system.
+
+.. peng3d:event:: peng3d.i18n.set_lang
+   
+   Sent whenever the default language is set.
+   
+   Note that this event is sent regardless of whether or not the language actually changed.
+   
+   Additional parameters are ``i18n``\ , set to the translation manager, and ``lang``
+   set to the new language.
+
+
 ``peng3d:keybind.*`` Events Category
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

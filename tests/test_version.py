@@ -28,7 +28,7 @@ import re
 
 import peng3d
 
-VERSION_PATTERN = r"[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{0,2}[a-z][0-9]{1,2}"
+VERSION_PATTERN = r"[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{0,2}"
 
 RELEASE_PATTERN = r"[0-9]{1,2}\.[0-9]{1,2}\.[0-9]{0,2}"
 

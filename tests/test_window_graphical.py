@@ -47,6 +47,7 @@ def test_question_skip(event_loop):
     event_loop.ask_question('Please press S to skip the rest of this test.')
     pytest.fail('You should have pressed S')
 
+@pytest.mark.skip(reason="Internal Pyglet Tests")
 @pytest.mark.graphical
 def test_window_exclusivity(event_loop):
     event_loop.create_window()

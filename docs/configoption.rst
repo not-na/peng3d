@@ -241,6 +241,27 @@ Resource Options
    
    By default set to 1024.
 
+.. _cfg-i18n:
+
+Translation Options
+-------------------
+
+.. confval:: i18n.enable
+   
+   Enables or Disables the i18n module.
+   
+   By default enabled.
+
+.. confval:: i18n.lang
+   
+   Determines the default language selected upon startup.
+   
+   Note that setting this config option after creating the first window will have
+   no effect. Use :py:meth:`~peng3d.i18n.TranslationManager.setLang()` instead.
+   
+   Currently defaults to ``en``\ , but may be changed to operating system language
+   in the future.
+
 Event Options
 -------------
 

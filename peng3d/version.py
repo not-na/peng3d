@@ -24,11 +24,10 @@
 
 __all__ = ["VERSION","RELEASE"]
 
-VERSION = "1.9.0a1"
+VERSION = "1.10.0"
 """
-Full version number of format ``MAJOR.MINOR.BUGFIX(a|b|pre)SUBRELEASE`` where major is increased only on very major feature changes.
+Full version number of format ``MAJOR.MINOR.BUGFIX`` where major is increased only on very major feature changes.
 Minor is changed if a new feature is introduced or an API change is made, while bugfix only changes if an important fix for a bug needs to be provided before the next release.
-Either a, b, or pre follows depending on the type of release, e.g. a for alpha, b for beta and pre for prereleases.
 
 Used to display the version in the title of the documentation.
 
@@ -38,9 +37,9 @@ Used to display the version in the title of the documentation.
 
 """
 
-RELEASE = "1.9.0"
+RELEASE = "1.10.0"
 """
-Same as :py:data:`VERSION` but without the subrelease.
+Currently the same as :py:data:`VERSION`\ .
 
 Used to display the version on the top-right of the documentation.
 """

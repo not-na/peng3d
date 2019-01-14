@@ -31,7 +31,32 @@ import re
 
 from .util import ActionDispatcher
 
+# TODO: add test cases for translations
 class TranslationManager(ActionDispatcher):
+    """
+    Manages sets of translation files in multiple languages.
+    
+    This Translation System uses language codes to identify languages, there is
+    no requirement to follow a specific standard, but it is recommended to use
+    simple 2-digit codes like ``en`` and ``de``\ , adding an underscore to
+    define sub-languages like ``en_gb`` and ``en_us``\ .
+    
+    Whenever a new translation file is needed, it will be parsed and then cached.
+    This speeds up access times and also practically eliminates load times when
+    switching languages.
+    
+    Several events are sent by this class, see :ref:`events-i18n`\ .
+    
+    Most of these events are also sent as actions, these actions are described
+    in the methods that cause them.
+    
+    There are also severale config options that determine the behaviour of this class.
+    See :ref:`cfg-i18n` for more information.
+    
+    
+    This Manager requires the :py:class:`~peng3d.resource.ResourceManager()` to
+    be already initialized.
+    """
     def __init__(self,peng):
         if not peng.cfg["rsrc.enable"]:
             raise RuntimeError("ResourceManager needs to be enabled to use Translations")
@@ -48,6 +73,25 @@ class TranslationManager(ActionDispatcher):
         self.setLang(self.peng.cfg["i18n.lang"])
     
     def setLang(self,lang):
+        """
+        Sets the default language for all domains.
+        
+        For recommendations regarding the format of the language code, see
+        :py:class:`TranslationManager`\ .
+        
+        Note that the ``lang`` parameter of both :py:meth:`translate()` and
+        :py:meth:`translate_lazy()` will override this setting.
+        
+        Also note that the code won't be checked for existence or plausibility.
+        This may cause the fallback strings to be displayed instead if the language
+        does not exist.
+        
+        Calling this method will cause the ``setlang`` action and the
+        :peng3d:event`peng3d:i18n.set_lang` event to be triggered. Note that both
+        action and event will be triggered even if the language did not actually change.
+        
+        This method also automatically updates the :confval:`i18n.lang` config value.
+        """
         self.lang = lang
         self.peng.cfg["i18n.lang"] = lang
         
@@ -58,6 +102,17 @@ class TranslationManager(ActionDispatcher):
         self.peng.sendEvent("peng3d:i18n.set_lang",{"lang":self.lang,"i18n":self})
     
     def discoverLangs(self,domain="*"):
+        """
+        Generates a list of languages based on files found on disk.
+        
+        The optional ``domain`` argument may specify a domain to use when checking
+        for files. By default, all domains are checked.
+        
+        This internally uses the :py:mod:`glob` built-in module and the
+        :confval:`i18n.lang.format` config option to find suitable filenames.
+        It then applies the regex in :confval:`i18n.discover_regex` to extract the
+        language code.
+        """
         rsrc = self.peng.cfg["i18n.lang.format"].format(domain=domain,lang="*")
         pattern = self.peng.rsrcMgr.resourceNameToPath(rsrc,self.peng.cfg["i18n.lang.ext"])
         files = glob.iglob(pattern)
