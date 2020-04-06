@@ -74,7 +74,7 @@ class Peng(object):
             _pyglet_patched = True
             pyglet_patch.patch_float2int()
     
-    def createWindow(self,cls=None,caption_t=None,*args,**kwargs):
+    def createWindow(self,cls=None,caption_t=None,rsrc_class=resource.ResourceManager, *args,**kwargs):
         """
         createWindow(cls=window.PengWindow, *args, **kwargs)
         
@@ -102,20 +102,23 @@ class Peng(object):
         self.sendEvent("peng3d:window.create.post",{"peng":self,"window":self.window})
         if self.cfg["rsrc.enable"] and self.resourceMgr is None:
             self.sendEvent("peng3d:rsrc.init.pre",{"peng":self,"basepath":self.cfg["rsrc.basepath"]})
-            self.resourceMgr = resource.ResourceManager(self,self.cfg["rsrc.basepath"])
+            self.resourceMgr = rsrc_class(self,self.cfg["rsrc.basepath"])
             self.rsrcMgr = self.resourceMgr
             self.sendEvent("peng3d:rsrc.init.post",{"peng":self,"rsrcMgr":self.resourceMgr})
-            if self.cfg["i18n.enable"] and self.i18n is None:
-                self.sendEvent("peng3d:i18n.init.pre",{"peng":self})
-                self.i18n = i18n.TranslationManager(self)
-                self._t = self.i18n.t
-                self._tl = self.i18n.tl
-                self.sendEvent("peng3d:i18n.init.post",{"peng":self,"i18n":self.i18n})
-        if caption_t is not None:
-            self.window.set_caption(self.t(caption_t))
-            def f():
+        if self.resourceMgr is not None and self.cfg["i18n.enable"] and self.i18n is None:
+            self.sendEvent("peng3d:i18n.init.pre",{"peng":self})
+            self.i18n = i18n.TranslationManager(self)
+            self._t = self.i18n.t
+            self._tl = self.i18n.tl
+            self.sendEvent("peng3d:i18n.init.post",{"peng":self,"i18n":self.i18n})
+            if caption_t is not None:
                 self.window.set_caption(self.t(caption_t))
-            self.i18n.addAction("setlang",f)
+                def f():
+                    self.window.set_caption(self.t(caption_t))
+                self.i18n.addAction("setlang",f)
+                return self.window
+        if caption_t is not None:
+            raise RuntimeError("Could not set translated window title since either the resource system or i18n has been disabled")
         return self.window
     
     def run(self,evloop=None):

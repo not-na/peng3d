@@ -59,6 +59,8 @@ class Label(Widget):
                  font_color=[62,67,73,255],
                  multiline=False,
                  label_cls=pyglet.text.Label,
+                 anchor_x="center",
+                 anchor_y="center",
                 ):
         super(Label,self).__init__(name,submenu,window,peng,pos,size,bg)
         
@@ -71,7 +73,7 @@ class Label(Widget):
                     # Font is changed later
                     x=0,y=0,
                     batch=self.submenu.batch2d,
-                    anchor_x="center", anchor_y="center",
+                    anchor_x=anchor_x, anchor_y=anchor_y,
                     group=pyglet.graphics.OrderedGroup(1),
                     width=self.size[0],height=self.size[1],
                     multiline=multiline,
@@ -86,7 +88,7 @@ class Label(Widget):
                     color=font_color,
                     x=0,y=0,
                     batch=self.submenu.batch2d,
-                    anchor_x="center", anchor_y="center",
+                    anchor_x=anchor_x, anchor_y=anchor_y,
                     group=pyglet.graphics.OrderedGroup(1),
                     width=self.size[0],height=self.size[1],
                     multiline=multiline,

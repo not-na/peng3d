@@ -104,15 +104,18 @@ class ResourceManager(object):
         This must not mean that the resource is meaningful, it simply signals that the file exists.
         """
         return os.path.exists(self.resourceNameToPath(name,ext))
-    def addCategory(self,name):
+    def addCategory(self,name, size=None):
         """
         Adds a new texture category with the given name.
         
         If the category already exists, it will be overridden.
         """
+        if size is None:
+            size = self.texsize, self.texsize
+
         self.categories[name]={}
         self.categoriesTexCache[name]={}
-        self.categoriesTexBin[name]=pyglet.image.atlas.TextureBin(self.texsize,self.texsize)
+        self.categoriesTexBin[name]=pyglet.image.atlas.TextureBin(size)
         self.peng.sendEvent("peng3d:rsrc.category.add",{"peng":self.peng,"category":name})
     def getTex(self,name,category):
         """
