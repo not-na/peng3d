@@ -36,7 +36,7 @@ _pyglet_patched = sys.version_info.major == 2 or not world._have_pyglet
 
 class Peng(object):
     """
-    This Class should only be instantiated once per application, if you want to use multiple windows, see :py:meth:`createWindow()`\ .
+    This Class should only be instantiated once per application, if you want to use multiple windows, see :py:meth:`createWindow()`\\ .
     
     An Instance of this class represents the whole Engine, with all accompanying state and window/world objects.
     
@@ -78,7 +78,7 @@ class Peng(object):
         """
         createWindow(cls=window.PengWindow, *args, **kwargs)
         
-        Creates a new window using the supplied ``cls``\ .
+        Creates a new window using the supplied ``cls``\\ .
         
         If ``cls`` is not given, :py:class:`peng3d.window.PengWindow()` will be used.
         
@@ -198,7 +198,7 @@ class Peng(object):
         """
         Sends an event with attached data.
         
-        ``event`` should be a string of format ``<namespace>:<category1>.<subcategory2>.<name>``\ .
+        ``event`` should be a string of format ``<namespace>:<category1>.<subcategory2>.<name>``\\ .
         There may be an arbitrary amount of subcategories. Also note that this
         format is not strictly enforced, but rather recommended by convention.
         
@@ -238,12 +238,12 @@ class Peng(object):
         A event may have an arbitrary amount of handlers, though assigning too
         many handlers may slow down event processing.
         
-        For the format of ``event``\ , see :py:meth:`sendEvent()`\ .
+        For the format of ``event``\\ , see :py:meth:`sendEvent()`\\ .
         
-        ``func`` is the handler which will be executed with two arguments, ``event_type`` and ``data``\ , as supplied to :py:meth:`sendEvent()`\ .
+        ``func`` is the handler which will be executed with two arguments, ``event_type`` and ``data``\\ , as supplied to :py:meth:`sendEvent()`\\ .
         
         If ``raiseErrors`` is True, exceptions caused by the handler will be re-raised.
-        Defaults to ``False``\ .
+        Defaults to ``False``\\ .
         """
         if not isinstance(event,str):
             raise TypeError("Event types must always be strings")

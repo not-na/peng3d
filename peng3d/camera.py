@@ -28,7 +28,7 @@ class Camera(object):
     """
     Camera object representing a location to draw from.
     
-    Each :py:class:`Camera` object is bound to a world and has three properties: a name, :py:attr:`pos` and :py:attr:`rot`\ .
+    Each :py:class:`Camera` object is bound to a world and has three properties: a name, :py:attr:`pos` and :py:attr:`rot`\\ .
     
     The name of the camera can be any string and is used to identify the camera and thus should be unique.
     """
@@ -49,7 +49,7 @@ class Camera(object):
         """
         Fake event handler called when this camera is rotated.
         
-        The ``old`` and ``new`` parameters are both rotations and are not equal. Each parameter is a 2-tuple of ``(yaw,pitch)``\ .
+        The ``old`` and ``new`` parameters are both rotations and are not equal. Each parameter is a 2-tuple of ``(yaw,pitch)``\\ .
         """
         pass
     def on_move(self,old,new):
@@ -96,7 +96,7 @@ class Camera(object):
 
 class CameraActorFollower(Camera):
     """
-    Special Camera that follows the specified :py:class:`Actor()`\ .
+    Special Camera that follows the specified :py:class:`Actor()`\\ .
     
     Note that neither the :py:meth:`on_move() <Camera.on_move>` nor the :py:meth:`on_rotate() <Camera.on_rotate>` event handlers are called due to the way the updating works.
     """
@@ -108,7 +108,7 @@ class CameraActorFollower(Camera):
     @property
     def pos(self):
         """
-        This property always equals the value of ``self.actor.pos``\ .
+        This property always equals the value of ``self.actor.pos``\\ .
         
         This property may also be written to.
         """
@@ -120,7 +120,7 @@ class CameraActorFollower(Camera):
     @property
     def rot(self):
         """
-        This property always equals the value of ``self.actor.rot``\ .
+        This property always equals the value of ``self.actor.rot``\\ .
         
         This property may also be written to.
         """

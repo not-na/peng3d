@@ -24,12 +24,14 @@
 
 import pytest
 
+
 @pytest.mark.skip(reason="Internal Pyglet Tests")
 @pytest.mark.graphical
 def test_question_pass(event_loop):
     event_loop.create_window()
     event_loop.create_menu()
     event_loop.ask_question('If you read this text, you should let the test pass.')
+
 
 @pytest.mark.skip(reason="Internal Pyglet Tests")
 @pytest.mark.graphical
@@ -39,6 +41,7 @@ def test_question_fail(event_loop):
     with pytest.raises(pytest.fail.Exception):
         event_loop.ask_question('Please press F to fail this test.')
 
+
 @pytest.mark.skip(reason="Internal Pyglet Tests")
 @pytest.mark.graphical
 def test_question_skip(event_loop):
@@ -46,6 +49,7 @@ def test_question_skip(event_loop):
     event_loop.create_menu()
     event_loop.ask_question('Please press S to skip the rest of this test.')
     pytest.fail('You should have pressed S')
+
 
 @pytest.mark.skip(reason="Internal Pyglet Tests")
 @pytest.mark.graphical

@@ -26,19 +26,23 @@ import peng3d
 
 import pytest
 
-def test_window_eventHandling(window):
+
+@pytest.mark.graphical
+def test_window_eventhandling(window):
     def test_handler(*args,**kwargs):
         assert kwargs == {}
         assert args == (1,2,3)
-    window.registerEventHandler("test_handler1",test_handler)
-    window.handleEvent("test_handler1",[1,2,3])
+    window.registerEventHandler("test_handler1", test_handler)
+    window.handleEvent("test_handler1", [1, 2, 3])
 
+
+@pytest.mark.graphical
 def test_window_menu(window):
     with pytest.raises(KeyError) as excinfo:
-        window.menu
+        _ = window.menu
     menu = peng3d.Menu("test",window,window.peng)
     window.addMenu(menu)
-    assert window.activeMenu == None
+    assert window.activeMenu is None
     window.changeMenu("test")
     assert window.menu is menu
 

@@ -84,7 +84,7 @@ class ActionDispatcher(object):
     
     Actions are simple callbacks that are specific to the instance they are registered with.
     
-    To be able to use actions, a class must be a subclass of :py:class:`ActionDispatcher()`\ .
+    To be able to use actions, a class must be a subclass of :py:class:`ActionDispatcher()`\\ .
     
     Creation of required data structures is handled automatically when the first action is added.
     
@@ -135,7 +135,7 @@ class SmartRegistry(object):
     It is possible to access the registry via the dict-style ``reg[key]`` notation.
     This will return the name of whatever object was used as the key.
     
-    Registering is also possible in a similar manner, like ``reg[name]=id``\ .
+    Registering is also possible in a similar manner, like ``reg[name]=id``\\ .
     ``id`` may be ``None`` to automatically generate one.
     
     This class also supports the ``in`` operator, note that both IDs and names are checked.
@@ -189,7 +189,7 @@ class SmartRegistry(object):
         ID that is not currently known. Note that the ID is not reserved, this means that
         calling this method simultaneously from multiple threads may cause the same ID to be returned twice.
         
-        Additionally, if the ID is greater or equal to ``max_id``\ , an :py:exc:`AssertionError` is raised.
+        Additionally, if the ID is greater or equal to ``max_id``\\ , an :py:exc:`AssertionError` is raised.
         """
         if self.reuse_ids:
             i = self.start_id

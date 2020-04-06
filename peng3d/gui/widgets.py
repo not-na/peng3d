@@ -20,7 +20,8 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
-#  
+#
+import inspect
 
 __all__ = [
     "BasicWidget","Background",
@@ -414,6 +415,11 @@ class BasicWidget(ActionDispatcher):
                     except Exception:
                         #print("Could not delete handler %s, memory leak may occur"%d)
                         import traceback;traceback.print_exc()
+
+        for eframe in self.peng.window._event_stack:
+            for e_t, e_m in eframe.items():
+                if inspect.ismethod(e_m) and dict(inspect.getmembers(e_m))["__self__"] == self:
+                    self.peng.window.remove_handler(e_t, e_m)
     #def __del__(self):
     #    print("del %s"%self.name)
     #    try:

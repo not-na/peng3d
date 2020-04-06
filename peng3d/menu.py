@@ -150,13 +150,13 @@ class Menu(BasicMenu):
     
     def on_enter(self,old):
         """
-        Same as :py:meth:`BasicMenu.on_enter()`\ , but also calls :py:meth:`Layer.on_menu_enter()` on every layer.
+        Same as :py:meth:`BasicMenu.on_enter()`\\ , but also calls :py:meth:`Layer.on_menu_enter()` on every layer.
         """
         for layer in self.layers:
             layer.on_menu_enter(old)
     def on_exit(self,new):
         """
-        Same as :py:meth:`BasicMenu.on_exit()`\ , but also calls :py:meth:`Layer.on_menu_exit()` on every layer.
+        Same as :py:meth:`BasicMenu.on_exit()`\\ , but also calls :py:meth:`Layer.on_menu_exit()` on every layer.
         """
         for layer in self.layers:
             layer.on_menu_exit(new)

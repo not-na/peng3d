@@ -20,7 +20,9 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
-#  
+#
+import inspect
+import weakref
 
 __all__ = [
     "LayeredWidget",
@@ -197,6 +199,29 @@ class BasicWidgetLayer(object):
         for vlist in self._vlists:
             vlist.delete()
         self._vlists = []
+
+        for e_type,e_handlers in self.widget.peng.eventHandlers.items():
+            if True or e_type in eh:
+                to_del = []
+                for e_handler in e_handlers:
+                    # Weird workaround due to implementation details of WeakMethod
+                    if isinstance(e_handler,weakref.ref):
+                        if super(weakref.WeakMethod,e_handler).__call__() is self:
+                            to_del.append(e_handler)
+                    elif e_handler is self:
+                        to_del.append(e_handler)
+                for d in to_del:
+                    try:
+                        #print("Deleting handler %s of type %s"%(d,e_type))
+                        del e_handlers[e_handlers.index(d)]
+                    except Exception:
+                        #print("Could not delete handler %s, memory leak may occur"%d)
+                        import traceback;traceback.print_exc()
+
+        for eframe in self.widget.peng.window._event_stack:
+            for e_t, e_m in eframe.items():
+                if inspect.ismethod(e_m) and dict(inspect.getmembers(e_m))["__self__"] == self:
+                    self.widget.peng.window.remove_handler(e_t, e_m)
 
 class WidgetLayer(BasicWidgetLayer):
     """

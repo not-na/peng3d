@@ -66,7 +66,7 @@ def points2htmlfontsize(points):
 
 class ResourceGroup(pyglet.graphics.Group):
     """
-    Pyglet Group that represents a Resource as returned by the :py:class:`ResourceManager() <peng3d.resource.ResourceManager>`\ .
+    Pyglet Group that represents a Resource as returned by the :py:class:`ResourceManager() <peng3d.resource.ResourceManager>`\\ .
     
     This Group should automatically merge different groups with different resources that are on the same texture atlas.
     """

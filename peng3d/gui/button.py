@@ -127,7 +127,7 @@ class ButtonBackground(Background):
         """
         Overrideable function that generates the colors to be used by various borderstyles.
         
-        Should return a 5-tuple of ``(bg,o,i,s,h)``\ .
+        Should return a 5-tuple of ``(bg,o,i,s,h)``\\ .
         
         ``bg`` is the base color of the background.
         
@@ -153,7 +153,7 @@ class ButtonBackground(Background):
         
         ``name`` is the (string) name of the borderstyle.
         
-        ``func`` will be called with its arguments as ``(bg,o,i,s,h)``\ , see :py:meth:`getColors()` for more information.
+        ``func`` will be called with its arguments as ``(bg,o,i,s,h)``\\ , see :py:meth:`getColors()` for more information.
         """
         self.borderstyles[name]=func
     
@@ -234,14 +234,14 @@ class Button(Widget):
     
     The border given is in pixels from the left/right and top/bottom, respectively.
     
-    The borderstyle may be either ``flat``\ , which has no border at all, 
-    ``gradient``\ , which fades from the inner color to the background color, 
-    ``oldshadow``\ , which uses a simple fake shadow with the light from the top-left corner and
-    ``material``\ , which imitates Google Material Design shadows.
+    The borderstyle may be either ``flat``\\ , which has no border at all,
+    ``gradient``\\ , which fades from the inner color to the background color,
+    ``oldshadow``\\ , which uses a simple fake shadow with the light from the top-left corner and
+    ``material``\\ , which imitates Google Material Design shadows.
     
     Also, the label of the button may only be a single line of text, anything else may produce undocumented behavior.
     
-    If necessary, the font size of the Label may be changed via the global Constant :py:data:`LABEL_FONT_SIZE`\ , changes will only apply to Buttons created after change.
+    If necessary, the font size of the Label may be changed via the global Constant :py:data:`LABEL_FONT_SIZE`\\ , changes will only apply to Buttons created after change.
     The text color used is ``[62,67,73,255]`` in RGBA and the font used is Arial, which should be available on most systems.
     """
     def __init__(self,name,submenu,window,peng,

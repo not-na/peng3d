@@ -30,7 +30,7 @@ try:
     import pyglet
     from pyglet.gl import *
 except ImportError:
-    pass # Probably headless
+    pass  # Probably headless
 
 try:
     import fastjson as json
@@ -89,7 +89,7 @@ class ResourceManager(object):
         
         ``ext`` is the file extension to use, e.g. ``.png`` or similar.
         
-        As an example, the resource name ``peng3d:some.category.foo`` with the extension ``.png`` results in the path ``<basepath>/assets/peng3d/some/category/foo.png``\ .
+        As an example, the resource name ``peng3d:some.category.foo`` with the extension ``.png`` results in the path ``<basepath>/assets/peng3d/some/category/foo.png``\\ .
         
         This resource naming scheme is used by most other methods of this class.
         
@@ -111,12 +111,12 @@ class ResourceManager(object):
         If the category already exists, it will be overridden.
         """
         if size is None:
-            size = self.texsize, self.texsize
+            size = self.texsize
 
         self.categories[name]={}
         self.categoriesTexCache[name]={}
-        self.categoriesTexBin[name]=pyglet.image.atlas.TextureBin(size)
-        self.peng.sendEvent("peng3d:rsrc.category.add",{"peng":self.peng,"category":name})
+        self.categoriesTexBin[name]=pyglet.image.atlas.TextureBin(size, size)
+        self.peng.sendEvent("peng3d:rsrc.category.add", {"peng": self.peng, "category": name})
     def getTex(self,name,category):
         """
         Gets the texture associated with the given name and category.

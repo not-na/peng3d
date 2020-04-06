@@ -42,7 +42,7 @@ class World(object):
     """
     World containing terrain, actors, cameras and views.
     
-    See the docs about :py:class:`Camera()`\ , :py:class:`WorldView()`\ , :py:class:`Actor()` for more information about each class.
+    See the docs about :py:class:`Camera()`\\ , :py:class:`WorldView()`\\ , :py:class:`Actor()` for more information about each class.
     
     This class does not draw anything, see :py:class:`StaticWorld()` for drawing simple terrain.
     """
@@ -61,7 +61,7 @@ class World(object):
         
         Each camera name must be unique, or else only the most recent version will be used. This behavior should not be relied on because some objects may cache objects.
         
-        Additionally, only instances of :py:class:`Camera() <peng3d.camera.Camera>` may be used, everything else raises a :py:exc:`TypeError`\ .
+        Additionally, only instances of :py:class:`Camera() <peng3d.camera.Camera>` may be used, everything else raises a :py:exc:`TypeError`\\ .
         """
         if not isinstance(camera,Camera):
             raise TypeError("camera is not of type Camera!")
@@ -72,7 +72,7 @@ class World(object):
         
         The same restrictions as for cameras apply, e.g. no duplicate names.
         
-        Additionally, only instances of :py:class:`WorldView()` may be used, everything else raises a :py:exc:`TypeError`\ .
+        Additionally, only instances of :py:class:`WorldView()` may be used, everything else raises a :py:exc:`TypeError`\\ .
         """
         if not isinstance(view,WorldView):
             raise TypeError("view is not of type WorldView!")
@@ -87,7 +87,7 @@ class World(object):
     
     def getView(self,name):
         """
-        Returns the view with name ``name``\ .
+        Returns the view with name ``name``\\ .
         
         Raises a :py:exc:`ValueError` if the view does not exist.
         """
@@ -135,15 +135,15 @@ class World(object):
 
 class StaticWorld(World):
     """
-    Subclass of :py:class:`StaticWorld()`\ , allows for semi-static terrain to be rendered.
+    Subclass of :py:class:`StaticWorld()`\\ , allows for semi-static terrain to be rendered.
     
     This class is not suitable for highly complex or user-modifiable terrain.
     
-    ``quads`` is a list of 3d vertices, e.g. a single quad may be ``[-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]``\ , which represents a rectangle of size 2x2 centered around 0,0.
+    ``quads`` is a list of 3d vertices, e.g. a single quad may be ``[-1,-1,-1, 1,-1,-1, 1,-1,1, -1,-1,1]``\\ , which represents a rectangle of size 2x2 centered around 0,0.
     It should also be noted that all quads have to be in a single list.
     
     ``colors`` is a list of RGB Colors in a similar format to ``quads`` but with colors instead. Note that there must be a color for every vertex in the vertex list.
-    Every color is an integer between 0 and 255 using the internal pyglet scheme ``c3B/static``\ .
+    Every color is an integer between 0 and 255 using the internal pyglet scheme ``c3B/static``\\ .
     
     You can modify the terrain via the ``terrain`` attribute, note that it is a pyglet vertex list, and not a python list.
     """
@@ -209,7 +209,7 @@ class WorldView(object):
         """
         Property for getting the currently active camera.
         
-        Always equals ``self.cameras[self.activeCamera]``\ .
+        Always equals ``self.cameras[self.activeCamera]``\\ .
         """
         return self.world.cameras[self.activeCamera]
     
@@ -271,7 +271,7 @@ class WorldViewMouseRotatable(WorldView):
         """
         Keyboard event handler handling only the escape key.
         
-        If an escape key press is detected, mouse exclusivity is toggled via :py:meth:`PengWindow.toggle_exclusivity()`\ .
+        If an escape key press is detected, mouse exclusivity is toggled via :py:meth:`PengWindow.toggle_exclusivity()`\\ .
         """
         if symbol == key.ESCAPE:
             self.world.peng.window.toggle_exclusivity()
@@ -280,7 +280,7 @@ class WorldViewMouseRotatable(WorldView):
         """
         Handles mouse motion and rotates the attached camera accordingly.
         
-        For more information about how to customize mouse movement, see the class documentation here :py:class:`WorldViewMouseRotatable()`\ .
+        For more information about how to customize mouse movement, see the class documentation here :py:class:`WorldViewMouseRotatable()`\\ .
         """
         if not self.world.peng.window.exclusive:
             return

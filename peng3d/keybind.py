@@ -51,7 +51,7 @@ MODNAME2MODIFIER = bidict.OrderedBidict([
 """
 Ordered Bidict that maps between user-friendly names and internal constants.
 
-Note that since this is a bidict, you can query the reverse mapping by accessing :py:attr:`MODNAME2MODIFIER.inv`\ .
+Note that since this is a bidict, you can query the reverse mapping by accessing :py:attr:`MODNAME2MODIFIER.inv`\\ .
 The non-inverse mapping maps from user-friendly name to internal constant.
 
 This mapping is used by the Keybind system to convert the modifier constants to names.
@@ -108,7 +108,7 @@ class KeybindHandler(object):
         """
         Adds a keybind to the internal registry.
         
-        Keybind names should be of the format ``namespace:category.subcategory.name``\ e.g. ``peng3d:actor.player.controls.forward`` for the forward key combo for the player actor.
+        Keybind names should be of the format ``namespace:category.subcategory.name``\\ e.g. ``peng3d:actor.player.controls.forward`` for the forward key combo for the player actor.
         
         :param str keybind: Keybind string, as described above
         :param str kbname: Name of the keybind, may be used to later change the keybinding without re-registering
@@ -177,7 +177,7 @@ class KeybindHandler(object):
         First, all keybind handlers registered via :py:meth:`add` will be handled,
         then the pyglet event :peng3d:pgevent:`on_key_combo` with params ``(combo,symbol,modifiers,release,mod)`` is sent to the :py:class:`Peng()` instance.
         
-        Also sends the events :peng3d:event:`peng3d:keybind.combo`\, :peng3d:event:`peng3d:keybind.combo.press` and :peng3d:event`peng3d:keybind.combo.release`\ .
+        Also sends the events :peng3d:event:`peng3d:keybind.combo`\\, :peng3d:event:`peng3d:keybind.combo.press` and :peng3d:event`peng3d:keybind.combo.release`\\ .
         
         :params str combo: Key combination pressed
         :params int symbol: Key pressed, passed from the same argument within pyglet

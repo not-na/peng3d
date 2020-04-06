@@ -173,9 +173,9 @@ class Material(object):
         """
         Read-only property storing the OpenGL constant representing the target of the texture of this material.
         
-        Commonly :py:const:`GL_TEXTURE_2D` or :py:const:`GL_TEXTURE_3D`\ .
+        Commonly :py:const:`GL_TEXTURE_2D` or :py:const:`GL_TEXTURE_3D`\\ .
         
-        Used in texture manipulation and activation, e.g. ``glEnable(material.target)``\ .
+        Used in texture manipulation and activation, e.g. ``glEnable(material.target)``\\ .
         """
         return self.rsrcMgr.getTex(self.texname,self.texcat)[0]
     @property
@@ -185,7 +185,7 @@ class Material(object):
         
         Used to manipulate the texture behind this material.
         
-        Commonly used in binding the texture: ``glBindTexture(material.target,material.id)``\ .
+        Commonly used in binding the texture: ``glBindTexture(material.target,material.id)``\\ .
         """
         return self.rsrcMgr.getTex(self.texname,self.texcat)[1]
     @property
@@ -193,16 +193,16 @@ class Material(object):
         """
         Read-only property storing the texture coordinates to use when drawing with this texture.
         
-        Should not be used directly, see :py:meth:`transformTexCoords()`\ .
+        Should not be used directly, see :py:meth:`transformTexCoords()`\\ .
         
-        Enables substitution of pyglet :py:class:`pyglet.graphics.Texture` objects with Materials in many places, e.g. in :py:class:`pyglet.graphics.TextureGroup`\ .
+        Enables substitution of pyglet :py:class:`pyglet.graphics.Texture` objects with Materials in many places, e.g. in :py:class:`pyglet.graphics.TextureGroup`\\ .
         """
         return self.rsrcMgr.getTex(self.texname,self.texcat)[2]
     
     @property
     def texdata(self):
         """
-        Read-only property equivalent to a 3-tuple containing :py:attr:`target`\ , :py:attr:`id` and :py:attr:`tex_coords`\ .
+        Read-only property equivalent to a 3-tuple containing :py:attr:`target`\\ , :py:attr:`id` and :py:attr:`tex_coords`\\ .
         
         Should be faster than getting each value directly. Useful if all of these values are needed.
         """
@@ -278,7 +278,7 @@ class Bone(object):
         
         ``data`` is the entity to modify in dictionary form.
         
-        ``rot`` is the rotation of the bone in the format used in :py:func:`calcSphereCoordinates()`\ .
+        ``rot`` is the rotation of the bone in the format used in :py:func:`calcSphereCoordinates()`\\ .
         """
         self.ensureBones(data)
         rot = rot[0]%360,max(-90, min(90, rot[1]))
@@ -353,7 +353,7 @@ class Bone(object):
         glTranslatef(-px,-py,-pz)#offset[0],offset[1],offset[2])
     def unsetRotate(self,data):
         """
-        Unsets the OpenGL state that was set before calling :py:meth:`setRotate()`\ .
+        Unsets the OpenGL state that was set before calling :py:meth:`setRotate()`\\ .
         
         Note that this method may cause various OpenGL errors if called without :py:meth:`setRotate()` having been called.
         """
@@ -390,7 +390,7 @@ class Bone(object):
         """
         Register a vertex Region as a dependent of this bone.
         
-        ``region`` must be an instance of :py:class:`Region`\ .
+        ``region`` must be an instance of :py:class:`Region`\\ .
         """
         self.regions[region.name]=region
 
@@ -422,13 +422,13 @@ class Region(object):
     
     Most regions will use quads as their primitive type, but it is also possible to use triangles, lines and points.
     
-    To use quads as the geometry type, specify either ``quads``\ , ``quad`` or ``GL_QUADS`` as its ``geometry_type``\ .
+    To use quads as the geometry type, specify either ``quads``\\ , ``quad`` or ``GL_QUADS`` as its ``geometry_type``\\ .
     
-    To use triangles as the geometry type, specify either ``tris``\ , ``triangles``\ , ``triangle`` or ``GL_TRIANGLES`` as its ``geometry_type``\ .
+    To use triangles as the geometry type, specify either ``tris``\\ , ``triangles``\\ , ``triangle`` or ``GL_TRIANGLES`` as its ``geometry_type``\\ .
     
-    To use lines as the geometry type, specify either ``lines``\ , ``line`` or ``GL_LINES`` as its ``geometry_type``\ .
+    To use lines as the geometry type, specify either ``lines``\\ , ``line`` or ``GL_LINES`` as its ``geometry_type``\\ .
     
-    To use points as the geometry type, specify either ``points``\ , ``point``\ , ``dots``\, ``dot`` or ``GL_POINTS`` as its ``geometry_type``\ .
+    To use points as the geometry type, specify either ``points``\\ , ``point``\\ , ``dots``\, ``dot`` or ``GL_POINTS`` as its ``geometry_type``\\ .
     
     Note that the number of vertices must be divisible by the number of vertices required per primitive, e.g. 4 for quads, 3 for triangles, 2 for lines and 1 for points.
     
@@ -488,14 +488,14 @@ class Region(object):
         """
         Returns the vertices of this region already transformed and ready-to-use.
         
-        Internally uses :py:meth:`Bone.transformVertices()`\ .
+        Internally uses :py:meth:`Bone.transformVertices()`\\ .
         """
         return self.bone.transformVertices(data,self.vertices,self.dims)
     def getGeometryType(self,data):
         """
         Returns the OpenGL constant representing the type of primitives used by this region.
         
-        May be one of :py:data:`GL_QUADS`\ , :py:data:`GL_TRIANGLES`\ , :py:data:`GL_LINES` or :py:data:`GL_POINTS`\ .
+        May be one of :py:data:`GL_QUADS`\\ , :py:data:`GL_TRIANGLES`\\ , :py:data:`GL_LINES` or :py:data:`GL_POINTS`\\ .
         """
         return self.geometry_type
     def getTexCoords(self,data):
@@ -504,14 +504,14 @@ class Region(object):
         
         Note that it is recommended to check the :py:attr:`enable_tex` flag first.
         
-        Internally uses :py:meth:`Material.transformTexCoords()`\ .
+        Internally uses :py:meth:`Material.transformTexCoords()`\\ .
         """
         return self.material.transformTexCoords(data,self.tex_coords,self.tex_dims)
     def getTexInfo(self,data):
         """
         Returns informations about the texture of this region.
         
-        Internally uses :py:attr:`Material.texdata`\ , exact specification available there.
+        Internally uses :py:attr:`Material.texdata`\\ , exact specification available there.
         """
         return self.material.texdata
 
@@ -580,7 +580,7 @@ class Animation(object):
         """
         Callback that is called to initialize this animation on a specific actor.
         
-        Internally sets the ``_anidata`` key of the given dict ``data``\ .
+        Internally sets the ``_anidata`` key of the given dict ``data``\\ .
         
         ``jumptype`` is either ``jump`` or ``animate`` to define how to switch to this animation.
         """
@@ -779,7 +779,7 @@ class JSONModelGroup(pyglet.graphics.Group):
     This group should always be set during any draw operations for the assigned actor.
     This can either be done by setting it as the group of a vertex list,
     the parent group of a group of a vertex list
-    or manually calling :py:meth:`set_state()` and :py:meth:`unset_state()`\ .
+    or manually calling :py:meth:`set_state()` and :py:meth:`unset_state()`\\ .
     """
     def __init__(self,model,data,obj,parent=None):
         super(JSONModelGroup,self).__init__(parent)
@@ -872,7 +872,7 @@ class Model(object):
     
     A single instance of this class may be used by multiple actors at the same time. See :py:meth:`Actor.setModel()` for more information.
     
-    A test model is available at ``assets/peng3d/model/test.json`` and a demo program using it under ``test_model.py``\ .
+    A test model is available at ``assets/peng3d/model/test.json`` and a demo program using it under ``test_model.py``\\ .
     
     .. todo::
        
@@ -1031,7 +1031,7 @@ class Model(object):
         """
         Called if the actor is removed from the world.
         
-        Can be extended for custom features, currently calls :py:meth:`cleanup()`\ .
+        Can be extended for custom features, currently calls :py:meth:`cleanup()`\\ .
         """
         # Can be extended, but the base class should always be called
         self.cleanup(obj)

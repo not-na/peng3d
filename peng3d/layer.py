@@ -121,7 +121,7 @@ class Layer3D(Layer):
     """
     3D Variant of :py:class:`Layer()` and a subclass of the former.
     
-    This class works the same as :py:class:`Layer2D()`\ , only for 3D drawing instead.
+    This class works the same as :py:class:`Layer2D()`\\ , only for 3D drawing instead.
     This class uses :py:meth:`PengWindow.set3d()` to set the 3D mode.
     
     Also, the correct :py:func:`glTranslatef()` and :py:func:`glRotatef()` are applied to simplify drawing objects.
@@ -143,7 +143,7 @@ class LayerGroup(Layer):
     """
     Layer variant wrapping the supplied pyglet group.
     
-    ``group`` may only be an instance of :py:class:`pyglet.graphics.Group`\ , else a :py:exc:`TypeError` will be raised.
+    ``group`` may only be an instance of :py:class:`pyglet.graphics.Group`\\ , else a :py:exc:`TypeError` will be raised.
     
     Also note that both the :py:meth:`predraw() <Layer.predraw()>` and :py:meth:`postdraw() <Layer.postdraw()>` methods are overwritten by this class.
     
@@ -170,7 +170,7 @@ class LayerGroup(Layer):
 
 class LayerWorld(Layer3D):
     """
-    Subclass of :py:class:`Layer3D()` implementing a 3D Layer showing a specific :py:class:`WorldView`\ .
+    Subclass of :py:class:`Layer3D()` implementing a 3D Layer showing a specific :py:class:`WorldView`\\ .
     
     All arguments passed to the constructor should be self-explanatory.
     
@@ -183,7 +183,7 @@ class LayerWorld(Layer3D):
         self.view = self.world.getView(self.viewname)
     def setView(self,name):
         """
-        Sets the view used to the specified ``name``\ .
+        Sets the view used to the specified ``name``\\ .
         
         The name must be known to the world or else a :py:exc:`ValueError` is raised.
         """
@@ -193,7 +193,7 @@ class LayerWorld(Layer3D):
         self.view = self.world.getView(self.viewname)
     def predraw(self):
         """
-        Sets up the attributes used by :py:class:`Layer3D()` and calls :py:meth:`Layer3D.predraw()`\ .
+        Sets up the attributes used by :py:class:`Layer3D()` and calls :py:meth:`Layer3D.predraw()`\\ .
         """
         self.cam = self.view.cam
         super(LayerWorld,self).predraw()
@@ -209,6 +209,6 @@ class LayerWorld(Layer3D):
         return self.view.on_menu_enter(old)
     def on_menu_exit(self,new):
         """
-        Same as :py:meth:`on_menu_enter()`\ .
+        Same as :py:meth:`on_menu_enter()`\\ .
         """
         return self.view.on_menu_exit(new)

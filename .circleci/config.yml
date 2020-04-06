@@ -3,9 +3,9 @@ workflows:
   version: 2
   test:
     jobs:
+      - test-3.7
       - test-3.6
       - test-3.5
-      - test-2.7
 jobs:
   test-3.6: &test-template
     working_directory: ~/not-na/peng3d
@@ -59,7 +59,7 @@ jobs:
       # Install Xvfb
       - run:
           name: Starting Xvfb
-          command: Xvfb :99 -screen 0 1920x1080x24
+          command: Xvfb :1 -screen 0 1920x1080x24
           background: true
       
       # Test

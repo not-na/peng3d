@@ -38,14 +38,14 @@ class TranslationManager(ActionDispatcher):
     
     This Translation System uses language codes to identify languages, there is
     no requirement to follow a specific standard, but it is recommended to use
-    simple 2-digit codes like ``en`` and ``de``\ , adding an underscore to
-    define sub-languages like ``en_gb`` and ``en_us``\ .
+    simple 2-digit codes like ``en`` and ``de``\\ , adding an underscore to
+    define sub-languages like ``en_gb`` and ``en_us``\\ .
     
     Whenever a new translation file is needed, it will be parsed and then cached.
     This speeds up access times and also practically eliminates load times when
     switching languages.
     
-    Several events are sent by this class, see :ref:`events-i18n`\ .
+    Several events are sent by this class, see :ref:`events-i18n`\\ .
     
     Most of these events are also sent as actions, these actions are described
     in the methods that cause them.
@@ -77,7 +77,7 @@ class TranslationManager(ActionDispatcher):
         Sets the default language for all domains.
         
         For recommendations regarding the format of the language code, see
-        :py:class:`TranslationManager`\ .
+        :py:class:`TranslationManager`\\ .
         
         Note that the ``lang`` parameter of both :py:meth:`translate()` and
         :py:meth:`translate_lazy()` will override this setting.

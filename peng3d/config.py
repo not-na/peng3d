@@ -56,7 +56,7 @@ class Config(object):
     Configuration object imitating a dictionary.
     
     ``config`` can be any dictionary-style object and is used to store the configuration set by the user.
-    This object only needs to implement the ``__getitem__``\ , ``__setitem__`` and ``__contains__`` special methods.
+    This object only needs to implement the ``__getitem__``\\ , ``__setitem__`` and ``__contains__`` special methods.
     
     ``defaults`` can be any dictionary-style object and is only read from in case the ``config`` object does not contain the key.
     Every config object is stackable, e.g. you can pass another :py:class:`Config` object as the ``defaults`` object.
@@ -177,5 +177,5 @@ DEFAULT_CONFIG = {
 """
 Default configuration values.
 
-All default configuration values are stored here, for more information about specific config values, see :doc:`/configoption`\ .
+All default configuration values are stored here, for more information about specific config values, see :doc:`/configoption`\\ .
 """

@@ -8,6 +8,7 @@ peng3d-py2.7/
 peng3d-py3.5/
 peng3d-py3.6/
 peng3d-headless-py3.5/
+peng3d-py/
 
 tests/screenshots/session/*.png
 

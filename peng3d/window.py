@@ -39,7 +39,7 @@ ICON_SIZES = [16,24,32,48,64,128,256,512]
 
 class PengWindow(pyglet.window.Window):
     """
-    Main window class for peng3d and subclass of :py:class:`pyglet.window.Window()`\ .
+    Main window class for peng3d and subclass of :py:class:`pyglet.window.Window()`\\ .
     
     This class should not be instantiated directly, use the :py:meth:`Peng.createWindow()` method.
     """
@@ -73,7 +73,7 @@ class PengWindow(pyglet.window.Window):
         Sets up the OpenGL state.
         
         This method should be called once after the config has been created and before the main loop is started.
-        You should not need to manually call this method, as it is automatically called by :py:meth:`run()`\ .
+        You should not need to manually call this method, as it is automatically called by :py:meth:`run()`\\ .
         
         Repeatedly calling this method has no effects.
         """
@@ -106,7 +106,7 @@ class PengWindow(pyglet.window.Window):
         """
         Sets the fog system up.
         
-        The specific options available are documented under :confval:`graphics.fogSettings`\ .
+        The specific options available are documented under :confval:`graphics.fogSettings`\\ .
         """
         fogcfg = self.cfg["graphics.fogSettings"]
         if not fogcfg["enable"]:
@@ -131,7 +131,7 @@ class PengWindow(pyglet.window.Window):
         """
         Sets the light system up.
         
-        The specific options available are documented under :confval:`graphics.lightSettings`\ .
+        The specific options available are documented under :confval:`graphics.lightSettings`\\ .
         
         Note that this feature is currently not implemented.
         """
@@ -162,7 +162,7 @@ class PengWindow(pyglet.window.Window):
         ########## End quotation marks
         # Various default values are set in this method, this should really be replaced with something more easy to use and robust
         # A possible replacement could be a defaultdict or similiar
-        # Update: now replaced by :py:class:`Config()`\ .
+        # Update: now replaced by :py:class:`Config()`\\ .
         
         # OpenGL configs
         self.cfg["graphics.clearColor"] = self.cfg.get("graphics.clearColor",(0.,0.,0.,1.))
@@ -196,7 +196,7 @@ class PengWindow(pyglet.window.Window):
         
         .. versionchanged:: 1.2a1
            
-           The push/pop handlers have been deprecated in favor of the new :py:meth:`Menu.on_enter() <peng3d.menu.Menu.on_enter>`\ , :py:meth:`Menu.on_exit() <peng3d.menu.Menu.on_exit>`\ , etc. events.
+           The push/pop handlers have been deprecated in favor of the new :py:meth:`Menu.on_enter() <peng3d.menu.Menu.on_enter>`\\ , :py:meth:`Menu.on_exit() <peng3d.menu.Menu.on_exit>`\\ , etc. events.
         """
         if menu not in self.menus:
             raise ValueError("Menu %s does not exist!"%menu)
@@ -258,7 +258,7 @@ class PengWindow(pyglet.window.Window):
         
         This method extends the behavior inherited from :py:meth:`pyglet.window.Window.dispatch_event()` by calling the various :py:meth:`handleEvent()` methods.
         
-        By default, :py:meth:`Peng.handleEvent()`\ , :py:meth:`handleEvent()` and :py:meth:`Menu.handleEvent()` are called in this order to handle events.
+        By default, :py:meth:`Peng.handleEvent()`\\ , :py:meth:`handleEvent()` and :py:meth:`Menu.handleEvent()` are called in this order to handle events.
         
         Note that some events may not be handled by all handlers during early startup.
         """
@@ -309,7 +309,7 @@ class PengWindow(pyglet.window.Window):
         """
         Property for accessing the currently active menu.
         
-        Always equals ``self.menus[self.activeMenu]``\ .
+        Always equals ``self.menus[self.activeMenu]``\\ .
         
         This property is read-only.
         """
@@ -323,7 +323,7 @@ class PengWindow(pyglet.window.Window):
         
         If ``override`` is given, it will be used instead.
         
-        You may also read the current exclusivity state via :py:attr:`exclusive`\ .
+        You may also read the current exclusivity state via :py:attr:`exclusive`\\ .
         """
         if override is not None:
             new = override
@@ -337,7 +337,7 @@ class PengWindow(pyglet.window.Window):
         """
         Configures OpenGL to draw in 2D.
         
-        Note that wireframe mode is always disabled in 2D-Mode, but can be re-enabled by calling ``glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)``\ .
+        Note that wireframe mode is always disabled in 2D-Mode, but can be re-enabled by calling ``glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)``\\ .
         """
         # Light
         
@@ -358,10 +358,10 @@ class PengWindow(pyglet.window.Window):
         """
         Configures OpenGL to draw in 3D.
         
-        This method also applies the correct rotation and translation as set in the supplied camera ``cam``\ .
+        This method also applies the correct rotation and translation as set in the supplied camera ``cam``\\ .
         It is discouraged to use :py:func:`glTranslatef()` or :py:func:`glRotatef()` directly as this may cause visual glitches.
         
-        If you need to configure any of the standard parameters, see the docs about :doc:`/configoption`\ .
+        If you need to configure any of the standard parameters, see the docs about :doc:`/configoption`\\ .
         
         The :confval:`graphics.wireframe` config value can be used to enable a wireframe mode, useful for debugging visual glitches.
         """
