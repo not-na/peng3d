@@ -56,16 +56,10 @@ jobs:
             - ~/.ivy2
             - ~/.bundle
       
-      # Install Xvfb
-      - run:
-          name: Starting Xvfb
-          command: Xvfb :1 -screen 0 1920x1080x24
-          background: true
-      
       # Test
       #   This would typically be a build job when using workflows, possibly combined with build
       # This is based on your 1.0 configuration file or project settings
-      - run: tox -- --junitxml=test-reports/junit.xml --x-display=$DISPLAY -v -m "'not graphical'"
+      - run: xvfb tox -- --junitxml=test-reports/junit.xml -v -m "'not graphical'"
   test-3.5:
     <<: *test-template
     docker:
