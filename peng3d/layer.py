@@ -45,6 +45,8 @@ class Layer(object):
         self.menu = menu
         self.peng = peng
         self.enabled = True
+
+        self.should_redraw = True
     
     # Subclass overrides
     def draw(self):
@@ -72,7 +74,28 @@ class Layer(object):
         Override this method in subclasses to redefine behavior.
         """
         pass
+
+    def on_redraw(self):
+        """
+        Called whenever the Layer should redraw itself.
+
+        Note that this method should not be called manually, instead call :py:meth:`redraw()`\ .
+
+        :return: None
+        """
+        pass
     # End subclass overrides
+
+    def redraw(self):
+        """
+        Call this to redraw the layer.
+
+        Note that the redraw will not happen immediately, rather on the next frame that this
+        layer is rendered. This massively improves performance.
+
+        :return:
+        """
+        self.should_redraw = True
     
     # Event handlers
     
@@ -94,6 +117,11 @@ class Layer(object):
     def _draw(self):
         if not self.enabled:
             return
+
+        if self.should_redraw:
+            self.on_redraw()
+            self.should_redraw = False
+
         self.predraw()
         try:
             self.draw()
@@ -189,7 +217,7 @@ class LayerWorld(Layer3D):
         """
         if name not in self.world.views:
             raise ValueError("Invalid viewname for world!")
-        self.viewname = viewname
+        self.viewname = name
         self.view = self.world.getView(self.viewname)
     def predraw(self):
         """

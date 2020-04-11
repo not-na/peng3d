@@ -247,14 +247,17 @@ class Button(Widget):
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  border=[4,4], borderstyle="flat",
-                 label="Button",min_size=None):
+                 label="Button",min_size=None,
+                 font_size=16, font="Arial",
+                 font_color=[62, 67, 73, 255],
+                 ):
         if bg is None:
             bg = ButtonBackground(self,border,borderstyle)
         super(Button,self).__init__(name,submenu,window,peng,pos,size,bg,min_size)
         self._label = pyglet.text.Label(str(label),
-                font_name="Arial",
-                font_size=LABEL_FONT_SIZE,
-                color=[62,67,73,255],
+                font_name=font,
+                font_size=font_size,
+                color=font_color,
                 x=0,y=0,
                 batch=self.submenu.batch2d,
                 group=pyglet.graphics.OrderedGroup(1),
@@ -395,6 +398,8 @@ class ImageButton(Button):
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  label="Button",
+                 font_size=16, font="Arial",
+                 font_color=[62, 67, 73, 255],
                  bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
                  bg_hover=None,
                  bg_disabled=None,
@@ -402,7 +407,7 @@ class ImageButton(Button):
                  ):
         if bg is None:
             bg = ImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed)
-        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label)
+        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font)
 
 
 class FramedImageBackground(ImageBackground):
@@ -643,6 +648,8 @@ class FramedImageButton(ImageButton):
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  label="Button",
+                 font_size=16, font="Arial",
+                 font_color=[62, 67, 73, 255],
                  bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
                  bg_hover=None,
                  bg_disabled=None,
@@ -651,7 +658,7 @@ class FramedImageButton(ImageButton):
                  ):
         if bg is None:
             bg = FramedImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed,frame_size)
-        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label)
+        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font)
 
 
 class ToggleButton(Button):
@@ -841,10 +848,13 @@ class Checkbox(ToggleButton):
                  pos=None, size=[100,24],bg=None,
                  borderstyle="flat",
                  label="Checkbox",
-                 checkcolor=[240,119,70]):
+                 checkcolor=[240,119,70],
+                 font_size=16, font="Arial",
+                 font_color=[62, 67, 73, 255],
+                 ):
         if bg is None:
             bg = CheckboxBackground(self,borderstyle,checkcolor)
-        super(Checkbox,self).__init__(name,submenu,window,peng,pos,size,bg,borderstyle=borderstyle,label=label)
+        super(Checkbox,self).__init__(name,submenu,window,peng,pos,size,bg,borderstyle=borderstyle,label=label, font_size=font_size, font_color=font_color, font=font)
     def redraw_label(self):
         """
         Re-calculates the position of the Label.

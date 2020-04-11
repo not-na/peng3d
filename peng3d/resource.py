@@ -69,10 +69,13 @@ class ResourceManager(object):
         glGetIntegerv(GL_MAX_TEXTURE_SIZE,maxsize)
         maxsize = min(maxsize.value,self.peng.cfg["rsrc.maxtexsize"]) # This is here to avoid massive memory overhead when only loading a few textures
         self.texsize = maxsize
-        
-        self.categories = {}
-        self.categoriesTexCache = {}
-        self.categoriesTexBin = {}
+
+        # name is always [category][name] here
+        self.categories = {}  # Maps from name -> TextureRegion
+        self.categoriesTexCache = {}  # Maps from name -> target,texid,texcoords
+        self.categoriesTexBin = {}  # Maps from name -> TextureBin
+        self.categoriesSettings = {}  # Maps from name -> settings dict
+        self.categoriesSizes = {}  # Maps from name -> size
         
         self.missingTexture = None
         
@@ -114,6 +117,11 @@ class ResourceManager(object):
             size = self.texsize
 
         self.categories[name]={}
+        self.categoriesSettings[name] = {
+            "magfilter": GL_NEAREST,
+            "minfilter": GL_NEAREST_MIPMAP_LINEAR,
+        }
+        self.categoriesSizes[name] = {}
         self.categoriesTexCache[name]={}
         self.categoriesTexBin[name]=pyglet.image.atlas.TextureBin(size, size)
         self.peng.sendEvent("peng3d:rsrc.category.add", {"peng": self.peng, "category": name})
@@ -153,14 +161,15 @@ class ResourceManager(object):
         #texreg = texreg.get_transform(True,True) # Mirrors the image due to how pyglets coordinate system works
         # Strange behavior, sometimes needed and sometimes not
         self.categories[category][name]=texreg
+        self.categoriesSizes[category][name] = img.width, img.height
         target = texreg.target
         texid = texreg.id
         texcoords = texreg.tex_coords
         # Prevents texture bleeding with texture sizes that are powers of 2, else weird lines may appear at certain angles.
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, self.categoriesSettings[category]["magfilter"])
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, self.categoriesSettings[category]["minfilter"])
         glGenerateMipmap(GL_TEXTURE_2D)
         
         out = target,texid,texcoords
@@ -218,6 +227,11 @@ class ResourceManager(object):
         out = target,texid,texcoords
         self.categoriesTexCache[category][name]=out
         return out
+
+    def getTexSize(self, name, category):
+        if name not in self.categoriesSizes[category]:
+            self.loadTex(name, category)
+        return self.categoriesSizes[category][name]
     
     def getModel(self,name):
         """

@@ -22,11 +22,13 @@
 #  
 #  
 
+from unittest.mock import Mock
+
 from . import window
 from . import gl
 from . import graphics
 
-class Mock(object):
+"""class Mock(object):
     def __init__(self, *args,**kwargs):
         pass
 
@@ -39,7 +41,7 @@ class Mock(object):
     def __setitem__(self,*args,**kwargs):
         pass
     def __in__(self,*args,**kwargs):
-        pass
+        pass"""
 
 lib = Mock()
 text = Mock()

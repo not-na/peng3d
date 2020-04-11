@@ -45,6 +45,9 @@ from ..util import mouse_aabb, ActionDispatcher, WatchingList as _WatchingList
 class Background(object):
     """
     Class representing the background of a widget.
+
+    Note that if a background is used as the background of a SubMenu, the SubMenu instance
+    itself should be passed as the widget.
     
     This base class does not do anything.
     """

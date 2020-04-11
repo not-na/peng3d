@@ -130,7 +130,8 @@ sphinx.ext.coverage.CoverageBuilder.build_py_coverage=build_py_coverage
 
 # Pyglet patch
 
-class Mock(object):
+
+"""class Mock(object):
     def __init__(self, *args,**kwargs):
         pass
 
@@ -144,7 +145,8 @@ class Mock(object):
         pass
     def __in__(self,*args,**kwargs):
         pass
-
+"""
+from unittest.mock import Mock
 
 # Patched extensions base path.
 sys.path.insert(0, os.path.abspath('.'))
@@ -195,34 +197,19 @@ sphinx.ext.autodoc.DataDocumenter.add_directive_header = add_directive_header
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
-spelling_show_suggestions = True
-spelling_ignore_pypi_package_names = True
-
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
+    'sphinx.ext.imgmath',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'peng3d_sphinxext',
 ]
-
-try:
-    import pip
-    installed_packages = pip.get_installed_distributions()
-    flat_installed_packages = [package.project_name for package in installed_packages]
-    if "sphinxcontrib-spelling" in flat_installed_packages and "pyenchant" in flat_installed_packages:
-        extensions.append("sphinxcontrib.spelling")
-except ImportError:
-    pass # May happen if pip is not installed
-except AttributeError:
-    pass
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -240,7 +227,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Peng3d'
-copyright = u'2016-2017, notna'
+copyright = u'2016-2020, notna'
 author = u'notna'
 
 # The version info for the project you're documenting, acts as replacement for
