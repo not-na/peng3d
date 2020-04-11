@@ -418,10 +418,13 @@ class FramedImageBackground(ImageBackground):
     
     Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
     """
-    def __init__(self,widget,bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None,frame_size=[[2,10,2],[2,10,2]]):
-        print("Use FramedImageBackground with care, may produce graphical glitches and crashes")
-        # TODO: fix this
-        self.frame_size = frame_size
+    def __init__(self,widget,bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None,frame=[[2,10,2],[2,10,2]]):
+        tc = bg_idle[2]
+        tsx, tsy = tc[3] - tc[0], tc[10] - tc[1]  # Texture Size
+
+        self.frame_x = list(map(lambda x: x * (tsx / sum(frame[0])), frame[0]))
+        self.frame_y = list(map(lambda y: y * (tsy / sum(frame[1])), frame[1]))
+
         self.repeat_edge=True
         self.repeat_center=True
         super(FramedImageBackground,self).__init__(widget,bg_idle,bg_hover,bg_disabled,bg_pressed)
@@ -433,209 +436,94 @@ class FramedImageBackground(ImageBackground):
             )
         self.reg_vlist(self.vlist_bg)
     def redraw_bg(self):
-        # Convenience variables
-        sx,sy = self.widget.size
-        x,y = self.widget.pos
-        fx,fy = self.frame_size
-        osx,osy = sum(fx),sum(fy)
-        bsx = (osx/osy)*sy
-        bsy = (osx/osy)*sy
-        # frame-axis-left/right/center/up/down
-        fxl,fxc,fxr = fx
-        fyu,fyc,fyd = fy
-        
-        fxl,fxc,fxr = (fxl/sum(fx))*bsx, (fxc/sum(fx))*bsx, (fxr/sum(fx))*bsx
-        fyu,fyc,fyd = (fyu/sum(fy))*bsy, (fyc/sum(fy))*bsy, (fyd/sum(fy))*bsy
-        
-        #assert fxl+fxc+fxr==sx
-        #assert fyu+fyc+fyd==sy
-        # To avoid confusion when supplied invalid numbers
-        
-        # 16 Vertices according to button_scheme.xcf
-        
-        v1  = x,         y+sy
-        v2  = x+fxl,     y+sy
-        v3  = x+sx-fxr,  y+sy
-        v4  = x+sx,      y+sy
-        v5  = x+sx,      y+sy-fyu
-        v6  = x+sx,      y+fyd
-        v7  = x+sx,      y
-        v8  = x+sx-fxr,  y
-        v9  = x+fxl,     y
-        v10 = x,         y
-        v11 = x,         y+fyd
-        v12 = x,         y+sy-fyu
-        v13 = x+fxl,     y+sy-fyu
-        v14 = x+sx-fxr,  y+sy-fyu
-        v15 = x+sx-fxr,  y+fyd
-        v16 = x+fxl,     y+fyd
-        
-        bv1  = x,         y+bsy
-        bv2  = x+fxl,     y+bsy
-        bv3  = x+bsx-fxr,  y+bsy
-        bv4  = x+bsx,      y+bsy
-        bv5  = x+bsx,      y+bsy-fyu
-        bv6  = x+bsx,      y+fyd
-        bv7  = x+bsx,      y
-        bv8  = x+bsx-fxr,  y
-        bv9  = x+fxl,     y
-        bv10 = x,         y
-        bv11 = x,         y+fyd
-        bv12 = x,         y+bsy-fyu
-        bv13 = x+fxl,     y+bsy-fyu
-        bv14 = x+bsx-fxr,  y+bsy-fyu
-        bv15 = x+bsx-fxr,  y+fyd
-        bv16 = x+fxl,     y+fyd
-        
-        qc1 = v10+v9 +v16+v11
-        qc2 = v12+v13+v2 +v1 
-        qc3 = v14+v5 +v4 +v3 
-        qc4 = v8 +v7 +v6 +v15
-        
-        #qe1 = bv9 +bv8 +bv15+bv16
-        #qe2 = bv11+bv16+bv13+bv12
-        #qe3 = bv13+bv14+bv3 +bv2 
-        #qe4 = bv15+bv6 +bv5 +bv14
-        qe1 = v9 +v8 +v15+v16
-        qe2 = v11+v16+v13+v12
-        qe3 = v13+v14+v3 +v2 
-        qe4 = v15+v6 +v5 +v14
-        
-        qc = v16+v15+v14+v13
-        
-        v = qc1+qc2+qc3+qc4+qe1+qe2+qe3+qe4+qc
-        
-        # Texture Coords
+        # Convenience Variables
+        sx, sy = self.widget.size
+        x, y = self.widget.pos
+
+        tc = self.bg_texinfo[2]
+        tsx, tsy = tc[3] - tc[0], tc[10] - tc[1]  # Texture Size
+
+        flx, frx = self.frame_x[0] * 4096, self.frame_x[2] * 4096
+        fcx = sx - (flx + frx)
+        fdy, fuy = self.frame_y[0] * 4096, self.frame_y[2] * 4096
+        fcy = sy - (fdy + fuy)
+
+        # Vertices
+
+        # 13-12---14-15
+        # |   |   |   |
+        # 9---8---10-11
+        # |   |   |   |
+        # 3---2---5---7
+        # |   |   |   |
+        # 0---1---4---6
+
+        v0 = x, y
+        v1 = x + flx, y
+        v2 = x + flx, y + fdy
+        v3 = x, y + fdy
+
+        v4 = x + flx + fcx, y
+        v5 = x + flx + fcx, y + fdy
+        v6 = x + sx, y
+        v7 = x + sx, y + fdy
+
+        v8 = x + flx, y + fdy + fcy
+        v9 = x, y + fdy + fcy
+        v10 = x + flx + fcx, y + fdy + fcy
+        v11 = x + sx, y + fdy + fcy
+
+        v12 = x + flx, y + sy
+        v13 = x, y + sy
+        v14 = x + flx + fcx, y + sy
+        v15 = x + sx, y + sy
+
+        self.vlist_bg.vertices = v0+v1+v2+v3 + v1+v4+v5+v2 + v4+v6+v7+v5 + \
+                                 v3+v2+v8+v9 + v2+v5+v10+v8 + v5+v7+v11+v10 + \
+                                 v9+v8+v12+v13 + v8+v10+v14+v12 + v10+v11+v15+v14
+
+        bg_disabled_coords = self.transform_texture(self.bg_disabled)
+        bg_pressed_coords = self.transform_texture(self.bg_pressed)
+        bg_hovered_coords = self.transform_texture(self.bg_hover)
+        bg_idle_coords = self.transform_texture(self.bg_texinfo)
+
         if not self.widget.enabled:
-            texcoords = self.bg_disabled[2]
+            self.vlist_bg.tex_coords = bg_disabled_coords
         elif self.widget.pressed:
-            texcoords = self.bg_pressed[2]
+            self.vlist_bg.tex_coords = bg_pressed_coords
         elif self.widget.is_hovering:
-            texcoords = self.bg_hover[2]
+            self.vlist_bg.tex_coords = bg_hovered_coords
         else:
-            texcoords = self.bg_texinfo[2]
-        print("###")
-        print(self.widget.enabled,self.widget.pressed,self.widget.is_hovering)
-        print(texcoords)
-        x,y,_,sx,_,_,_,sy,_,_,_,_ = texcoords
-        sx,sy=sx-x,sy-y
-        asx,asy = min(sx,(osx/osy)*sx),min(sy,(osx/osy)*sx)
-        fxl,fxc,fxr=(fx[0]/sum(fx))*sx, (fx[1]/sum(fx))*sx, (fx[2]/sum(fx))*sx
-        fyu,fyc,fyd=(fy[0]/sum(fy))*sy, (fy[1]/sum(fy))*sy, (fy[2]/sum(fy))*sy
-        
-        print(x,y,sx,sy)
-        print(fxl,fxc,fxr)
-        print(fyu,fyc,fyd)
-        print("###")
-        
-        assert fxl+fxc+fxr==sx
-        assert fyu+fyc+fyd==sy
-        
-        t1  = x,         y+sy,      0
-        t2  = x+fxl,     y+sy,      0
-        t3  = x+sx-fxr,  y+sy,      0
-        t4  = x+sx,      y+sy,      0
-        t5  = x+sx,      y+sy-fyu,  0
-        t6  = x+sx,      y+fyd,     0
-        t7  = x+sx,      y,         0
-        t8  = x+sx-fxr,  y,         0
-        t9  = x+fxl,     y,         0
-        t10 = x,         y,         0
-        t11 = x,         y+fyd,     0
-        t12 = x,         y+sy-fyu,  0
-        t13 = x+fxl,     y+sy-fyu,  0
-        t14 = x+sx-fxr,  y+sy-fyu,  0
-        t15 = x+sx-fxr,  y+fyd,     0
-        t16 = x+fxl,     y+fyd,     0
-        
-        at1  = x,         y+asy,      0
-        at2  = x+fxl,     y+asy,      0
-        at3  = x+asx-fxr,  y+asy,      0
-        at4  = x+asx,      y+asy,      0
-        at5  = x+asx,      y+asy-fyu,  0
-        at6  = x+asx,      y+fyd,     0
-        at7  = x+asx,      y,         0
-        at8  = x+asx-fxr,  y,         0
-        at9  = x+fxl,     y,         0
-        at10 = x,         y,         0
-        at11 = x,         y+fyd,     0
-        at12 = x,         y+asy-fyu,  0
-        at13 = x+fxl,     y+asy-fyu,  0
-        at14 = x+asx-fxr,  y+asy-fyu,  0
-        at15 = x+asx-fxr,  y+fyd,     0
-        at16 = x+fxl,     y+fyd,     0
-        
-        
-        
-        tqc1 = t10+t9 +t16+t11
-        tqc2 = t12+t13+t2 +t1 
-        tqc3 = t14+t5 +t4 +t3 
-        tqc4 = t8 +t7 +t6 +t15
-        
-        # size of center x size adjusted
-        #fxcr = (fx[1]/sum(fx))*bsx
-        # rel x pos of v3 in P
-        #xv3 = self.widget.size[0]-(self.widget.size[0]*((fx[2]/sum(fx))))
-        xv3 = v3[0]-self.widget.pos[0]
-        xv2 = v2[0]-self.widget.pos[0]
-        #xv2 = self.widget.size[0]*(fx[0]/sum(fx))
-        #txr = (fxcr/self.widget.size[0])*(self.widget.size[0]+((fx[2]/sum(fx))*bsx))
-        #  P   Ratio of (center-x-size adjusted) to x-size applied to (x-size plus (right-x-size adjusted))
-        #txr = fxl+(self.widget.size[0]*((fx[2]/sum(fx))))
-        #  T   Left-x-size not adjusted plus x-size times (ratio of right-x-size to total)
-        #txr = sx-fxr # Default
-        #  T   x-size minus right-x-size not adjusted
-        #txr = (max((xv3-xv2),fx[1])/self.widget.size[0])*sx
-        print(fx[1]/sum(fx))
-        txr = (fx[1]/sum(fx))*asx
-        #  P  ratio of (xv3 rel to xv2) to x-size
-        
-        
-        txr = x+txr
-        
-        xt2  = x+fxl,     y+asy,      0
-        xt13 = x+fxl,     y+asy-fyu,  0
-        xt16 = x+fxl,     y+fyd,     0
-        xt9  = x+fxl,     y,         0
-        
-        xt8  = txr,  y,         0
-        xt15 = txr,  y+fyd,     0
-        xt14 = txr,  y+asy-fyu,  0
-        xt3  = txr,  y+asy,      0
-        
-        
-        yt6  = x+asx,      y+fyd,     0
-        yt15 = x+asx-fxr,  y+fyd,     0
-        yt11 = x,         y+fyd,     0
-        yt16 = x+fxl,     y+fyd,     0
-        
-        yt12 = x,         y+asy-fyu,  0
-        yt13 = x+fxl,     y+asy-fyu,  0
-        yt5  = x+asx,      y+asy-fyu,  0
-        yt14 = x+asx-fxr,  y+asy-fyu,  0
-        
-        tqe1 = xt9 +xt8 +xt15+xt16
-        tqe2 = yt11+yt16+yt13+yt12
-        tqe3 = xt13+xt14+xt3 +xt2 
-        tqe4 = yt15+yt6 +yt5 +yt14
-        
-        #tqe1 = at9 +at8 +at15+at16
-        #tqe2 = at11+at16+at13+at12
-        #tqe3 = at13+at14+at3 +at2 
-        #tqe4 = at15+at6 +at5 +at14
-        
-        #tqe1 = t9 +t8 +t15+t16
-        #tqe2 = t11+t16+t13+t12
-        #tqe3 = t13+t14+t3 +t2 
-        #tqe4 = t15+t6 +t5 +t14
-        
-        tqc = t16+t15+t14+t13
-        
-        t = tqc1+tqc2+tqc3+tqc4+tqe1+tqe2+tqe3+tqe4+tqc
-        #print(t)
-        #print(v)
-        self.vlist_bg.vertices=v
-        self.vlist_bg.tex_coords=t
+            self.vlist_bg.tex_coords = bg_idle_coords
+
+    def transform_texture(self, texture):
+        t = texture[2]
+
+        # Tex_coords
+        t0 = t[0], t[1], t[2]
+        t1 = t[0] + self.frame_x[0], t[1], t[2]
+        t2 = t[0] + self.frame_x[0], t[1] + self.frame_y[0], t[2]
+        t3 = t[0], t[1] + self.frame_y[0], t[2]
+
+        t4 = t[3] - self.frame_x[2], t[4], t[5]
+        t5 = t[3] - self.frame_x[2], t[4] + self.frame_y[0], t[5]
+        t6 = t[3], t[4], t[5]
+        t7 = t[3], t[4] + self.frame_y[0], t[5]
+
+        t8 = t[9] + self.frame_x[0], t[10] - self.frame_y[2], t[11]
+        t9 = t[9], t[10] - self.frame_y[2], t[11]
+        t10 = t[6] - self.frame_x[2], t[7] - self.frame_y[2], t[8]
+        t11 = t[6], t[7] - self.frame_y[2], t[8]
+
+        t12 = t[9] + self.frame_x[0], t[10], t[11]
+        t13 = t[9], t[10], t[11]
+        t14 = t[6] - self.frame_y[2], t[7], t[8]
+        t15 = t[6], t[7], t[8]
+
+        tex_coords = t0+t1+t2+t3 + t1+t4+t5+t2 + t4+t6+t7+t5 + \
+                     t3+t2+t8+t9 + t2+t5+t10+t8 + t5+t7+t11+t10 + \
+                     t9+t8+t12+t13 + t8+t10+t14+t12 + t10+t11+t15+t14
+        return tex_coords
 
 class FramedImageButton(ImageButton):
     """
