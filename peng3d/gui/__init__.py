@@ -22,7 +22,7 @@
 #  
 #  
 
-__all__ = ["GUIMenu","SubMenu","GUILayer"]
+__all__ = ["GUIMenu","SubMenu","GUILayer","FakeWidget"]
 
 #from pprint import pprint
 #import gc
@@ -69,11 +69,20 @@ class GUIMenu(Menu):
     
     Note that widgets are not managed directly by this class, but rather by each :py:class:`SubMenu`\ .
     """
-    def __init__(self,name,window,peng):
+    def __init__(self,name,window,peng,
+                 font="Arial", font_size=16,
+                 font_color=[62, 67, 73, 255],
+                 borderstyle="flat",
+                 ):
         super(GUIMenu,self).__init__(name,window,peng)
         pyglet.clock.schedule_interval(lambda dt: None,1./30)
         self.submenus = {}
         self.activeSubMenu = None
+
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
+        self.borderstyle = borderstyle
 
         self.batch2d = pyglet.graphics.Batch()
 
@@ -195,11 +204,20 @@ class SubMenu(util.ActionDispatcher):
     
     ``exit`` is triggered everytime the :py:meth:`on_exit()` method has been called.
     """
-    def __init__(self,name,menu,window,peng):
+    def __init__(self,name,menu,window,peng,
+                 font=None, font_size=None,
+                 font_color=None,
+                 borderstyle=None,
+                 ):
         self.name = name
         self.menu = menu
         self.window = window
         self.peng = peng
+
+        self.font = font if font is not None else self.menu.font
+        self.font_size = font_size if font_size is not None else self.menu.font_size
+        self.font_color = font_color if font_color is not None else self.menu.font_color
+        self.borderstyle = borderstyle if borderstyle is not None else self.menu.borderstyle
         
         self.widgets = collections.OrderedDict()
         

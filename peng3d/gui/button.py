@@ -246,11 +246,15 @@ class Button(Widget):
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
-                 border=[4,4], borderstyle="flat",
+                 border=[4,4], borderstyle=None,
                  label="Button",min_size=None,
-                 font_size=16, font="Arial",
-                 font_color=[62, 67, 73, 255],
+                 font_size=None, font=None,
+                 font_color=None,
                  ):
+        font = font if font is not None else submenu.font
+        font_size = font_size if font_size is not None else submenu.font_size
+        font_color = font_color if font_color is not None else submenu.font_color
+        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
         if bg is None:
             bg = ButtonBackground(self,border,borderstyle)
         super(Button,self).__init__(name,submenu,window,peng,pos,size,bg,min_size)
@@ -401,13 +405,17 @@ class ImageButton(Button):
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  label="Button",
-                 font_size=16, font="Arial",
-                 font_color=[62, 67, 73, 255],
+                 font_size=None, font=None,
+                 font_color=None,
                  bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
                  bg_hover=None,
                  bg_disabled=None,
                  bg_pressed=None,
                  ):
+        font = font if font is not None else submenu.font
+        font_size = font_size if font_size is not None else submenu.font_size
+        font_color = font_color if font_color is not None else submenu.font_color
+
         if bg is None:
             bg = ImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed)
         super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font)
@@ -421,7 +429,13 @@ class FramedImageBackground(ImageBackground):
     
     Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
     """
-    def __init__(self,widget,bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None,frame=[[2,10,2],[2,10,2]]):
+    def __init__(self,widget,
+                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_hover=None,
+                 bg_disabled=None,
+                 bg_pressed=None,
+                 frame=[[2,10,2],[2,10,2]],
+                 ):
         tc = bg_idle[2]
         tsx, tsy = tc[3] - tc[0], tc[10] - tc[1]  # Texture Size
 
@@ -539,14 +553,18 @@ class FramedImageButton(ImageButton):
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  label="Button",
-                 font_size=16, font="Arial",
-                 font_color=[62, 67, 73, 255],
+                 font_size=None, font=None,
+                 font_color=None,
                  bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
                  bg_hover=None,
                  bg_disabled=None,
                  bg_pressed=None,
                  frame_size=[[2,10,2],[2,10,2]],
                  ):
+        font = font if font is not None else submenu.font
+        font_size = font_size if font_size is not None else submenu.font_size
+        font_color = font_color if font_color is not None else submenu.font_color
+
         if bg is None:
             bg = FramedImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed,frame_size)
         super(FramedImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font)
@@ -737,12 +755,17 @@ class Checkbox(ToggleButton):
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
-                 borderstyle="flat",
+                 borderstyle=None,
                  label="Checkbox",
                  checkcolor=[240,119,70],
-                 font_size=16, font="Arial",
-                 font_color=[62, 67, 73, 255],
+                 font_size=None, font=None,
+                 font_color=None,
                  ):
+        font = font if font is not None else submenu.font
+        font_size = font_size if font_size is not None else submenu.font_size
+        font_color = font_color if font_color is not None else submenu.font_color
+        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
+
         if bg is None:
             bg = CheckboxBackground(self,borderstyle,checkcolor)
         super(Checkbox,self).__init__(name,submenu,window,peng,pos,size,bg,borderstyle=borderstyle,label=label, font_size=font_size, font_color=font_color, font=font)

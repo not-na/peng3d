@@ -55,13 +55,16 @@ class Label(Widget):
                  pos=None,size=None,
                  bg=None,
                  label="Label",
-                 font_size=16,font="Arial",
-                 font_color=[62,67,73,255],
+                 font_size=None,font=None,
+                 font_color=None,
                  multiline=False,
                  label_cls=pyglet.text.Label,
                  anchor_x="center",
                  anchor_y="center",
                 ):
+        font = font if font is not None else submenu.font
+        font_size = font_size if font_size is not None else submenu.font_size
+        font_color = font_color if font_color is not None else submenu.font_color
         super(Label,self).__init__(name,submenu,window,peng,pos,size,bg)
         
         self.font_name = font
@@ -197,15 +200,18 @@ class TextInput(Widget):
                  pos=None,size=None,
                  bg=None,
                  text="",default="",
-                 border=[4,4],borderstyle="flat",
-                 font_size=16,font="Arial",
-                 font_color=[62,67,73,255],
+                 border=[4,4],borderstyle=None,
+                 font_size=None,font=None,
+                 font_color=None,
                  font_color_default=[62,67,73,200],
                  allow_overflow=False,
                  allow_copypaste=True,
                  min_size=None,
                  ):
-        
+        font = font if font is not None else submenu.font
+        font_size = font_size if font_size is not None else submenu.font_size
+        font_color = font_color if font_color is not None else submenu.font_color
+        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
         if allow_copypaste == "force" and not HAVE_PYPERCLIP:
             raise ValueError("%s with name %s requires Clipboard support, but Pyperclip is not installed"%(self.__class__.__name__,name))
         

@@ -113,21 +113,22 @@ class DialogSubMenu(SubMenu):
         "label_ok":"add_btn_ok",
     }
     def __init__(self,name,menu,window,peng,
-                borderstyle="oldshadow",
-                font_size=16, font="Arial",
-                font_color=[62, 67, 73, 255],
+                borderstyle=None,
+                font_size=None, font=None,
+                font_color=None,
                 multiline=False,
                 **kwargs # for label_main etc.
                 ):
         super(DialogSubMenu,self).__init__(name,menu,window,peng)
 
-        self.font_size = font_size
-        self.font = font
-        self.font_color = font_color
+        self.font = font if font is not None else self.menu.font
+        self.font_size = font_size if font_size is not None else self.menu.font_size
+        self.font_color = font_color if font_color is not None else self.menu.font_color
+        self.borderstyle = borderstyle if borderstyle is not None else self.menu.borderstyle
+
         self.multiline = multiline
         
         self.prev_submenu = None
-        self.borderstyle = borderstyle
         
         labels = {}
         labels.update(self.DEFAULT_LABELS)
@@ -384,7 +385,7 @@ class TextSubMenu(DialogSubMenu):
         # no button needed, timer does the rest
         }
     def __init__(self,name,menu,window,peng,
-                borderstyle="oldshadow",
+                borderstyle=None,
                 timeout=10,
                 **kwargs
                 ):

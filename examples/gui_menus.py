@@ -149,7 +149,7 @@ def main(args):
     # Create Window with caption
     peng.createWindow(caption_t="i18n:common.window.caption",resizable=True,vsync=True)
     # Create main GUI Menu and register it immediately
-    m_main = peng3d.GUIMenu("main",peng.window,peng)
+    m_main = peng3d.GUIMenu("main",peng.window,peng, borderstyle="oldshadow")
     peng.window.addMenu(m_main)
     m_main.setBackground([200, 255, 100])
     

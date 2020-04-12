@@ -157,9 +157,10 @@ class Progressbar(Widget):
                  bg=None,
                  nmin=0,nmax=100,n=0,
                  border=[4,4],
-                 borderstyle="flat",
+                 borderstyle=None,
                  colors=[[240,119,70],[240,119,70]],
                  ):
+        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
         self._nmin = nmin
         self._nmax = nmax
         self._n = n
@@ -244,7 +245,7 @@ class AdvancedProgressbar(Progressbar):
                  categories={},
                  offset_nmin=0,offset_nmax=0,offset_n=0,
                  border=[4,4],
-                 borderstyle="flat",
+                 borderstyle=None,
                  colors=[[240,119,70],[240,119,70]],
                  ):
         super(AdvancedProgressbar,self).__init__(name,submenu,window,peng,pos,size,bg,offset_nmin,offset_nmax,offset_n,border,borderstyle,colors)
@@ -400,10 +401,11 @@ class Slider(Progressbar):
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
-                 border=[4,4], borderstyle="flat",
+                 border=[4,4], borderstyle=None,
                  nmin=0,nmax=100,n=0,
                  handlesize=[16,24],
                  ):
+        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
         self.handlesize = handlesize
         if bg is None:
             bg = SliderBackground(self,border,borderstyle)
@@ -454,10 +456,11 @@ class VerticalSlider(Slider):
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[24,100], bg=None,
-                 border=[4,4], borderstyle="flat",
+                 border=[4,4], borderstyle=None,
                  nmin=0,nmax=100,n=0,
                  handlesize=[24,16],
                  ):
+        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
         if bg is None:
             bg = VerticalSliderBackground(self,border,borderstyle)
         super(VerticalSlider,self).__init__(name,submenu,window,peng,pos,size,bg,border,borderstyle,nmin,nmax,n,handlesize)
