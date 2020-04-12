@@ -114,9 +114,17 @@ class DialogSubMenu(SubMenu):
     }
     def __init__(self,name,menu,window,peng,
                 borderstyle="oldshadow",
+                font_size=16, font="Arial",
+                font_color=[62, 67, 73, 255],
+                multiline=False,
                 **kwargs # for label_main etc.
                 ):
         super(DialogSubMenu,self).__init__(name,menu,window,peng)
+
+        self.font_size = font_size
+        self.font = font
+        self.font_color = font_color
+        self.multiline = multiline
         
         self.prev_submenu = None
         self.borderstyle = borderstyle
@@ -161,7 +169,8 @@ class DialogSubMenu(SubMenu):
                         pos=lambda sw,sh, bw,bh: (sw/2-bw/2,sh/2-bh/2),
                         size=[0,0],
                         label=label_main,
-                        #multiline=True, # TODO: implement multine dialog
+                        font=self.font, font_size=self.font_size, font_color=self.font_color,
+                        multiline=self.multiline,
                         )
         self.wlabel_main.size = lambda sw,sh: (sw,self.wlabel_main._label.font_size)
         self.addWidget(self.wlabel_main)
@@ -180,7 +189,8 @@ class DialogSubMenu(SubMenu):
                         pos=lambda sw,sh, bw,bh: (sw/2-bw/2,sh/2-bh/2-bh*2),
                         size=[0,0],
                         label=label_ok,
-                        borderstyle=self.borderstyle
+                        borderstyle=self.borderstyle,
+                        font=self.font, font_size=self.font_size, font_color=self.font_color,
                         )
         self.wbtn_ok.size = lambda sw,sh: (self.wbtn_ok._label.font_size*8,self.wbtn_ok._label.font_size*2)
         self.addWidget(self.wbtn_ok)
@@ -289,7 +299,8 @@ class ConfirmSubMenu(DialogSubMenu):
                         pos=lambda sw,sh, bw,bh: (sw/2-bw-4,sh/2-bh/2-bh*2),
                         size=[0,0],
                         label=label_confirm,
-                        borderstyle=self.borderstyle
+                        borderstyle=self.borderstyle,
+                        font=self.font, font_size=self.font_size, font_color=self.font_color,
                         )
         self.wbtn_confirm.size = lambda sw,sh: (self.wbtn_confirm._label.font_size*8,self.wbtn_confirm._label.font_size*2)
         self.addWidget(self.wbtn_confirm)
@@ -313,7 +324,8 @@ class ConfirmSubMenu(DialogSubMenu):
                         pos=lambda sw,sh, bw,bh: (sw/2+4,sh/2-bh/2-bh*2),
                         size=[0,0],
                         label=label_cancel,
-                        borderstyle=self.borderstyle
+                        borderstyle=self.borderstyle,
+                        font=self.font, font_size=self.font_size, font_color=self.font_color,
                         )
         self.wbtn_cancel.size = lambda sw,sh: (self.wbtn_cancel._label.font_size*8,self.wbtn_cancel._label.font_size*2)
         self.addWidget(self.wbtn_cancel)
@@ -453,6 +465,7 @@ class ProgressSubMenu(DialogSubMenu):
                         pos=lambda sw,sh, bw,bh: (sw/2-bw/2,self.wprogressbar.pos[1]+8),
                         size=[0,0],
                         label="", # set by update_progressbar()
+                        font=self.font, font_size=self.font_size, font_color=self.font_color,
                         )
         self.wprogresslabel.size = lambda sw,sh: (sw,self.wprogresslabel._label.font_size)
         self.addWidget(self.wprogresslabel)
@@ -596,6 +609,7 @@ class AdvancedProgressSubMenu(ProgressSubMenu):
                         pos=lambda sw,sh, bw,bh: (sw/2-bw/2,self.wprogressbar.pos[1]+8),
                         size=[0,0],
                         label="", # set by update_progressbar()
+                        font=self.font, font_size=self.font_size, font_color=self.font_color,
                         )
         self.wprogresslabel.size = lambda sw,sh: (sw,self.wprogresslabel._label.font_size)
         self.addWidget(self.wprogresslabel)

@@ -331,6 +331,9 @@ class ImageBackground(Background):
     
     It should also be possible to use this class as a background for most other Widgets.
     """
+
+    vlist_layer = 0
+
     def __init__(self,widget,bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None):
         bg = bg_idle
         self.bg_texinfo = bg
@@ -352,7 +355,7 @@ class ImageBackground(Background):
         super(ImageBackground,self).__init__(widget)
     def init_bg(self):
         # TODO: add seperate groups per active texture, in case the different images are on different textures
-        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo))
+        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo), parent=pyglet.graphics.OrderedGroup(self.vlist_layer))
         self.vlist_bg = self.submenu.batch2d.add(4,GL_QUADS,self.bg_group,
             "v2f",
             ("t3f",self.bg_texinfo[2]),

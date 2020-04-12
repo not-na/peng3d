@@ -137,6 +137,7 @@ class ResourceManager(object):
         See :py:meth:`loadTex()` for more information.
         """
         if category not in self.categoriesTexCache:
+            self.peng.sendEvent("peng3d:rsrc.missing.category", {"cat": category, "name": name})
             return self.getMissingTex(category)
         if name not in self.categoriesTexCache[category]:
             self.loadTex(name,category)
@@ -156,6 +157,7 @@ class ResourceManager(object):
         try:
             img = pyglet.image.load(self.resourceNameToPath(name,".png"))
         except FileNotFoundError:
+            self.peng.sendEvent("peng3d:rsrc.missing.tex", {"cat": category, "name": name})
             img = self.getMissingTexture()
         texreg = self.categoriesTexBin[category].add(img)
         #texreg = texreg.get_transform(True,True) # Mirrors the image due to how pyglets coordinate system works

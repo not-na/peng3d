@@ -128,6 +128,9 @@ class SubMenu(util.ActionDispatcher):
         self.on_resize(*self.size)
         
         self.batch2d = pyglet.graphics.Batch()
+
+        # For compatibility with Background classes
+        self.pressed, self.hovered = False, False
     
     def draw(self):
         """
@@ -252,7 +255,8 @@ class SubMenu(util.ActionDispatcher):
         elif bg in ["flat","gradient","oldshadow","material"]:
             self.bg = ContainerButtonBackground(self,borderstyle=bg)
             self.on_resize(self.window.width,self.window.height)
-    
+
+    # The following properties are needed for compatibility with Background classes
     @property
     def pos(self):
         return [0,0] # As property to prevent bug with accidental manipulation
@@ -260,6 +264,14 @@ class SubMenu(util.ActionDispatcher):
     @property
     def size(self):
         return self.window.width,self.window.height
+
+    @property
+    def submenu(self):
+        return self
+
+    @property
+    def enabled(self):
+        return self.menu.submenu is self and self.window.menu is self.menu
     
     def on_resize(self,width,height):
         sx,sy = width,height

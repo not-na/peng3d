@@ -141,12 +141,13 @@ class TextInputBackground(ButtonBackground):
     
     This background uses the button drawing routines and adds a cursor.
     """
+    vlist_cursor_layer = 10
     def __init__(self,*args,**kwargs):
         self.stime = 0
         super(TextInputBackground,self).__init__(*args,**kwargs)
     def init_bg(self):
         super(TextInputBackground,self).init_bg()
-        self.vlist_cursor = self.submenu.batch2d.add(2,GL_LINES,pyglet.graphics.OrderedGroup(10),
+        self.vlist_cursor = self.submenu.batch2d.add(2,GL_LINES,pyglet.graphics.OrderedGroup(self.vlist_cursor_layer),
             "v2f",
             "c3B",
             )
@@ -211,8 +212,7 @@ class TextInput(Widget):
         if bg is None:
             bg = TextInputBackground(self,border,borderstyle)
         super(TextInput,self).__init__(name,submenu,window,peng,pos,size,bg,min_size)
-        
-        self.cursor_pos = 0
+
         self.focussed = False
         self.allow_overflow = allow_overflow
         self.allow_copypaste = True if allow_copypaste is True or allow_copypaste=="force" else False
@@ -236,7 +236,7 @@ class TextInput(Widget):
                 anchor_x="left", anchor_y="center",
                 width=self.size[0],height=self.size[1]
                 )
-        self.cursor_pos = 0
+        self.cursor_pos = len(text)
         self.focussed = False
         
         if getattr(text,"_dynamic",False):
@@ -275,9 +275,9 @@ class TextInput(Widget):
         
         # Label position
         x = x+self.bg.border[0]
-        y = y+sy/2.-self._text.font_size/4.
-        w = self.size[0]
-        h = self.size[1]
+        y = y+sy/2.
+        w = self.size[0] - self.bg.border[0]*2
+        h = self.size[1] - self.bg.border[1]*2
         
         self._text.x,self._text.y = x,y
         self._text.width,self._text.height=w,h
