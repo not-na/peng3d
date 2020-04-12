@@ -57,6 +57,20 @@ class GUIMenu(Menu):
         pyglet.clock.schedule_interval(lambda dt: None,1./30)
         self.submenus = {}
         self.activeSubMenu = None
+
+        self.batch2d = pyglet.graphics.Batch()
+
+        self.bg = [242, 241, 240, 255]
+        self.bg_vlist = pyglet.graphics.vertex_list(4,
+                                                    "v2f",
+                                                    "c4B",
+                                                    )
+
+        # For compatibility with Background classes
+        self.pressed, self.is_hovering, self.enabled = False, False, True
+
+        self.peng.registerEventHandler("on_resize", self.on_resize)
+        self.on_resize(*self.size)
     
     def addSubMenu(self,submenu):
         """
@@ -91,6 +105,41 @@ class GUIMenu(Menu):
         """
         super(GUIMenu,self).draw()
         self.submenu.draw()
+
+    def draw_bg(self):
+        # Draws the background
+        if isinstance(self.bg, Layer):
+            self.bg._draw()
+        elif hasattr(self.bg, "draw") and callable(self.bg.draw):
+            self.bg.draw()
+        elif isinstance(self.bg, list) or isinstance(self.bg, tuple):
+            self.bg_vlist.draw(GL_QUADS)
+        elif callable(self.bg):
+            self.bg()
+        elif isinstance(self.bg, Background):
+            # The background will be drawn via the batch
+            if not self.bg.initialized:
+                self.bg.init_bg()
+                self.bg.redraw_bg()
+                self.bg.initialized = True
+        elif self.bg == "blank":
+            pass
+        elif self.bg is None:
+            raise RuntimeError("Cannot set Menu background to None")
+        else:
+            raise TypeError("Unknown/Unsupported background type")
+
+        self.batch2d.draw()
+
+    def setBackground(self, bg):
+        self.bg = bg
+        if isinstance(bg, list) or isinstance(bg, tuple):
+            if len(bg) == 3 and isinstance(bg, list):
+                bg.append(255)
+            self.bg_vlist.colors = bg * 4
+        elif bg in ["flat", "gradient", "oldshadow", "material"]:
+            self.bg = ContainerButtonBackground(self, borderstyle=bg)
+            self.on_resize(self.window.width, self.window.height)
     
     @property
     def submenu(self):
@@ -98,6 +147,24 @@ class GUIMenu(Menu):
         Property containing the :py:class:`SubMenu` instance that is currently active.
         """
         return self.submenus[self.activeSubMenu]
+
+    # The following properties are needed for compatibility with Background classes
+    @property
+    def pos(self):
+        return [0, 0]  # As property to prevent bug with accidental manipulation
+
+    @property
+    def size(self):
+        return self.window.width, self.window.height
+
+    def on_resize(self, width, height):
+        sx,sy = width,height
+        self.bg_vlist.vertices = [0,0, sx,0, sx,sy, 0,sy]
+        if isinstance(self.bg,Background):
+            if not self.bg.initialized:
+                self.bg.init_bg()
+                self.bg.initialized=True
+            self.bg.redraw_bg()
 
 class SubMenu(util.ActionDispatcher):
     """
@@ -119,7 +186,7 @@ class SubMenu(util.ActionDispatcher):
         
         self.widgets = collections.OrderedDict()
         
-        self.bg = [242,241,240,255]
+        self.bg = None
         self.bg_vlist = pyglet.graphics.vertex_list(4,
             "v2f",
             "c4B",
@@ -130,7 +197,7 @@ class SubMenu(util.ActionDispatcher):
         self.batch2d = pyglet.graphics.Batch()
 
         # For compatibility with Background classes
-        self.pressed, self.hovered = False, False
+        self.pressed, self.is_hovering = False, False
     
     def draw(self):
         """
@@ -158,8 +225,10 @@ class SubMenu(util.ActionDispatcher):
                 self.bg.initialized=True
         elif self.bg=="blank":
             pass
+        elif self.bg is None:
+            self.menu.draw_bg()
         else:
-            raise TypeError("Unknown background type")
+            raise TypeError("Unknown/Unsupported background type")
         
         # In case the background modified relevant state
         self.window.set2d()
@@ -244,7 +313,9 @@ class SubMenu(util.ActionDispatcher):
         It is also possible to supply any other method or function that will get called.
         
         Also, the strings ``flat``\ , ``gradient``\ , ``oldshadow`` and ``material`` may be given, resulting in a background that looks similar to buttons. 
-        
+
+        If the Background is ``None``\\ , the default background of the parent menu will be used.
+
         Lastly, the string ``"blank"`` may be passed to skip background drawing.
         """
         self.bg = bg

@@ -42,13 +42,10 @@ def createGUI():
     s_start = peng3d.gui.SubMenu("start",m_main,peng.window,peng)
     m_main.addSubMenu(s_start)
     
-    s_start.setBackground([242,241,240])
-    
     # Insert Widget Initialization Code here
     
     ##### Basic Dialog
     sm_basic = peng3d.gui.DialogSubMenu("test_dialog",m_main,peng.window,peng,)
-    sm_basic.setBackground([242,241,240])
     sm_basic.addAction("click_ok",print,tl("i18n:common.ok"))
     sm_basic.addAction("enter",print,tl("i18n:common.enter"))
     sm_basic.addAction("exit",print,tl("i18n:common.exit"))
@@ -69,7 +66,7 @@ def createGUI():
     
     ##### Confirm Dialog
     sm_confirm = peng3d.gui.ConfirmSubMenu("test_confirm",m_main,peng.window,peng,)
-    sm_confirm.setBackground([242,241,240])
+    sm_confirm.setBackground([255,100,240])
     sm_confirm.addAction("confirm",print,tl("i18n:common.confirmed"))
     sm_confirm.addAction("cancel",print,tl("i18n:common.cancelled"))
     sm_confirm.addAction("enter",print,tl("i18n:common.enter"))
@@ -92,7 +89,6 @@ def createGUI():
     ##### Text Dialog
     sm_text = peng3d.gui.TextSubMenu("test_text",m_main,peng.window,peng)
     sm_text.timeout=5
-    sm_text.setBackground([242,241,240])
     sm_text.addAction("enter",print,tl("i18n:common.enter"))
     sm_text.addAction("exit",print,tl("i18n:common.exit"))
     
@@ -112,7 +108,6 @@ def createGUI():
     
     ##### Progress Dialog
     sm_progress = peng3d.gui.ProgressSubMenu("test_progress",m_main,peng.window,peng,label_progressbar=tl("i18n:gui_menus.progress.plabel"))
-    sm_progress.setBackground([242,241,240])
     sm_progress.addAction("enter",print,tl("i18n:common.enter"))
     sm_progress.addAction("exit",print,tl("i18n:common.exit"))
     sm_progress.addAction("enter",setattr,sm_progress,"progress_n",0)
@@ -156,6 +151,7 @@ def main(args):
     # Create main GUI Menu and register it immediately
     m_main = peng3d.GUIMenu("main",peng.window,peng)
     peng.window.addMenu(m_main)
+    m_main.setBackground([200, 255, 100])
     
     def test_handler(symbol,modifiers,release):
         if release:
