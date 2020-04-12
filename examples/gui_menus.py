@@ -66,7 +66,7 @@ def createGUI():
     
     ##### Confirm Dialog
     sm_confirm = peng3d.gui.ConfirmSubMenu("test_confirm",m_main,peng.window,peng,)
-    sm_confirm.setBackground([255,100,240])
+    sm_confirm.setBackground([255,100,100])
     sm_confirm.addAction("confirm",print,tl("i18n:common.confirmed"))
     sm_confirm.addAction("cancel",print,tl("i18n:common.cancelled"))
     sm_confirm.addAction("enter",print,tl("i18n:common.enter"))

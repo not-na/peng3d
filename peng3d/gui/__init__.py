@@ -46,6 +46,23 @@ from .container import *
 from .layered import *
 from .. import util
 
+
+class FakeWidget(object):
+    def __init__(self, parent):
+        self.parent = parent
+        self.submenu = parent
+
+        self.pressed, self.is_hovering, self.enabled = False, False, True
+
+    @property
+    def pos(self):
+        return [0, 0]  # As property to prevent bug with accidental manipulation
+
+    @property
+    def size(self):
+        return self.parent.size
+
+
 class GUIMenu(Menu):
     """
     :py:class:`peng3d.menu.Menu` subclass adding 2D GUI Support.
