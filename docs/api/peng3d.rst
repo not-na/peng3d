@@ -23,6 +23,7 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    gui/widgets
    gui/button
    gui/menus
+   gui/layout
    gui/layered
    gui/container
    gui/text

@@ -446,7 +446,7 @@ class FramedImageBackground(ImageBackground):
         self.repeat_center=True
         super(FramedImageBackground,self).__init__(widget,bg_idle,bg_hover,bg_disabled,bg_pressed)
     def init_bg(self):
-        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo))
+        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo), parent=pyglet.graphics.OrderedGroup(self.vlist_layer))
         self.vlist_bg = self.submenu.batch2d.add(36,GL_QUADS,self.bg_group,
             "v2f",
             "t3f",

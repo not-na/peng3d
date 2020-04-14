@@ -44,6 +44,7 @@ from .slider import *
 from .text import *
 from .container import *
 from .layered import *
+from .layout import *
 from .. import util
 
 

@@ -32,6 +32,8 @@ import weakref
 import time
 
 # Internal Debug/Performance monitor variable
+from . import layout
+
 _num_saved_redraws = 0
 
 try:
@@ -204,6 +206,8 @@ class BasicWidget(ActionDispatcher):
         elif callable(self._pos):
             w,h = self.submenu.size[:]
             r = self._pos(w,h,*self.size)
+        elif isinstance(self._pos, layout.LayoutCell):
+            r = self._pos.pos
         else:
             raise TypeError("Invalid position type")
         
@@ -223,7 +227,9 @@ class BasicWidget(ActionDispatcher):
         """
         Similar to :py:attr:`pos` but for the size instead.
         """
-        if isinstance(self._size,list) or isinstance(self._size,tuple):
+        if isinstance(self._pos, layout.LayoutCell):
+            s = self._pos.size
+        elif isinstance(self._size,list) or isinstance(self._size,tuple):
             s = self._size
         elif callable(self._size):
             w,h = self.submenu.size[:]
