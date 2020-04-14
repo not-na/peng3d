@@ -146,7 +146,7 @@ class TranslationManager(ActionDispatcher):
         return _LazyTranslator(self,key,translate,lang)
     tl = translate_lazy
     
-    def loadDomain(self,domain,lang=None):
+    def loadDomain(self,domain,lang=None, encoding="utf-8"):
         if lang is None:
             lang = self.lang
         
@@ -158,7 +158,7 @@ class TranslationManager(ActionDispatcher):
             return # prevents errors
         fname = self.peng.rsrcMgr.resourceNameToPath(rsrc,self.peng.cfg["i18n.lang.ext"])
         try:
-            with open(fname,"r") as f:
+            with open(fname,"r", encoding=encoding, errors="surrogateescape") as f:
                 data = f.readlines()
         except Exception:
             return # prevents errors
