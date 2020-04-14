@@ -230,6 +230,22 @@ class ResourceManager(object):
         self.categoriesTexCache[category][name]=out
         return out
 
+    def normTex(self, dat, default_cat=None):
+        if isinstance(dat, str):
+            if default_cat is None:
+                raise ValueError("default_cat cannot be None if a string is given")
+            return self.getTex(dat, default_cat)
+        elif isinstance(dat, list) or isinstance(dat, tuple):
+            if len(dat) == 2:
+                # Tuple of name, cat
+                return self.getTex(dat[0], dat[1])
+            elif len(dat) == 3:
+                return dat  # Already a texture 3-tupel
+            else:
+                raise TypeError("Invalid length list/tuple")
+        else:
+            raise TypeError("Invalid type for normTex")
+
     def getTexSize(self, name, category):
         if name not in self.categoriesSizes[category]:
             self.loadTex(name, category)

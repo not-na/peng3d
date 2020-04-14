@@ -77,8 +77,15 @@ class Container(Widget):
     This Class is a subclass of :py:class:`peng3d.gui.widgets.Widget` but also exhibits part of the API of :py:class:`peng3d.gui.SubMenu`\ .
     """
     def __init__(self,name,submenu,window,peng,
-                 pos=None,size=None,_skip_draw=False
+                 pos=None,size=None,_skip_draw=False,
+                 font=None, font_size=None,
+                 font_color=None,
+                 borderstyle=None,
                 ):
+        self.borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
+        self.font = font if font is not None else submenu.font
+        self.font_size = font_size if font_size is not None else submenu.font_size
+        self.font_color = font_color if font_color is not None else submenu.font_color
         super(Container,self).__init__(name,submenu,window,peng,pos,size)
         
         self.menu = submenu
@@ -214,12 +221,17 @@ class ScrollableContainer(Container):
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
                  scrollbar_width=12,
-                 borderstyle="flat",
+                 font=None, font_size=None,
+                 font_color=None,
+                 borderstyle=None,
                  content_height=100,
                 ):
         self.offset_y = 0
         self.content_height = content_height
-        super(ScrollableContainer,self).__init__(name,submenu,window,peng,pos,size,_skip_draw=True)
+        super(ScrollableContainer,self).__init__(name,submenu,window,peng,pos,size,borderstyle=borderstyle,
+                                                 font=font, font_size=font_size, font_color=font_color,
+                                                 _skip_draw=True,
+                                                 )
         self._scrollbar = VerticalSlider("__scrollbar_%s"%name,self,self.peng.window,self.peng,
                                 pos=[0,0],
                                 size=[24,0],

@@ -338,23 +338,27 @@ class ImageBackground(Background):
 
     vlist_layer = 0
 
-    def __init__(self,widget,bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],bg_hover=None,bg_disabled=None,bg_pressed=None):
-        bg = bg_idle
+    def __init__(self,widget,bg_idle=None,bg_hover=None,bg_disabled=None,bg_pressed=None):
+        self.widget = widget
+        bg = self.widget.peng.resourceMgr.normTex(bg_idle, "gui")
         self.bg_texinfo = bg
         if bg_hover is None:
-            assert bg_hover[1]==self.bg_texinfo[1] # see init_bg()
             self.bg_hover=bg
         else:
+            bg_hover = self.widget.peng.resourceMgr.normTex(bg_hover, "gui")
+            assert bg_hover[1] == self.bg_texinfo[1]  # see init_bg()
             self.bg_hover=bg_hover
         if bg_disabled is None:
-            assert bg_disabled[1]==self.bg_texinfo[1] # see init_bg()
             self.bg_disabled=bg
         else:
+            bg_disabled = self.widget.peng.resourceMgr.normTex(bg_disabled, "gui")
+            assert bg_disabled[1] == self.bg_texinfo[1]  # see init_bg()
             self.bg_disabled=bg_disabled
         if bg_pressed is None:
-            assert bg_pressed[1]==self.bg_texinfo[1] # see init_bg()
             self.bg_pressed=bg
         else:
+            bg_pressed = self.widget.peng.resourceMgr.normTex(bg_pressed, "gui")
+            assert bg_pressed[1] == self.bg_texinfo[1]  # see init_bg()
             self.bg_pressed=bg_pressed
         super(ImageBackground,self).__init__(widget)
     def init_bg(self):
@@ -407,7 +411,7 @@ class ImageButton(Button):
                  label="Button",
                  font_size=None, font=None,
                  font_color=None,
-                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_idle=None,
                  bg_hover=None,
                  bg_disabled=None,
                  bg_pressed=None,
@@ -417,6 +421,7 @@ class ImageButton(Button):
         font_color = font_color if font_color is not None else submenu.font_color
 
         if bg is None:
+            self.peng = peng
             bg = ImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed)
         super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font)
 

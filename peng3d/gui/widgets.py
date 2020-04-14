@@ -227,7 +227,7 @@ class BasicWidget(ActionDispatcher):
         """
         Similar to :py:attr:`pos` but for the size instead.
         """
-        if isinstance(self._pos, layout.LayoutCell):
+        if isinstance(getattr(self, "_pos", None), layout.LayoutCell):
             s = self._pos.size
         elif isinstance(self._size,list) or isinstance(self._size,tuple):
             s = self._size
