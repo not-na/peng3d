@@ -132,7 +132,12 @@ class GUIMenu(Menu):
         Note that the layers are drawn first and may be overridden by the submenu and widgets.
         """
         super(GUIMenu,self).draw()
-        self.submenu.draw()
+        # TODO: find a way to re-raise these exceptions bypassing pyglet
+        try:
+            self.submenu.draw()
+        except (AttributeError, TypeError):
+            import traceback
+            traceback.print_exc()
 
     def draw_bg(self):
         # Draws the background

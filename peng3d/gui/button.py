@@ -55,9 +55,7 @@ class ButtonBackground(Background):
         
         self.border = border
         self.borderstyle = borderstyle
-        
-        self.batch = batch
-        
+
         self.change_on_press = change_on_press if change_on_press is not None else self.change_on_press
         
         self.borderstyles = {}
@@ -67,9 +65,7 @@ class ButtonBackground(Background):
         self.addBorderstyle("material",self.bs_material)
     def init_bg(self):
         # Can only be initialized here due to order of initialization
-        self.batch = self.batch if self.batch is not None else self.submenu.batch2d
-        
-        self.vlist = self.batch.add(self.n_vertices,GL_QUADS,pyglet.graphics.OrderedGroup(self.vlist_layer),
+        self.vlist = self.submenu.batch2d.add(self.n_vertices,GL_QUADS,pyglet.graphics.OrderedGroup(self.vlist_layer),
             "v2f",
             "c3B",
             )
@@ -430,7 +426,7 @@ class FramedImageBackground(ImageBackground):
     """
     Background for the :py:class:`FramedImageButton` Widget.
 
-    This background is similar to :py:class:`ImageBackground`\ , but it attempts to scale smarter with less artifacts.
+    This background is similar to :py:class:`ImageBackground`\\ , but it attempts to scale smarter with less artifacts.
 
     Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
     """
