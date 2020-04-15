@@ -28,6 +28,7 @@ __all__ = [
 
 import peng3d
 from peng3d import util
+from peng3d.util import WatchingList
 
 try:
     import pyglet
@@ -98,13 +99,133 @@ class GridLayout(Layout):
 
 
 class LayoutCell(object):
+    """
+    Base Layout Cell.
+
+    Not to be used directly. Usually subclasses of this class are returned by layouts.
+
+    Instances can be passed to Widgets as the ``pos`` argument. The ``size`` argument will
+    be automatically overridden.
+    """
     @property
     def pos(self):
+        """
+        Property accessing the position of the cell.
+
+        This usually refers to the bottom-left corner, but may change depending on arguments
+        passed during creation.
+
+        Note that results can be floats.
+
+        :return: 2-tuple of ``(x,y)``
+        """
         raise NotImplementedError("pos property has to be overridden")
 
     @property
     def size(self):
+        """
+        Property accessing the size of the cell.
+
+        Note that results can be floats.
+
+        :return: 2-tuple of ``(width, height)``
+        """
         raise NotImplementedError("size property has to be overridden")
+
+
+class DumbLayoutCell(LayoutCell):
+    """
+    Dumb layout cell that behaves like a widget.
+
+    Note that this class is not actually widget and should only be used as the ``pos``
+    argument to a widget or the ``parent`` to another Layout.
+
+    It can be used to create, for example, a :py:class:`GridLayout()` over only a portion
+    of the screen.
+
+    Even though setting the :py:attr:`pos` and :py:attr:`size` attributes is possible,
+    sometimes a redraw cannot be triggered correctly if e.g. the parent is not submenu.
+    """
+    def __init__(self, parent, pos, size):
+        self.parent = parent
+        self._pos = pos
+        self._size = size
+
+    @property
+    def pos(self):
+        """
+        Property that will always be a 2-tuple representing the position of the widget.
+
+        Note that this method may call the method given as ``pos`` in the initializer.
+
+        The returned object will actually be an instance of a helper class to allow for setting only the x/y coordinate.
+
+        This property also respects any :py:class:`Container` set as its parent, any offset will be added automatically.
+
+        Note that setting this property will override any callable set permanently.
+        """
+        if isinstance(self._pos, list) or isinstance(self._pos, tuple):
+            r = self._pos
+        elif callable(self._pos):
+            w, h = self.parent.size[:]
+            r = self._pos(w, h, *self.size)
+        elif isinstance(self._pos, LayoutCell):
+            r = self._pos.pos
+        else:
+            raise TypeError("Invalid position type")
+
+        ox, oy = self.parent.pos
+        r = r[0] + ox, r[1] + oy
+
+        # if isinstance(self.submenu,ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
+        #    r = r[0],r[1]+self.submenu.offset_y
+        return WatchingList(r, self._wlredraw_pos)
+
+    @pos.setter
+    def pos(self, value):
+        self._pos = value
+        if hasattr(self.parent, "redraw"):
+            self.parent.redraw()
+
+    @property
+    def size(self):
+        """
+        Similar to :py:attr:`pos` but for the size instead.
+        """
+        if isinstance(getattr(self, "_pos", None), LayoutCell):
+            s = self._pos.size
+        elif isinstance(self._size, list) or isinstance(self._size, tuple):
+            s = self._size
+        elif callable(self._size):
+            w, h = self.parent.size[:]
+            s = self._size(w, h)
+        else:
+            raise TypeError("Invalid size type")
+
+        s = s[:]
+
+        if s[0] == -1 or s[1] == -1:
+            raise ValueError("Cannot set size to -1 in DumbLayoutCell")
+
+        # Prevents crashes with negative size
+        s = [max(s[0], 0), max(s[1], 0)]
+        return WatchingList(s, self._wlredraw_size)
+
+    @size.setter
+    def size(self, value):
+        self._size = value
+        if hasattr(self.parent, "redraw"):
+            self.parent.redraw()
+
+    def _wlredraw_pos(self,wl):
+        self._pos = wl[:]
+        if hasattr(self.parent, "redraw"):
+            self.parent.redraw()
+
+    def _wlredraw_size(self,wl):
+        self._size = wl[:]
+        if hasattr(self.parent, "redraw"):
+            self.parent.redraw()
 
 
 class _GridCell(LayoutCell):
