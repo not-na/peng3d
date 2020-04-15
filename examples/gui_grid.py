@@ -67,10 +67,19 @@ def createGUI():
                              )
     s_start.addWidget(btn2)
 
-    btn3 = peng3d.gui.Button("btn3", s_start, peng.window, peng,
-                             pos=layout.get_cell([1, 1], [1, 1]),
-                             label="Button 3",
-                             )
+    btn3 = peng3d.gui.FramedImageButton("btn3", s_start, peng.window, peng,
+                                        pos=layout.get_cell([1, 1], [1, 1]),
+                                        label="Button 3",
+                                        bg_idle=["test_gui:gui.testbtn", "gui"],
+                                        bg_hover=["test_gui:gui.testbtn-hover", "gui"],
+                                        frame=[
+                                            (6, 87, 7),
+                                            (7, 87, 6),
+                                        ],
+                                        scale=[2, 1],
+                                        repeat_edge=True,
+                                        repeat_center=True,
+                                        )
     s_start.addWidget(btn3)
 
     btn4 = peng3d.gui.Button("btn4", s_start, peng.window, peng,

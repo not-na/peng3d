@@ -50,6 +50,7 @@ from .. import util
 
 class FakeWidget(object):
     def __init__(self, parent):
+        self.peng = parent.peng
         self.parent = parent
         self.submenu = parent
 

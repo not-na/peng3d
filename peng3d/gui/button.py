@@ -429,150 +429,360 @@ class ImageButton(Button):
 class FramedImageBackground(ImageBackground):
     """
     Background for the :py:class:`FramedImageButton` Widget.
-    
+
     This background is similar to :py:class:`ImageBackground`\ , but it attempts to scale smarter with less artifacts.
-    
+
     Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
     """
     def __init__(self,widget,
-                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_idle=None,
                  bg_hover=None,
                  bg_disabled=None,
                  bg_pressed=None,
                  frame=[[2,10,2],[2,10,2]],
+                 scale=(0, 0),
+                 repeat_edge=False,
+                 repeat_center=False,
+                 tex_size=None
                  ):
-        tc = bg_idle[2]
-        tsx, tsy = tc[3] - tc[0], tc[10] - tc[1]  # Texture Size
+        super(FramedImageBackground, self).__init__(widget, bg_idle, bg_hover, bg_disabled, bg_pressed)
 
-        self.frame_x = list(map(lambda x: x * (tsx / sum(frame[0])), frame[0]))
-        self.frame_y = list(map(lambda y: y * (tsy / sum(frame[1])), frame[1]))
+        if tex_size is None:
+            if (not (isinstance(bg_idle, list) or isinstance(bg_idle, tuple))) and len(bg_idle) != 2:
+                raise TypeError("Invalid type or length of bg_idle for auto-tex_size, please specify tex_size")
+            self.tsx, self.tsy = self.widget.peng.resourceMgr.getTexSize(bg_idle[0], bg_idle[1])  # Texture Size in pixels
+        else:
+            self.tsx, self.tsy = tex_size
+        self.frame_x = list(
+            map(lambda x: x * (self.tsx / sum(frame[0])), frame[0]))  # Frame Size in the texture, in pixels
+        self.frame_y = list(map(lambda y: y * (self.tsy / sum(frame[1])), frame[1]))
 
-        self.repeat_edge=True
-        self.repeat_center=True
-        super(FramedImageBackground,self).__init__(widget,bg_idle,bg_hover,bg_disabled,bg_pressed)
+        self._scale = scale
+
+        self.repeat_edge = repeat_edge
+        self.repeat_center = repeat_center
+
+        for i in frame:
+            if (self.repeat_edge or self.repeat_center) and i[1] == 0:
+                raise ValueError("Cannot repeat edges or center with the middle frame being 0")
+
+    @property
+    def scale(self):
+        if self._scale == (None, None):
+            raise ValueError(f"Scale cannot be {self._scale}")
+
+        scale = self._scale
+        if scale[0] == 0:  # 0 makes the resulting frames similar to the texture frames but scaled up to the widget size
+            scale = self.widget.size[0] / sum(self.frame_x), scale[1]
+        if scale[1] == 0:
+            scale = scale[0], self.widget.size[1] / sum(self.frame_y)
+        if scale[0] == None:  # None makes the scale similar to the second scale
+            scale = scale[1], scale[1]
+        if scale[1] == None:
+            scale = scale[0], scale[0]
+        return scale
+
     def init_bg(self):
-        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo), parent=pyglet.graphics.OrderedGroup(self.vlist_layer))
-        self.vlist_bg = self.submenu.batch2d.add(36,GL_QUADS,self.bg_group,
-            "v2f",
-            "t3f",
-            )
-        self.reg_vlist(self.vlist_bg)
+        if (self.frame_x[0] + self.frame_x[2]) * self.scale[0] > self.widget.size[0] or \
+                (self.frame_y[0] + self.frame_y[2]) * self.scale[1] > self.widget.size[1]:
+            raise ValueError(f"Scale {self.scale} is too large for this widget")
+
+        self.bg_group = pyglet.graphics.TextureGroup(_FakeTexture(*self.bg_texinfo),
+                                                     parent=pyglet.graphics.OrderedGroup(self.vlist_layer))
+        self.vlist_corners = self.submenu.batch2d.add(16, GL_QUADS, self.bg_group, "v2f", "t3f")
+        self.vlist_edges = self.submenu.batch2d.add(16, GL_QUADS, self.bg_group, "v2f", "t3f")
+        self.vlist_center = self.submenu.batch2d.add(4, GL_QUADS, self.bg_group, "v2f", "t3f")
+        self.reg_vlist(self.vlist_corners)
+        self.reg_vlist(self.vlist_edges)
+        self.reg_vlist(self.vlist_center)
+
     def redraw_bg(self):
         # Convenience Variables
         sx, sy = self.widget.size
         x, y = self.widget.pos
 
-        tc = self.bg_texinfo[2]
-        tsx, tsy = tc[3] - tc[0], tc[10] - tc[1]  # Texture Size
+        # Frame length in the result, in pixels
+        flx, fcx, frx = map(lambda x: self.scale[0] * x, self.frame_x)
+        sfcx = sx - (flx + frx)  # Stretched center frame length
+        fdy, fcy, fuy = map(lambda y: self.scale[1] * y, self.frame_y)
+        sfcy = sy - (fdy + fuy)
 
-        flx, frx = self.frame_x[0] * 4096, self.frame_x[2] * 4096
-        fcx = sx - (flx + frx)
-        fdy, fuy = self.frame_y[0] * 4096, self.frame_y[2] * 4096
-        fcy = sy - (fdy + fuy)
+        amx, amy, rx, ry = 0, 0, 0, 0
+        if self.repeat_center or self.repeat_edge:
+            amx, amy = int(sfcx / fcx), int(sfcy / fcy)  # Amount of complete textures in an edge
+            rx, ry = sfcx % fcx, sfcy % fcy  # Length of the rest tile in pixels
 
         # Vertices
 
-        # 13-12---14-15
+        # 11-10---15-14
         # |   |   |   |
-        # 9---8---10-11
+        # 8---9---12-13
         # |   |   |   |
-        # 3---2---5---7
+        # 3---2---7---6
         # |   |   |   |
-        # 0---1---4---6
+        # 0---1---4---5
 
+        # Corners
+        #     x         y
         v0 = x, y
         v1 = x + flx, y
         v2 = x + flx, y + fdy
         v3 = x, y + fdy
 
-        v4 = x + flx + fcx, y
-        v5 = x + flx + fcx, y + fdy
-        v6 = x + sx, y
-        v7 = x + sx, y + fdy
+        v4 = x + sx - frx, y
+        v5 = x + sx, y
+        v6 = x + sx, y + fdy
+        v7 = x + sx - frx, y + fdy
 
-        v8 = x + flx, y + fdy + fcy
-        v9 = x, y + fdy + fcy
-        v10 = x + flx + fcx, y + fdy + fcy
-        v11 = x + sx, y + fdy + fcy
+        v8 = x, y + sy - fuy
+        v9 = x + flx, y + sy - fuy
+        v10 = x + flx, y + sy
+        v11 = x, y + sy
 
-        v12 = x + flx, y + sy
-        v13 = x, y + sy
-        v14 = x + flx + fcx, y + sy
-        v15 = x + sx, y + sy
+        v12 = x + sx - frx, y + sy - fuy
+        v13 = x + sx, y + sy - fuy
+        v14 = x + sx, y + sy
+        v15 = x + sx - frx, y + sy
 
-        self.vlist_bg.vertices = v0+v1+v2+v3 + v1+v4+v5+v2 + v4+v6+v7+v5 + \
-                                 v3+v2+v8+v9 + v2+v5+v10+v8 + v5+v7+v11+v10 + \
-                                 v9+v8+v12+v13 + v8+v10+v14+v12 + v10+v11+v15+v14
+        self.vlist_corners.vertices = v0 + v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9 + v10 + v11 + v12 + v13 + v14 + v15
 
-        bg_disabled_coords = self.transform_texture(self.bg_disabled)
-        bg_pressed_coords = self.transform_texture(self.bg_pressed)
-        bg_hovered_coords = self.transform_texture(self.bg_hover)
-        bg_idle_coords = self.transform_texture(self.bg_texinfo)
+        if self.repeat_edge:
+            self.vlist_edges.resize(8 * (amx + amy + 2))
+
+            vd, vu, vl, vr = [], [], [], []
+            for i in range(amx):
+                vd += x + flx + i * fcx, y
+                vd += x + flx + (i + 1) * fcx, y
+                vd += x + flx + (i + 1) * fcx, y + fdy
+                vd += x + flx + i * fcx, y + fdy
+
+                vu += x + flx + i * fcx, y + sy - fuy
+                vu += x + flx + (i + 1) * fcx, y + sy - fuy
+                vu += x + flx + (i + 1) * fcx, y + sy
+                vu += x + flx + i * fcx, y + sy
+
+            vd += x + sx - frx - rx, y
+            vd += x + sx - frx, y
+            vd += x + sx - frx, y + fdy
+            vd += x + sx - frx - rx, y + fdy
+
+            vu += x + sx - frx - rx, y + sy - fuy
+            vu += x + sx - frx, y + sy - fuy
+            vu += x + sx - frx, y + sy
+            vu += x + sx - frx - rx, y + sy
+
+            for j in range(amy):
+                vl += x, y + fdy + j * fcy
+                vl += x + flx, y + fdy + j * fcy
+                vl += x + flx, y + fdy + (j + 1) * fcy
+                vl += x, y + fdy + (j + 1) * fcy
+
+                vr += x + sx - frx, y + fdy + j * fcy
+                vr += x + sx, y + fdy + j * fcy
+                vr += x + sx, y + fdy + (j + 1) * fcy
+                vr += x + sx - frx, y + fdy + (j + 1) * fcy
+
+            vl += x, y + sy - fuy - ry
+            vl += x + flx, y + sy - fuy - ry
+            vl += x + flx, y + sy - fuy
+            vl += x, y + sy - fuy
+
+            vr += x + sx - frx, y + sy - fuy - ry
+            vr += x + sx, y + sy - fuy - ry
+            vr += x + sx, y + sy - fuy
+            vr += x + sx - frx, y + sy - fuy
+
+            self.vlist_edges.vertices = vd + vl + vr + vu
+        else:
+            self.vlist_edges.vertices = v1 + v4 + v7 + v2 + v3 + v2 + v9 + v8 + v7 + v6 + v13 + v12 + v9 + v12 + v15 + v10
+
+        if self.repeat_center:
+            self.vlist_center.resize(4 * (amx + 1) * (amy + 1))
+            v = []
+
+            # Completed tiles
+            for j in range(amy):
+                for i in range(amx):
+                    v += x + flx + i * fcx, y + fdy + j * fcy
+                    v += x + flx + (i + 1) * fcx, y + fdy + j * fcy
+                    v += x + flx + (i + 1) * fcx, y + fdy + (j + 1) * fcy
+                    v += x + flx + i * fcx, y + fdy + (j + 1) * fcy
+
+            # X-shortened tiles
+            for j in range(amy):
+                v += x + sx - frx - rx, y + fdy + j * fcy
+                v += x + sx - frx, y + fdy + j * fcy
+                v += x + sx - frx, y + fdy + (j + 1) * fcy
+                v += x + sx - frx - rx, y + fdy + (j + 1) * fcy
+
+            # Y-shortened tiles
+            for i in range(amx):
+                v += x + flx + i * fcx, y + sy - fuy - ry
+                v += x + flx + (i + 1) * fcx, y + sy - fuy - ry
+                v += x + flx + (i + 1) * fcx, y + sy - fuy
+                v += x + flx + i * fcx, y + sy - fuy
+
+            # X-Y-shortened tile
+            v += x + sx - frx - rx, y + sy - fuy - ry
+            v += x + sx - frx, y + sy - fuy - ry
+            v += x + sx - frx, y + sy - fuy
+            v += x + sx - frx - rx, y + sy - fuy
+
+            self.vlist_center.vertices = v
+        else:
+            self.vlist_center.vertices = v2 + v7 + v12 + v9
 
         if not self.widget.enabled:
-            self.vlist_bg.tex_coords = bg_disabled_coords
+            self.vlist_corners.tex_coords, self.vlist_edges.tex_coords, self.vlist_center.tex_coords = self.transform_texture(
+                self.bg_disabled, amx, amy, rx, ry
+            )
         elif self.widget.pressed:
-            self.vlist_bg.tex_coords = bg_pressed_coords
+            self.vlist_corners.tex_coords, self.vlist_edges.tex_coords, self.vlist_center.tex_coords = self.transform_texture(
+                self.bg_pressed, amx, amy, rx, ry
+            )
         elif self.widget.is_hovering:
-            self.vlist_bg.tex_coords = bg_hovered_coords
+            self.vlist_corners.tex_coords, self.vlist_edges.tex_coords, self.vlist_center.tex_coords = self.transform_texture(
+                self.bg_hover, amx, amy, rx, ry
+            )
         else:
-            self.vlist_bg.tex_coords = bg_idle_coords
+            self.vlist_corners.tex_coords, self.vlist_edges.tex_coords, self.vlist_center.tex_coords = self.transform_texture(
+                self.bg_texinfo, amx, amy, rx, ry
+            )
 
-    def transform_texture(self, texture):
+    def transform_texture(self, texture, amx, amy, rx, ry):
         t = texture[2]
+        sx, sy = self.widget.size
 
-        # Tex_coords
+        tx, ty = t[3] - t[0], t[10] - t[1]  # Texture Size on texture level
+
+        # Frame length on texture level
+        flx, fcx, frx = map(lambda x: x * tx / self.tsx, self.frame_x)
+        fdy, fcy, fuy = map(lambda y: y * ty / self.tsy, self.frame_y)
+
+        if self.repeat_center or self.repeat_edge:
+            rx = (rx * tx) / (self.tsx * self.scale[0])
+            ry *= ty / self.tsy / self.scale[1]
+
         t0 = t[0], t[1], t[2]
-        t1 = t[0] + self.frame_x[0], t[1], t[2]
-        t2 = t[0] + self.frame_x[0], t[1] + self.frame_y[0], t[2]
-        t3 = t[0], t[1] + self.frame_y[0], t[2]
+        t1 = t[0] + flx, t[1], t[2]
+        t2 = t[0] + flx, t[1] + fdy, t[2]
+        t3 = t[0], t[1] + fdy, t[2]
 
-        t4 = t[3] - self.frame_x[2], t[4], t[5]
-        t5 = t[3] - self.frame_x[2], t[4] + self.frame_y[0], t[5]
-        t6 = t[3], t[4], t[5]
-        t7 = t[3], t[4] + self.frame_y[0], t[5]
+        t4 = t[3] - frx, t[4], t[5]
+        t5 = t[3], t[4], t[5]
+        t6 = t[3], t[4] + fdy, t[5]
+        t7 = t[3] - frx, t[4] + fdy, t[5]
 
-        t8 = t[9] + self.frame_x[0], t[10] - self.frame_y[2], t[11]
-        t9 = t[9], t[10] - self.frame_y[2], t[11]
-        t10 = t[6] - self.frame_x[2], t[7] - self.frame_y[2], t[8]
-        t11 = t[6], t[7] - self.frame_y[2], t[8]
+        t8 = t[9], t[10] - fuy, t[11]
+        t9 = t[9] + flx, t[10] - fuy, t[11]
+        t10 = t[9] + flx, t[10], t[11]
+        t11 = t[9], t[10], t[11]
 
-        t12 = t[9] + self.frame_x[0], t[10], t[11]
-        t13 = t[9], t[10], t[11]
-        t14 = t[6] - self.frame_y[2], t[7], t[8]
-        t15 = t[6], t[7], t[8]
+        t12 = t[6] - frx, t[7] - fuy, t[8]
+        t13 = t[6], t[7] - fuy, t[8]
+        t14 = t[6], t[7], t[8]
+        t15 = t[6] - frx, t[7], t[8]
 
-        tex_coords = t0+t1+t2+t3 + t1+t4+t5+t2 + t4+t6+t7+t5 + \
-                     t3+t2+t8+t9 + t2+t5+t10+t8 + t5+t7+t11+t10 + \
-                     t9+t8+t12+t13 + t8+t10+t14+t12 + t10+t11+t15+t14
-        return tex_coords
+        corner_tex = t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 + t10 + t11 + t12 + t13 + t14 + t15
+
+        if self.repeat_edge:
+            td, tl, tr, tu = [], [], [], []
+
+            td += (t1 + t4 + t7 + t2) * amx
+            tu += (t9 + t12 + t15 + t10) * amx
+
+            td += t1
+            td += t[0] + flx + rx, t[1], t[2]
+            td += t[0] + flx + rx, t[1] + fdy, t[2]
+            td += t2
+
+            tu += t9
+            tu += t[9] + flx + rx, t[10] - fuy, t[11]
+            tu += t[9] + flx + rx, t[10], t[11]
+            tu += t10
+
+            tl += (t3 + t2 + t9 + t8) * amy
+            tr += (t7 + t6 + t13 + t12) * amy
+
+            tl += t3 + t2
+            tl += t[0] + flx, t[1] + fdy + ry, t[2]
+            tl += t[0], t[1] + fdy + ry, t[2]
+
+            tr += t7 + t6
+            tr += t[3], t[4] + fdy + ry, t[5]
+            tr += t[3] - frx, t[4] + fdy + ry, t[5]
+
+            edge_tex = td + tl + tr + tu
+        else:
+            edge_tex = t1 + t4 + t7 + t2 + t3 + t2 + t9 + t8 + t7 + t6 + t13 + t12 + t9 + t12 + t15 + t10
+
+        if self.repeat_center:
+            tc = []
+
+            tc += (t2 + t7 + t12 + t9) * amx * amy
+            for i in range(amy):
+                tc += t2
+                tc += t[0] + flx + rx, t[1] + fdy, t[2]
+                tc += t[9] + flx + rx, t[10] - fuy, t[11]
+                tc += t9
+
+            for i in range(amx):
+                tc += t2 + t7
+                tc += t[3] - frx, t[4] + fdy + ry, t[5]
+                tc += t[0] + flx, t[1] + fdy + ry, t[2]
+
+            tc += t2
+            tc += t[0] + flx + rx, t[1] + fdy, t[2]
+            tc += t[0] + flx + rx, t[1] + fdy + ry, t[8]
+            tc += t[0] + flx, t[1] + fdy + ry, t[2]
+
+            center_tex = tc
+        else:
+            center_tex = t2 + t7 + t12 + t9
+
+        return corner_tex, edge_tex, center_tex
 
 class FramedImageButton(ImageButton):
     """
     Subclass of :py:class:`ImageButton` adding smart scaling to the background.
-    
+
     By default, this Widget uses :py:class:`FramedImageBackground` as its Background class.
-    
-    Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
+
+    ``frame`` defines the ratio between the borders and the center. The sum of each item must
+    be greater than zero, else a ZeroDivisionError may be thrown. Note that up to two items
+    of each frame may be left as ``0``\ . This will cause the appropriate border or center
+    to not be rendered at all.
+
+    ``tex_size`` may be left empty if a resource name is passed. It will then be automatically
+    determined.
+
+    .. todo::
+        Document ``scale``
     """
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=[100,24],bg=None,
                  label="Button",
                  font_size=None, font=None,
                  font_color=None,
-                 bg_idle=[GL_TEXTURE_2D,GL_TEXTURE1,[0]*12],
+                 bg_idle=None,
                  bg_hover=None,
                  bg_disabled=None,
                  bg_pressed=None,
-                 frame_size=[[2,10,2],[2,10,2]],
+                 frame=[[2,10,2],[2,10,2]],
+                 scale=(1, 1),
+                 repeat_edge=False,
+                 repeat_center=False,
+                 tex_size=None
                  ):
         font = font if font is not None else submenu.font
         font_size = font_size if font_size is not None else submenu.font_size
         font_color = font_color if font_color is not None else submenu.font_color
 
         if bg is None:
-            bg = FramedImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed,frame_size)
-        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font)
+            self.peng = peng
+            bg = FramedImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed,frame, scale, repeat_edge, repeat_center, tex_size)
+        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos=pos,size=size,bg=bg,label=label, font_size=font_size, font_color=font_color, font=font)
+
 
 
 class ToggleButton(Button):
