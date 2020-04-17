@@ -83,7 +83,7 @@ class GridLayout(Layout):
         """
         return self.size[0]/self.res[0], self.size[1]/self.res[1]
 
-    def get_cell(self, pos, size, anchor_x="left", anchor_y="bottom"):
+    def get_cell(self, pos, size, anchor_x="left", anchor_y="bottom", border=1):
         """
         Returns a grid cell suitable for use as the ``pos`` parameter of any widget.
 
@@ -95,7 +95,7 @@ class GridLayout(Layout):
         :param anchor_y: either ``bottom``\\ , ``center`` or ``top``
         :return: LayoutCell subclass
         """
-        return _GridCell(self.peng, self, pos, size, anchor_x, anchor_y)
+        return _GridCell(self.peng, self, pos, size, anchor_x, anchor_y, border)
 
 
 class LayoutCell(object):
@@ -106,6 +106,9 @@ class LayoutCell(object):
 
     Instances can be passed to Widgets as the ``pos`` argument. The ``size`` argument will
     be automatically overridden.
+
+    Note that manually setting ``size`` will override the size set by the layout cell,
+    though the position will be kept.
     """
     @property
     def pos(self):
@@ -229,7 +232,7 @@ class DumbLayoutCell(LayoutCell):
 
 
 class _GridCell(LayoutCell):
-    def __init__(self, peng, parent, offset, size, anchor_x, anchor_y):
+    def __init__(self, peng, parent, offset, size, anchor_x, anchor_y, border=1):
         self.peng = peng
         self.parent = parent
         self.offset = offset
@@ -237,10 +240,13 @@ class _GridCell(LayoutCell):
 
         self.anchor_x = anchor_x
         self.anchor_y = anchor_y
+        self.border = border
 
     @property
     def pos(self):
         dx, dy = self.parent.bordersize
+        dx *= self.border
+        dy *= self.border
 
         px, py = self.parent.pos            # Parent position in px
         oxc, oyc = self.offset              # Offset in cells
@@ -275,6 +281,6 @@ class _GridCell(LayoutCell):
         dx, dy = self.parent.bordersize
         csx, csy = self.parent.cell_size  # Cell size in px
         sxc, sxy = self._size  # Size in cells
-        sx, sy = sxc * csx-dx, sxy * csy-dy
+        sx, sy = sxc * csx-dx*self.border, sxy * csy-dy*self.border
 
         return sx, sy

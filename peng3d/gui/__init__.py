@@ -199,6 +199,11 @@ class GUIMenu(Menu):
                 self.bg.initialized=True
             self.bg.redraw_bg()
 
+    def on_enter(self, old):
+        super().on_enter(old)
+
+        self.submenu.redraw()
+
 class SubMenu(util.ActionDispatcher):
     """
     Sub Menu of the GUI system.
@@ -368,6 +373,11 @@ class SubMenu(util.ActionDispatcher):
         elif bg in ["flat","gradient","oldshadow","material"]:
             self.bg = ContainerButtonBackground(self,borderstyle=bg)
             self.on_resize(self.window.width,self.window.height)
+
+    def redraw(self):
+        for widget in self.widgets.values():
+            widget.on_mouse_motion(*self.window.mouse_pos, 0, 0)
+            widget.redraw()
 
     # The following properties are needed for compatibility with Background classes
     @property

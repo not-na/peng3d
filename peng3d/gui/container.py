@@ -166,7 +166,7 @@ class Container(Widget):
         
         if not isinstance(self.submenu,Container):
             glEnable(GL_SCISSOR_TEST)
-            glScissor(*self.pos+self.size)
+            glScissor(*[int(i) for i in self.pos+self.size])
         
         SubMenu.draw(self)
         

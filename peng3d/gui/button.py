@@ -160,7 +160,7 @@ class ButtonBackground(Background):
         
         Note that this property may not represent the actual pressed state, it will always be False if ``change_on_press`` is disabled.
         """
-        return self.change_on_press and self.widget.pressed
+        return self.change_on_press and (self.widget.pressed or getattr(self.widget, "focussed", False))
     @property
     def is_hovering(self):
         """
@@ -241,7 +241,7 @@ class Button(Widget):
     The text color used is ``[62,67,73,255]`` in RGBA and the font used is Arial, which should be available on most systems.
     """
     def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],bg=None,
+                 pos=None, size=None,bg=None,
                  border=[4,4], borderstyle=None,
                  label="Button",min_size=None,
                  font_size=None, font=None,
@@ -333,6 +333,7 @@ class ImageBackground(Background):
     """
 
     vlist_layer = 0
+    change_on_press = True
 
     def __init__(self,widget,bg_idle=None,bg_hover=None,bg_disabled=None,bg_pressed=None):
         self.widget = widget
@@ -387,12 +388,21 @@ class ImageBackground(Background):
         
         if not self.widget.enabled:
             self.vlist_bg.tex_coords = self.bg_disabled[2]
-        elif self.widget.pressed:
+        elif self.pressed:
             self.vlist_bg.tex_coords = self.bg_pressed[2]
         elif self.widget.is_hovering:
             self.vlist_bg.tex_coords = self.bg_hover[2]
         else:
             self.vlist_bg.tex_coords = self.bg_texinfo[2]
+
+    @property
+    def pressed(self):
+        """
+        Read-only helper property to be used by borderstyles for determining if the widget should be rendered as pressed or not.
+
+        Note that this property may not represent the actual pressed state, it will always be False if ``change_on_press`` is disabled.
+        """
+        return self.change_on_press and (self.widget.pressed or getattr(self.widget, "focussed", False))
 
 class ImageButton(Button):
     """
@@ -403,7 +413,7 @@ class ImageButton(Button):
     There are no changes to any other mechanics of the Button, only visually.
     """
     def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],bg=None,
+                 pos=None, size=None,bg=None,
                  label="Button",
                  font_size=None, font=None,
                  font_color=None,
@@ -632,7 +642,7 @@ class FramedImageBackground(ImageBackground):
             self.vlist_corners.tex_coords, self.vlist_edges.tex_coords, self.vlist_center.tex_coords = self.transform_texture(
                 self.bg_disabled, amx, amy, rx, ry
             )
-        elif self.widget.pressed:
+        elif self.pressed:
             self.vlist_corners.tex_coords, self.vlist_edges.tex_coords, self.vlist_center.tex_coords = self.transform_texture(
                 self.bg_pressed, amx, amy, rx, ry
             )
@@ -756,7 +766,7 @@ class FramedImageButton(ImageButton):
         Document ``scale``
     """
     def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],bg=None,
+                 pos=None, size=None,bg=None,
                  label="Button",
                  font_size=None, font=None,
                  font_color=None,
@@ -965,7 +975,7 @@ class Checkbox(ToggleButton):
     The label given will be displayed to the right of the Checkbox.
     """
     def __init__(self,name,submenu,window,peng,
-                 pos=None, size=[100,24],bg=None,
+                 pos=None, size=None,bg=None,
                  borderstyle=None,
                  label="Checkbox",
                  checkcolor=[240,119,70],

@@ -66,6 +66,8 @@ class PengWindow(pyglet.window.Window):
             if symbol == key.ESCAPE:
                 return pyglet.event.EVENT_HANDLED
         self.push_handlers(on_key_press) # to stop the auto-exit on escape
+
+        self.mouse_pos = [0, 0]
         
         self.peng.sendEvent("peng3d:window.create",{"peng":self.peng,"window":self})
     def setup(self):
@@ -251,6 +253,9 @@ class PengWindow(pyglet.window.Window):
         """
         self.clear()
         self.menu.draw()
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.mouse_pos = x, y
     
     def dispatch_event(self,event_type,*args):
         """

@@ -173,6 +173,7 @@ class BasicWidget(ActionDispatcher):
         self._enabled = True
         self._is_scrollbar = False
         self.do_redraw = True
+        self.stay_pressed = False
         
         self.registerEventHandlers()
     
@@ -227,13 +228,13 @@ class BasicWidget(ActionDispatcher):
         """
         Similar to :py:attr:`pos` but for the size instead.
         """
-        if isinstance(getattr(self, "_pos", None), layout.LayoutCell):
-            s = self._pos.size
-        elif isinstance(self._size,list) or isinstance(self._size,tuple):
+        if isinstance(self._size,list) or isinstance(self._size,tuple):
             s = self._size
         elif callable(self._size):
             w,h = self.submenu.size[:]
             s = self._size(w,h)
+        elif isinstance(getattr(self, "_pos", None), layout.LayoutCell):
+            s = self._pos.size
         else:
             raise TypeError("Invalid size type")
         
@@ -361,7 +362,8 @@ class BasicWidget(ActionDispatcher):
         if self.pressed:
             if mouse_aabb([x,y],self.size,self.pos):
                 self.doAction("click")
-            self.pressed = False
+            if not self.stay_pressed:
+                self.pressed = False
             self.doAction("statechanged")
             self.redraw()
     def on_mouse_drag(self,x,y,dx,dy,button,modifiers):
