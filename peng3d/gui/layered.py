@@ -29,6 +29,7 @@ __all__ = [
     "BasicWidgetLayer","WidgetLayer",
     "GroupWidgetLayer",
     "ImageWidgetLayer","DynImageWidgetLayer",
+    "FramedImageWidgetLayer",
     "ImageButtonWidgetLayer",
     "LabelWidgetLayer",
     "FormattedLabelWidgetLayer","HTMLLabelWidgetLayer",
@@ -417,7 +418,7 @@ class DynImageWidgetLayer(WidgetLayer):
         
         ``rsrc`` should be a 2-tuple of ``(resource_name,category)``\ .
         """
-        self.imgs[name]=self.widget.peng.resourceMgr.getTex(*rsrc)
+        self.imgs[name]=self.widget.peng.resourceMgr.normTex(rsrc)
     def switchImage(self,name):
         """
         Switches the active image to the given name.
@@ -450,6 +451,330 @@ class DynImageWidgetLayer(WidgetLayer):
         
         self.img_vlist.tex_coords = self.imgs[self.cur_img][2]
 
+
+class FramedImageWidgetLayer(DynImageWidgetLayer):
+    """
+    Subclass of :py:class:`DynImageWidgetLayer` allowing for dynamically smart scaled images.
+
+    Similar to :py:class:`FramedImageButton`\\ . Allows for scaling and/or repeating
+    the borders, corners and center independently.
+
+    Note that the ``tex_size`` parameter, if not given, will be derived from a random texture
+    that has been given in ``imgs``\\ . Also note that the ``frame``\\ , ``scale``\\ ,
+    ``repeat_edge`` and ``repeat_center`` parameters are identical for all images.
+    """
+    def __init__(self,name, widget,
+                 z_index=None,
+                 border=[0, 0], offset=[0, 0],
+                 imgs={},
+                 default=None,
+                 frame=[[2,10,2],[2,10,2]],
+                 scale=(0, 0),
+                 repeat_edge=False,
+                 repeat_center=False,
+                 tex_size=None,
+                 ):
+        super().__init__(name, widget, z_index, border, offset, imgs, default)
+
+        if tex_size is None:
+            t = list(imgs.values())[0]
+            self.tsx, self.tsy = self.widget.peng.resourceMgr.getTexSize(*t)  # Texture Size in pixels
+        else:
+            self.tsx, self.tsy = tex_size
+        self.frame_x = list(
+            map(lambda x: x * (self.tsx / sum(frame[0])), frame[0]))  # Frame Size in the texture, in pixels
+        self.frame_y = list(map(lambda y: y * (self.tsy / sum(frame[1])), frame[1]))
+
+        self._scale = scale
+
+        self.repeat_edge = repeat_edge
+        self.repeat_center = repeat_center
+
+        for i in frame:
+            if (self.repeat_edge or self.repeat_center) and i[1] == 0:
+                raise ValueError("Cannot repeat edges or center with the middle frame being 0")
+
+    @property
+    def scale(self):
+        if self._scale == (None, None):
+            raise ValueError(f"Scale cannot be {self._scale}")
+
+        scale = self._scale
+        if scale[0] == 0:  # 0 makes the resulting frames similar to the texture frames but scaled up to the widget size
+            scale = self.size[0] / sum(self.frame_x), scale[1]
+        if scale[1] == 0:
+            scale = scale[0], self.size[1] / sum(self.frame_y)
+        if scale[0] == None:  # None makes the scale similar to the second scale
+            scale = scale[1], scale[1]
+        if scale[1] == None:
+            scale = scale[0], scale[0]
+        return scale
+
+    @property
+    def size(self):
+        return self.getSize()
+
+    def initialize(self):
+        self.cur_img = self.cur_img if self.cur_img is not None else (
+            self.default_img if self.default_img is not None else list(self.imgs.keys())[0])
+
+        if (self.frame_x[0] + self.frame_x[2]) * self.scale[0] > self.widget.size[0] or \
+                (self.frame_y[0] + self.frame_y[2]) * self.scale[1] > self.widget.size[1]:
+            raise ValueError(f"Scale {self.scale} is too large for this widget")
+
+        self.bg_group = _DynImageGroup(self, self.group)
+        self.vlist_corners = self.widget.submenu.batch2d.add(16, GL_QUADS, self.bg_group, "v2f", "t3f")
+        self.vlist_edges = self.widget.submenu.batch2d.add(16, GL_QUADS, self.bg_group, "v2f", "t3f")
+        self.vlist_center = self.widget.submenu.batch2d.add(4, GL_QUADS, self.bg_group, "v2f", "t3f")
+        self.regVList(self.vlist_corners)
+        self.regVList(self.vlist_edges)
+        self.regVList(self.vlist_center)
+
+    def on_redraw(self):
+        WidgetLayer.on_redraw(self)
+
+        # Convenience Variables
+        sx, sy = self.size
+        x, y, _, _ = self.getPos()
+
+        # Frame length in the result, in pixels
+        flx, fcx, frx = map(lambda x: self.scale[0] * x, self.frame_x)
+        sfcx = sx - (flx + frx)  # Stretched center frame length
+        fdy, fcy, fuy = map(lambda y: self.scale[1] * y, self.frame_y)
+        sfcy = sy - (fdy + fuy)
+
+        amx, amy, rx, ry = 0, 0, 0, 0
+        if self.repeat_center or self.repeat_edge:
+            amx, amy = int(sfcx / fcx), int(sfcy / fcy)  # Amount of complete textures in an edge
+            rx, ry = sfcx % fcx, sfcy % fcy  # Length of the rest tile in pixels
+
+        # Vertices
+
+        # 11-10---15-14
+        # |   |   |   |
+        # 8---9---12-13
+        # |   |   |   |
+        # 3---2---7---6
+        # |   |   |   |
+        # 0---1---4---5
+
+        # Corners
+        #     x         y
+        v0 = x, y
+        v1 = x + flx, y
+        v2 = x + flx, y + fdy
+        v3 = x, y + fdy
+
+        v4 = x + sx - frx, y
+        v5 = x + sx, y
+        v6 = x + sx, y + fdy
+        v7 = x + sx - frx, y + fdy
+
+        v8 = x, y + sy - fuy
+        v9 = x + flx, y + sy - fuy
+        v10 = x + flx, y + sy
+        v11 = x, y + sy
+
+        v12 = x + sx - frx, y + sy - fuy
+        v13 = x + sx, y + sy - fuy
+        v14 = x + sx, y + sy
+        v15 = x + sx - frx, y + sy
+
+        self.vlist_corners.vertices = (
+                v0 + v1 + v2 + v3 +
+                v4 + v5 + v6 + v7 +
+                v8 + v9 + v10 + v11 +
+                v12 + v13 + v14 + v15
+        )
+
+        if self.repeat_edge:
+            self.vlist_edges.resize(8 * (amx + amy + 2))
+
+            vd, vu, vl, vr = [], [], [], []
+            for i in range(amx):
+                vd += x + flx + i * fcx, y
+                vd += x + flx + (i + 1) * fcx, y
+                vd += x + flx + (i + 1) * fcx, y + fdy
+                vd += x + flx + i * fcx, y + fdy
+
+                vu += x + flx + i * fcx, y + sy - fuy
+                vu += x + flx + (i + 1) * fcx, y + sy - fuy
+                vu += x + flx + (i + 1) * fcx, y + sy
+                vu += x + flx + i * fcx, y + sy
+
+            vd += x + sx - frx - rx, y
+            vd += x + sx - frx, y
+            vd += x + sx - frx, y + fdy
+            vd += x + sx - frx - rx, y + fdy
+
+            vu += x + sx - frx - rx, y + sy - fuy
+            vu += x + sx - frx, y + sy - fuy
+            vu += x + sx - frx, y + sy
+            vu += x + sx - frx - rx, y + sy
+
+            for j in range(amy):
+                vl += x, y + fdy + j * fcy
+                vl += x + flx, y + fdy + j * fcy
+                vl += x + flx, y + fdy + (j + 1) * fcy
+                vl += x, y + fdy + (j + 1) * fcy
+
+                vr += x + sx - frx, y + fdy + j * fcy
+                vr += x + sx, y + fdy + j * fcy
+                vr += x + sx, y + fdy + (j + 1) * fcy
+                vr += x + sx - frx, y + fdy + (j + 1) * fcy
+
+            vl += x, y + sy - fuy - ry
+            vl += x + flx, y + sy - fuy - ry
+            vl += x + flx, y + sy - fuy
+            vl += x, y + sy - fuy
+
+            vr += x + sx - frx, y + sy - fuy - ry
+            vr += x + sx, y + sy - fuy - ry
+            vr += x + sx, y + sy - fuy
+            vr += x + sx - frx, y + sy - fuy
+
+            self.vlist_edges.vertices = vd + vl + vr + vu
+        else:
+            self.vlist_edges.vertices = (
+                    v1 + v4 + v7 + v2 +
+                    v3 + v2 + v9 + v8 +
+                    v7 + v6 + v13 + v12 +
+                    v9 + v12 + v15 + v10
+            )
+
+        if self.repeat_center:
+            self.vlist_center.resize(4 * (amx + 1) * (amy + 1))
+            v = []
+
+            # Completed tiles
+            for j in range(amy):
+                for i in range(amx):
+                    v += x + flx + i * fcx, y + fdy + j * fcy
+                    v += x + flx + (i + 1) * fcx, y + fdy + j * fcy
+                    v += x + flx + (i + 1) * fcx, y + fdy + (j + 1) * fcy
+                    v += x + flx + i * fcx, y + fdy + (j + 1) * fcy
+
+            # X-shortened tiles
+            for j in range(amy):
+                v += x + sx - frx - rx, y + fdy + j * fcy
+                v += x + sx - frx, y + fdy + j * fcy
+                v += x + sx - frx, y + fdy + (j + 1) * fcy
+                v += x + sx - frx - rx, y + fdy + (j + 1) * fcy
+
+            # Y-shortened tiles
+            for i in range(amx):
+                v += x + flx + i * fcx, y + sy - fuy - ry
+                v += x + flx + (i + 1) * fcx, y + sy - fuy - ry
+                v += x + flx + (i + 1) * fcx, y + sy - fuy
+                v += x + flx + i * fcx, y + sy - fuy
+
+            # X-Y-shortened tile
+            v += x + sx - frx - rx, y + sy - fuy - ry
+            v += x + sx - frx, y + sy - fuy - ry
+            v += x + sx - frx, y + sy - fuy
+            v += x + sx - frx - rx, y + sy - fuy
+
+            self.vlist_center.vertices = v
+        else:
+            self.vlist_center.vertices = v2 + v7 + v12 + v9
+
+        t = self.transform_texture(self.imgs[self.cur_img], amx, amy, rx, ry)
+        self.vlist_corners.tex_coords, self.vlist_edges.tex_coords, self.vlist_center.tex_coords = t
+
+    def transform_texture(self, texture, amx, amy, rx, ry):
+        t = texture[2]
+        sx, sy = self.size
+
+        tx, ty = t[3] - t[0], t[10] - t[1]  # Texture Size on texture level
+
+        # Frame length on texture level
+        flx, fcx, frx = map(lambda x: x * tx / self.tsx, self.frame_x)
+        fdy, fcy, fuy = map(lambda y: y * ty / self.tsy, self.frame_y)
+
+        if self.repeat_center or self.repeat_edge:
+            rx = (rx * tx) / (self.tsx * self.scale[0])
+            ry *= ty / self.tsy / self.scale[1]
+
+        t0 = t[0], t[1], t[2]
+        t1 = t[0] + flx, t[1], t[2]
+        t2 = t[0] + flx, t[1] + fdy, t[2]
+        t3 = t[0], t[1] + fdy, t[2]
+
+        t4 = t[3] - frx, t[4], t[5]
+        t5 = t[3], t[4], t[5]
+        t6 = t[3], t[4] + fdy, t[5]
+        t7 = t[3] - frx, t[4] + fdy, t[5]
+
+        t8 = t[9], t[10] - fuy, t[11]
+        t9 = t[9] + flx, t[10] - fuy, t[11]
+        t10 = t[9] + flx, t[10], t[11]
+        t11 = t[9], t[10], t[11]
+
+        t12 = t[6] - frx, t[7] - fuy, t[8]
+        t13 = t[6], t[7] - fuy, t[8]
+        t14 = t[6], t[7], t[8]
+        t15 = t[6] - frx, t[7], t[8]
+
+        corner_tex = t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 + t10 + t11 + t12 + t13 + t14 + t15
+
+        if self.repeat_edge:
+            td, tl, tr, tu = [], [], [], []
+
+            td += (t1 + t4 + t7 + t2) * amx
+            tu += (t9 + t12 + t15 + t10) * amx
+
+            td += t1
+            td += t[0] + flx + rx, t[1], t[2]
+            td += t[0] + flx + rx, t[1] + fdy, t[2]
+            td += t2
+
+            tu += t9
+            tu += t[9] + flx + rx, t[10] - fuy, t[11]
+            tu += t[9] + flx + rx, t[10], t[11]
+            tu += t10
+
+            tl += (t3 + t2 + t9 + t8) * amy
+            tr += (t7 + t6 + t13 + t12) * amy
+
+            tl += t3 + t2
+            tl += t[0] + flx, t[1] + fdy + ry, t[2]
+            tl += t[0], t[1] + fdy + ry, t[2]
+
+            tr += t7 + t6
+            tr += t[3], t[4] + fdy + ry, t[5]
+            tr += t[3] - frx, t[4] + fdy + ry, t[5]
+
+            edge_tex = td + tl + tr + tu
+        else:
+            edge_tex = t1 + t4 + t7 + t2 + t3 + t2 + t9 + t8 + t7 + t6 + t13 + t12 + t9 + t12 + t15 + t10
+
+        if self.repeat_center:
+            tc = []
+
+            tc += (t2 + t7 + t12 + t9) * amx * amy
+            for i in range(amy):
+                tc += t2
+                tc += t[0] + flx + rx, t[1] + fdy, t[2]
+                tc += t[9] + flx + rx, t[10] - fuy, t[11]
+                tc += t9
+
+            for i in range(amx):
+                tc += t2 + t7
+                tc += t[3] - frx, t[4] + fdy + ry, t[5]
+                tc += t[0] + flx, t[1] + fdy + ry, t[2]
+
+            tc += t2
+            tc += t[0] + flx + rx, t[1] + fdy, t[2]
+            tc += t[0] + flx + rx, t[1] + fdy + ry, t[8]
+            tc += t[0] + flx, t[1] + fdy + ry, t[2]
+
+            center_tex = tc
+        else:
+            center_tex = t2 + t7 + t12 + t9
+
+        return corner_tex, edge_tex, center_tex
+
+
 class ImageButtonWidgetLayer(DynImageWidgetLayer):
     """
     Subclass of :py:class:`DynImageWidgetLayer()` that acts like an :py:class:`ImageButton()`\ .
@@ -472,6 +797,7 @@ class ImageButtonWidgetLayer(DynImageWidgetLayer):
                     default="idle",
                     )
         self.widget.addAction("statechanged",lambda:self.switchImage(self.widget.getState()))
+
 
 class LabelWidgetLayer(WidgetLayer):
     """

@@ -437,8 +437,6 @@ class FramedImageBackground(ImageBackground):
     Background for the :py:class:`FramedImageButton` Widget.
 
     This background is similar to :py:class:`ImageBackground`\\ , but it attempts to scale smarter with less artifacts.
-
-    Note that this feature is currently not working properly, and will thus output a warning on the console if tried to use.
     """
     def __init__(self,widget,
                  bg_idle=None,
@@ -449,7 +447,7 @@ class FramedImageBackground(ImageBackground):
                  scale=(0, 0),
                  repeat_edge=False,
                  repeat_center=False,
-                 tex_size=None
+                 tex_size=None,
                  ):
         super(FramedImageBackground, self).__init__(widget, bg_idle, bg_hover, bg_disabled, bg_pressed)
 

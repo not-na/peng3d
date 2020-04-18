@@ -269,7 +269,7 @@ class _GridCell(LayoutCell):
             y = py+oy+dy/2
         elif self.anchor_y == "center":
             y = py+oy+sy/2
-        elif self.anchor_y == "right":
+        elif self.anchor_y == "top":
             y = py+oy+sy-dy/2
         else:
             raise ValueError(f"Invalid anchor_y of {self.anchor_y}")

@@ -145,6 +145,9 @@ class BasicWidget(ActionDispatcher):
     ``size`` is similar to ``pos`` but will only get ``window_width,window_height`` as its arguments.
     
     Commonly, the lambda ``lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.)`` is used to center the widget.
+
+    Additionally, an instance of a subclass of :py:class:`LayoutCell` may be passed as ``pos``\\ .
+    Note that this will automatically override ``size`` as well, unless ``size`` is also supplied.
     
     The actions available may differ from widget to widget, by default these are used:
     
@@ -154,6 +157,7 @@ class BasicWidget(ActionDispatcher):
     - ``hover_start`` signals that the cursor is now hovering over the widget
     - ``hover`` is called every time the cursor moves while still being over the widget
     - ``hover_end`` is called after the cursor leaves the widget
+    - ``statechanged`` is called every time the visual state of the widget should change
 
     """
     def __init__(self,name,submenu,window,peng,
@@ -211,9 +215,10 @@ class BasicWidget(ActionDispatcher):
             r = self._pos.pos
         else:
             raise TypeError("Invalid position type")
-        
-        ox,oy = self.submenu.pos
-        r = r[0]+ox,r[1]+oy
+
+        if not isinstance(self._pos, layout.LayoutCell):
+            ox,oy = self.submenu.pos
+            r = r[0]+ox,r[1]+oy
         
         #if isinstance(self.submenu,ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
         #    r = r[0],r[1]+self.submenu.offset_y

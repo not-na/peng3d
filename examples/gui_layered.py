@@ -46,7 +46,7 @@ def createGUI():
     btn_ex1 = peng3d.gui.LayeredWidget("btn_ex1",s_start,peng.window,peng,
                                 # at the center
                                 pos=lambda sw,sh,bw,bh: (sw/2.-bw/2.,sh/2.-bh/2.),
-                                size=[100,100],
+                                size=lambda sw, sh: (sw/2, sh/2),
                                 )
     s_start.addWidget(btn_ex1)
     
@@ -64,12 +64,29 @@ def createGUI():
                             )
                     )
     # Static Image Layer with additional border to show underlying layers
-    btn_ex1.addLayer(peng3d.gui.ImageWidgetLayer("img",btn_ex1,
-                            # Uses the resources of test_gui.py
-                            img=["test_gui:gui.testbtn","gui"],
-                            border=[4,4],
-                            )
-                    )
+    #btn_ex1.addLayer(peng3d.gui.ImageWidgetLayer("img",btn_ex1,
+    #                        # Uses the resources of test_gui.py
+    #                        img=["test_gui:gui.testbtn","gui"],
+    #                        border=[4,4],
+    #                        )
+    #                )
+
+    # "Smart" framed Image Layer with additional border
+    btn_ex1.addLayer(peng3d.gui.FramedImageWidgetLayer(
+        "img", btn_ex1,
+        imgs={
+            "default": ("test_gui:gui.testbtn", "gui"),
+        },
+        default="default",
+        frame=[
+            (6, 87, 7),
+            (7, 87, 7),
+        ],
+        scale=[1, 1],
+        repeat_edge=True,
+        repeat_center=True,
+    ))
+
     # Plaintext label automatically centered on the parent widget
     #btn_ex1.addLayer(peng3d.gui.LabelWidgetLayer("label",btn_ex1,
     #                        label="Lorem"
