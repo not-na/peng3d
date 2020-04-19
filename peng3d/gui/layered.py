@@ -832,7 +832,7 @@ class LabelWidgetLayer(WidgetLayer):
         if getattr(label,"_dynamic",False):
             def f():
                 self.label = str(label)
-            self.peng.i18n.addAction("setlang",f)
+            self.widget.peng.i18n.addAction("setlang",f)
         
         self.on_redraw()
     
