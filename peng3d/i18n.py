@@ -171,7 +171,7 @@ class TranslationManager(ActionDispatcher):
             ls = line.split("=")
             k = ls.pop(0) # first ever useful application of pop
             v = "=".join(ls).strip()
-            d[k]=v
+            d[k]=v.replace("\\n", "\n")
         self.cache[lang][domain]=d
         
         self.doAction("loaddomain")
