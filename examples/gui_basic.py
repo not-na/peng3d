@@ -145,7 +145,7 @@ def createGUI(main,game):
                                 pos=[100,100],
                                 size=[300,300],
                                 borderstyle="oldshadow",
-                                content_height=200,
+                                content_height=500,
                                 )
     #testcontainer.setBackground([255,241,240,255])
     testcontainer.setBackground("oldshadow")

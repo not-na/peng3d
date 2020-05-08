@@ -32,8 +32,6 @@ import weakref
 import time
 
 # Internal Debug/Performance monitor variable
-from . import layout
-
 _num_saved_redraws = 0
 
 try:
@@ -43,6 +41,8 @@ except ImportError:
     pass # Headless mode
 
 from ..util import mouse_aabb, ActionDispatcher, WatchingList as _WatchingList
+from . import layout
+
 
 class Background(object):
     """
@@ -220,8 +220,8 @@ class BasicWidget(ActionDispatcher):
             ox,oy = self.submenu.pos
             r = r[0]+ox,r[1]+oy
         
-        #if isinstance(self.submenu,ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
-        #    r = r[0],r[1]+self.submenu.offset_y
+        if isinstance(self.submenu, ScrollableContainer) and not self._is_scrollbar:# and self.name != "__scrollbar_%s"%self.submenu.name: # Widget inside scrollable container and not the scrollbar
+            r = r[0], r[1]+self.submenu.offset_y
         return _WatchingList(r,self._wlredraw_pos)
     @pos.setter
     def pos(self,value):
