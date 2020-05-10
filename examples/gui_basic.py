@@ -90,8 +90,9 @@ def createGUI(main,game):
     def f():
         global testbtn
         print("Testbtn clicked!")
-        title.delWidget(testbtn)
-        del testbtn
+        #title.delWidget(testbtn)
+        #del testbtn
+        playbtn.visible = not playbtn.visible
     testbtn.addAction("click",f)
     title.addWidget(testbtn)
     

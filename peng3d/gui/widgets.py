@@ -178,6 +178,7 @@ class BasicWidget(ActionDispatcher):
         self._is_scrollbar = False
         self.do_redraw = True
         self.stay_pressed = False
+        self._visible = True
         
         self.registerEventHandlers()
     
@@ -206,6 +207,10 @@ class BasicWidget(ActionDispatcher):
         
         Note that setting this property will override any callable set permanently.
         """
+        if not self.visible:
+            # TODO: find a "better" way to do this
+            return [-10000, -10000]
+
         if isinstance(self._pos,list) or isinstance(self._pos,tuple):
             r = self._pos
         elif callable(self._pos):
@@ -290,7 +295,23 @@ class BasicWidget(ActionDispatcher):
     def enabled(self,value):
         self._enabled=value
         self.redraw()
-    
+
+    @property
+    def visible(self):
+        """
+        Property used for storing whether or not this widget is enabled.
+
+        May influence rendering and behavior.
+
+        Note that the widget will be immediately redrawn if this property is changed.
+        """
+        return self._visible
+
+    @visible.setter
+    def visible(self, value):
+        self._visible = value
+        self.redraw()
+
     def getState(self):
         """
         Returns the current state of the widget.
