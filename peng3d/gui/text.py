@@ -62,6 +62,7 @@ class Label(Widget):
                  label_cls=pyglet.text.Label,
                  anchor_x="center",
                  anchor_y="center",
+                 label_layer=1,
                 ):
         font = font if font is not None else submenu.font
         font_size = font_size if font_size is not None else submenu.font_size
@@ -78,7 +79,7 @@ class Label(Widget):
                     x=0,y=0,
                     batch=self.submenu.batch2d,
                     anchor_x=anchor_x, anchor_y=anchor_y,
-                    group=pyglet.graphics.OrderedGroup(1),
+                    group=pyglet.graphics.OrderedGroup(label_layer),
                     width=self.size[0],height=self.size[1],
                     multiline=multiline,
                     )
@@ -93,7 +94,7 @@ class Label(Widget):
                     x=0,y=0,
                     batch=self.submenu.batch2d,
                     anchor_x=anchor_x, anchor_y=anchor_y,
-                    group=pyglet.graphics.OrderedGroup(1),
+                    group=pyglet.graphics.OrderedGroup(label_layer),
                     width=self.size[0],height=self.size[1],
                     multiline=multiline,
                     )

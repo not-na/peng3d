@@ -246,6 +246,7 @@ class Button(Widget):
                  label="Button",min_size=None,
                  font_size=None, font=None,
                  font_color=None,
+                 label_layer=1,
                  ):
         font = font if font is not None else submenu.font
         font_size = font_size if font_size is not None else submenu.font_size
@@ -260,7 +261,7 @@ class Button(Widget):
                 color=font_color,
                 x=0,y=0,
                 batch=self.submenu.batch2d,
-                group=pyglet.graphics.OrderedGroup(1),
+                group=pyglet.graphics.OrderedGroup(label_layer),
                 anchor_x="center", anchor_y="center"
                 )
         if getattr(label,"_dynamic",False):
@@ -421,6 +422,7 @@ class ImageButton(Button):
                  bg_hover=None,
                  bg_disabled=None,
                  bg_pressed=None,
+                 label_layer=1,
                  ):
         font = font if font is not None else submenu.font
         font_size = font_size if font_size is not None else submenu.font_size
@@ -429,7 +431,7 @@ class ImageButton(Button):
         if bg is None:
             self.peng = peng
             bg = ImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed)
-        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font)
+        super(ImageButton,self).__init__(name,submenu,window,peng,pos,size,bg,label=label, font_size=font_size, font_color=font_color, font=font, label_layer=label_layer)
 
 
 class FramedImageBackground(ImageBackground):
@@ -776,7 +778,8 @@ class FramedImageButton(ImageButton):
                  scale=(1, 1),
                  repeat_edge=False,
                  repeat_center=False,
-                 tex_size=None
+                 tex_size=None,
+                 label_layer=1,
                  ):
         font = font if font is not None else submenu.font
         font_size = font_size if font_size is not None else submenu.font_size
@@ -785,8 +788,7 @@ class FramedImageButton(ImageButton):
         if bg is None:
             self.peng = peng
             bg = FramedImageBackground(self,bg_idle,bg_hover,bg_disabled,bg_pressed,frame, scale, repeat_edge, repeat_center, tex_size)
-        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos=pos,size=size,bg=bg,label=label, font_size=font_size, font_color=font_color, font=font)
-
+        super(FramedImageButton,self).__init__(name,submenu,window,peng,pos=pos,size=size,bg=bg,label=label, font_size=font_size, font_color=font_color, font=font, label_layer=label_layer)
 
 
 class ToggleButton(Button):
@@ -979,6 +981,7 @@ class Checkbox(ToggleButton):
                  checkcolor=[240,119,70],
                  font_size=None, font=None,
                  font_color=None,
+                 label_layer=1,
                  ):
         font = font if font is not None else submenu.font
         font_size = font_size if font_size is not None else submenu.font_size
@@ -987,7 +990,7 @@ class Checkbox(ToggleButton):
 
         if bg is None:
             bg = CheckboxBackground(self,borderstyle,checkcolor)
-        super(Checkbox,self).__init__(name,submenu,window,peng,pos,size,bg,borderstyle=borderstyle,label=label, font_size=font_size, font_color=font_color, font=font)
+        super(Checkbox,self).__init__(name,submenu,window,peng,pos,size,bg,borderstyle=borderstyle,label=label, font_size=font_size, font_color=font_color, font=font, label_layer=label_layer)
     def redraw_label(self):
         """
         Re-calculates the position of the Label.
