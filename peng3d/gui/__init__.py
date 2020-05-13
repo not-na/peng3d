@@ -232,6 +232,8 @@ class SubMenu(util.ActionDispatcher):
         self.borderstyle = borderstyle if borderstyle is not None else self.menu.borderstyle
         
         self.widgets = collections.OrderedDict()
+
+        self.widget_order = {}
         
         self.bg = None
         self.bg_vlist = pyglet.graphics.vertex_list(4,
@@ -290,14 +292,25 @@ class SubMenu(util.ActionDispatcher):
         self.batch2d.draw()
         
         # Call custom draw methods where needed
-        for widget in self.widgets.values():
-            widget.draw()
+        #for widget in self.widgets.values():
+        #    widget.draw()
+        for order in sorted(self.widget_order.keys()):
+            for w in self.widget_order[order]:
+                w.draw()
     
-    def addWidget(self,widget):
+    def addWidget(self,widget, order_key=0):
         """
         Adds a widget to this submenu.
+
+        ``order_key`` optionally specifies the "layer" this widget will be on. Note that
+        this does not work with batched widgets. All batched widgets will be drawn before
+        widgets that use a custom draw() method.
         """
         self.widgets[widget.name]=widget
+
+        if order_key not in self.widget_order:
+            self.widget_order[order_key] = []
+        self.widget_order[order_key].append(widget)
     def getWidget(self,name):
         """
         Returns the widget with the given name.
@@ -326,6 +339,10 @@ class SubMenu(util.ActionDispatcher):
         w.delete()
         del self.widgets[widget]
         del widget
+
+        for o in self.widget_order:
+            if w in o:
+                del o[o.index(w)]
         
         #w_wref = weakref.ref(w)
         

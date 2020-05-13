@@ -91,6 +91,8 @@ class Container(Widget):
         self.menu = submenu
         
         self.widgets = collections.OrderedDict()
+
+        self.widget_order = {}
         
         self.bg = [242,241,240,255]
         self.bg_vlist = pyglet.graphics.vertex_list(4,
@@ -139,7 +141,7 @@ class Container(Widget):
         self._enabled=value
         self.redraw()
     
-    def addWidget(self,widget):
+    def addWidget(self,widget, order_key=0):
         """
         Adds a widget to this container.
         
@@ -148,6 +150,10 @@ class Container(Widget):
         if self is widget: # Prevents being able to add the container to itself, causing a recursion loop on redraw
             return
         self.widgets[widget.name]=widget
+
+        if order_key not in self.widget_order:
+            self.widget_order[order_key] = []
+        self.widget_order[order_key].append(widget)
     def getWidget(self,name):
         """
         Returns the widget with the given name.

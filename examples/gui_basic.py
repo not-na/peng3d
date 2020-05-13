@@ -150,7 +150,7 @@ def createGUI(main,game):
                                 )
     #testcontainer.setBackground([255,241,240,255])
     testcontainer.setBackground("oldshadow")
-    title.addWidget(testcontainer)
+    title.addWidget(testcontainer, -100)
     
     tc_label = peng3d.gui.Label("tc_label",testcontainer,peng.window,peng,
                                 pos=[0,0],
