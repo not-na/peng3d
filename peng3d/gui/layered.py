@@ -812,10 +812,13 @@ class LabelWidgetLayer(WidgetLayer):
                 z_index=None,
                 border=[0,0],offset=[0,0],
                 label="",
-                font_size=16,font="Arial",
-                font_color=[62,67,73,255],
+                font_size=None,font=None,
+                font_color=None,
                 multiline=False,
                 ):
+        font = font if font is not None else widget.submenu.font
+        font_size = font_size if font_size is not None else widget.submenu.font_size
+        font_color = font_color if font_color is not None else widget.submenu.font_color
         super(LabelWidgetLayer,self).__init__(name,widget,z_index,border,offset)
         
         self._label = pyglet.text.Label(str(label),

@@ -142,8 +142,8 @@ class TranslationManager(ActionDispatcher):
             return key # would just display the key to the user, good enough to be understood
         return self.cache[lang][domain][name]
     t = translate
-    def translate_lazy(self,key,translate=True,lang=None):
-        return _LazyTranslator(self,key,translate,lang)
+    def translate_lazy(self,key,data=None,translate=True,lang=None):
+        return _LazyTranslator(self,key,data,translate,lang)
     tl = translate_lazy
     
     def loadDomain(self,domain,lang=None, encoding="utf-8"):
@@ -181,20 +181,31 @@ class TranslationManager(ActionDispatcher):
 
 class _LazyTranslator(object):
     _dynamic=True
-    def __init__(self,i18n,key,translate=True,lang=None):
+    def __init__(self,i18n,key,data=None,translate=True,lang=None):
         self.i18n = i18n
         self.key = key
+        self.data = data if data is not None else {}
         self.translate = translate
         self.lang = lang
     def __str__(self):
-        return self.i18n.translate(self.key,self.translate,self.lang)
+        t = self.i18n.translate(self.key,self.translate,self.lang)
+
+        if self.data != {}:
+            try:
+                return t.format(**self.data)
+            except Exception:
+                return t
+        else:
+            return t
     def __repr__(self):
-        return self.i18n.translate(self.key,self.translate,self.lang)
+        return str(self)
+
     def __mod__(self,other):
         try:
             return str(self)%other
         except Exception:
             return str(self)
+
     def format(self,*args,**kwargs):
         try:
             return str(self).format(*args,**kwargs)
