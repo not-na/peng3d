@@ -144,6 +144,9 @@ DEFAULT_CONFIG = {
     "controls.keybinds.common.copy":"Ctrl-C",
     "controls.keybinds.common.paste":"Ctrl-V",
     "controls.keybinds.common.cut":"Ctrl-X",
+
+    "controls.scroll.mult_x": 12,
+    "controls.scroll.mult_y": 12,
     
     # debug.*
     # Debug config

@@ -251,6 +251,8 @@ class ScrollableContainer(Container):
         self.addWidget(self._scrollbar)
         
         self.redraw()
+
+        self.peng.registerEventHandler("on_mouse_scroll", self.on_mouse_scroll)
     
     def on_redraw(self):
         """
@@ -276,6 +278,16 @@ class ScrollableContainer(Container):
         self._scrollbar._nmax = self.content_height
         
         super(ScrollableContainer,self).on_redraw() # Re-draws everything, including child widgets
+
+    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        if not self.is_hovering:
+            return
+
+        dx = scroll_x * self.window.cfg["controls.scroll.mult_x"]
+        dy = scroll_y * self.window.cfg["controls.scroll.mult_y"]
+
+        # TODO: implement x-scrolling
+        self._scrollbar.n += dy
 
 
 # Hack to allow BasicWidget to do isinstance of Container/ScrollableContainer for offset code
