@@ -76,6 +76,8 @@ class Container(Widget):
     
     This Class is a subclass of :py:class:`peng3d.gui.widgets.Widget` but also exhibits part of the API of :py:class:`peng3d.gui.SubMenu`\ .
     """
+
+    IS_CLICKABLE = True
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,_skip_draw=False,
                  font=None, font_size=None,

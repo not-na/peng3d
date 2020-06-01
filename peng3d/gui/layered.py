@@ -54,6 +54,8 @@ class LayeredWidget(Widget):
     
     ``layers`` must be a list of 2-tuples of ``(layer,z_index)``\ .
     """
+
+    IS_CLICKABLE = True
     def __init__(self,name,submenu,window,peng,
                 pos=None,size=None,
                 bg=None,layers=[],
@@ -867,7 +869,7 @@ class LabelWidgetLayer(WidgetLayer):
         return self._label.text
     @label.setter
     def label(self,label):
-        self._label.text = label
+        self._label.text = str(label)
 
 class FormattedLabelWidgetLayer(WidgetLayer):
     """

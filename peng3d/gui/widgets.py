@@ -160,6 +160,19 @@ class BasicWidget(ActionDispatcher):
     - ``statechanged`` is called every time the visual state of the widget should change
 
     """
+
+    IS_CLICKABLE = False
+    """
+    Class attribute used to signal if widgets of this class are usually clickable.
+    
+    This attribute is used to fill the initial value of :py:attr:`enabled` and can therefore
+    be overridden on a widget-by-widget basis.
+    
+    Note that leaving this set to ``False`` will prevent most mouse-related actions
+    from being triggered. This is due to internal optimization and the main benefit of leaving
+    this option off.
+    """
+
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None):
         self.name = name
@@ -174,7 +187,7 @@ class BasicWidget(ActionDispatcher):
         
         self.is_hovering = False
         self.pressed = False
-        self._enabled = True
+        self._enabled = self.IS_CLICKABLE
         self._is_scrollbar = False
         self.do_redraw = True
         self.stay_pressed = False

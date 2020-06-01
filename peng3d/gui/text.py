@@ -262,6 +262,8 @@ class TextInput(Widget):
     Note that arguments already used by TextInput are not passed down. This may cause issues
     with ButtonBackground and some other classes.
     """
+
+    IS_CLICKABLE = True
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
                  bg=None,

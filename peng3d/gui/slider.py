@@ -152,6 +152,8 @@ class Progressbar(Widget):
     ``nmin``\ , ``nmax`` and ``n`` represent the minimal value, maximal value and current value, respectively.
     Unexpected behavior may occur if the minimal value is bigger then the maximum value.
     """
+
+    IS_CLICKABLE = True
     def __init__(self,name,submenu,window,peng,
                  pos=None,size=None,
                  bg=None,

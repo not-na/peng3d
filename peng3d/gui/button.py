@@ -240,6 +240,8 @@ class Button(Widget):
     If necessary, the font size of the Label may be changed via the global Constant :py:data:`LABEL_FONT_SIZE`\\ , changes will only apply to Buttons created after change.
     The text color used is ``[62,67,73,255]`` in RGBA and the font used is Arial, which should be available on most systems.
     """
+
+    IS_CLICKABLE = True
     def __init__(self,name,submenu,window,peng,
                  pos=None, size=None,bg=None,
                  border=[4,4], borderstyle=None,
