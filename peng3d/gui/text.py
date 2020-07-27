@@ -26,6 +26,7 @@ __all__ = [
     "Label",
     "TextInput","TextInputBackground",
     "CustomTextInputBackground",
+    "PasswordInput",
     ]
 
 import time
@@ -261,6 +262,9 @@ class TextInput(Widget):
     Additional parameters required by the custom background should be passed as keyword arguments.
     Note that arguments already used by TextInput are not passed down. This may cause issues
     with ButtonBackground and some other classes.
+
+    ``allow_returnkey`` determines whether pressing the return key inserts a ``\r`` character or not.
+    Note that the ``send_form`` action of the submenu may still be sent, even if this is set to true.
     """
 
     IS_CLICKABLE = True
@@ -276,6 +280,7 @@ class TextInput(Widget):
                  allow_copypaste=True,
                  min_size=None,
                  parent_bgcls=None,
+                 allow_returnkey=False,
                  *args, **kwargs
                  ):
         font = font if font is not None else submenu.font
@@ -297,6 +302,8 @@ class TextInput(Widget):
             bg = CustomTextInputBackground(self, cls=parent_bgcls, *args, **kwargs)
 
         super(TextInput,self).__init__(name,submenu,window,peng,pos,size,bg,min_size)
+
+        self.allow_returnkey = allow_returnkey
 
         self.focussed = False
         self.allow_overflow = allow_overflow
@@ -383,6 +390,9 @@ class TextInput(Widget):
 
     def on_text(self,text):
         if not (self.focussed and self.clickable):
+            return
+
+        if not self.allow_returnkey and ("\n" in text or "\r" in text):
             return
 
         otext = self.text
@@ -527,3 +537,56 @@ class TextInput(Widget):
     @default.setter
     def default(self,default):
         self._default.text = str(default)
+
+
+class PasswordInput(TextInput):
+    def __init__(self, *args, replacement_char="*", **kwargs,
+                 ):
+        super().__init__(*args, **kwargs)
+
+        self.replacement_char = replacement_char
+
+        # Re-set the text content to ensure it is replaced / hidden
+        self._pwd = self._text.text
+        self.text = self._pwd
+
+    @property
+    def text(self):
+        """
+        Property for accessing the text.
+        """
+        return self._pwd
+
+    @text.setter
+    def text(self, text):
+        text = str(text)
+        otext = self._pwd
+        self._pwd = text
+        self._text.text = self.replacement_char*len(text)
+
+        # Reverts the change if
+        # 1. the text length has NOT increased
+        # 2. and allow_overflow is False
+        # 3. and the text is wider than the widget size minus the border size
+        # 4. and the text is not empty
+        if len(otext) < len(text) and not self.allow_overflow and self.size[0] - self.bg.border[
+            0] * 2 <= self._text.content_width if len(self.text) != 0 else 0:
+            self._text.text = self.replacement_char*len(text)
+
+        self._text._update()
+        self.doAction("textchange")
+        self.doAction("pwd_change")
+        self.redraw()  # necessary for size/pos that depends on label size
+
+    @property
+    def password(self):
+        """
+        Proxy for :py:attr:`text`\\ .
+
+        :return: Current password
+        """
+        return self._pwd
+
+    @password.setter
+    def password(self, pwd):
+        self.text = pwd

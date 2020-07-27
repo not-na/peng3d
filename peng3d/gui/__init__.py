@@ -97,6 +97,8 @@ class GUIMenu(Menu):
         # For compatibility with Background classes
         self.pressed, self.is_hovering, self.enabled = False, False, True
 
+        self.peng.keybinds.add("enter", f"peng3d:menu.[{self.name}].send_form", self._on_send_form, False)
+
         self.peng.registerEventHandler("on_resize", self.on_resize)
         self.on_resize(*self.size)
     
@@ -204,6 +206,12 @@ class GUIMenu(Menu):
 
         self.submenu.redraw()
 
+    def _on_send_form(self, symbol, modifiers, release):
+        # TODO: support context here
+        if release:
+            return
+        self.submenu.send_form()
+
 class SubMenu(util.ActionDispatcher):
     """
     Sub Menu of the GUI system.
@@ -215,6 +223,9 @@ class SubMenu(util.ActionDispatcher):
     ``enter`` is triggered everytime the :py:meth:`on_enter()` method has been called.
     
     ``exit`` is triggered everytime the :py:meth:`on_exit()` method has been called.
+
+    ``send_form`` is triggered if the contained form is sent by either pressing enter or
+    calling :py:meth:`send_form()`\\ .
     """
     def __init__(self,name,menu,window,peng,
                  font=None, font_size=None,
@@ -244,6 +255,8 @@ class SubMenu(util.ActionDispatcher):
         self.on_resize(*self.size)
         
         self.batch2d = pyglet.graphics.Batch()
+
+        self.form_ctx = None
 
         # For compatibility with Background classes
         self.pressed, self.is_hovering = False, False
@@ -412,6 +425,37 @@ class SubMenu(util.ActionDispatcher):
     @property
     def enabled(self):
         return self.menu.submenu is self and self.window.menu is self.menu
+
+    def send_form(self, ctx=None):
+        """
+        Triggers whatever form data is entered to be sent.
+
+        Only causes action ``send_form`` to be sent if submenu is active and :py:meth:`form_valid()`
+        returns true.
+
+        The given context is stored in :py:attr:`form_ctx`\\ .
+
+        :param ctx: Arbitrary context
+        :return: If the form was actually sent
+        """
+        if self.enabled and self.form_valid(ctx):
+            self.form_ctx = ctx
+            self.doAction("send_form")
+            return True
+        return False
+
+    def form_valid(self, ctx=None):
+        """
+        Called to pre-check if a form is valid.
+
+        Should be overridden by subclasses.
+
+        By default, this always returns true.
+
+        :param ctx: Arbitrary context
+        :return: If the form is valid
+        """
+        return True
     
     def on_resize(self,width,height):
         sx,sy = width,height

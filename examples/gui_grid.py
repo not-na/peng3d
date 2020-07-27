@@ -47,13 +47,19 @@ def createGUI():
 
     s_start.setBackground([242, 241, 240])
 
+    def f():
+        print(f"Sent form with {pwdin.password=}")
+    s_start.addAction("send_form", f)
+
     layout = peng3d.gui.layout.GridLayout(peng, s_start, [4, 6], [10, 10])
 
     btn0 = peng3d.gui.Button("btn0", s_start, peng.window, peng,
                              pos=layout.get_cell([1, 4], [2, 1]),
-                             label="Button 0",
+                             label="Send",
                              )
     s_start.addWidget(btn0)
+
+    btn0.addAction("click", s_start.send_form)
 
     btn1 = peng3d.gui.Button("btn1", s_start, peng.window, peng,
                              pos=layout.get_cell([1, 3], [2, 1]),
@@ -82,11 +88,21 @@ def createGUI():
                                         )
     s_start.addWidget(btn3)
 
-    btn4 = peng3d.gui.Button("btn4", s_start, peng.window, peng,
-                             pos=layout.get_cell([2, 1], [1, 1]),
-                             label="Button 4",
-                             )
-    s_start.addWidget(btn4)
+    # btn4 = peng3d.gui.Button("btn4", s_start, peng.window, peng,
+    #                          pos=layout.get_cell([2, 1], [1, 1]),
+    #                          label="Button 4",
+    #                          )
+    # s_start.addWidget(btn4)
+    pwdin = peng3d.gui.PasswordInput(
+        "pwdin", s_start, peng.window, peng,
+        pos=layout.get_cell([2, 1], [1, 1]),
+        default="Password Field",
+    )
+    s_start.addWidget(pwdin)
+
+    def f():
+        print(f"Password changed: {pwdin.password}")
+    pwdin.addAction("pwd_change", f)
 
     # Set SubMenu as selected at the end, to avoid premature rendering with widgets missing
     # Should not happen normally, but still a good practice
