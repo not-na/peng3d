@@ -190,7 +190,7 @@ class GUIMenu(Menu):
 
     @property
     def size(self):
-        return self.window.width, self.window.height
+        return self.window.get_size()
 
     def on_resize(self, width, height):
         sx,sy = width,height

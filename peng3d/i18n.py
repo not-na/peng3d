@@ -121,7 +121,7 @@ class TranslationManager(ActionDispatcher):
         r = re.compile(self.peng.cfg["i18n.discover_regex"])
         
         for f in files:
-            m = r.fullmatch(f)
+            m = r.fullmatch(f.replace("\\", "/"))
             if m is not None:
                 langs.add(m.group("lang"))
         

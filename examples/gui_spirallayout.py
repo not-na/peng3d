@@ -85,6 +85,12 @@ def createGUI():
     # Should not happen normally, but still a good practice
     m_main.changeSubMenu("start")
 
+    # Add an FPS display
+    global fps_display
+    fps_display = pyglet.window.FPSDisplay(peng.window)
+
+    peng.window.registerEventHandler("on_draw", fps_display.draw)
+
 
 def main(args):
     # Define these as global variables for easier access
@@ -112,6 +118,10 @@ def main(args):
     # Actually creates the GUI
     # In a separate function for clarity and readability
     createGUI()
+
+    def f(dt=None):
+        pass
+    pyglet.clock.schedule_interval_soft(f, 1/60.)
 
     # Switch to the main menu and start the main loop
     peng.window.changeMenu("main")

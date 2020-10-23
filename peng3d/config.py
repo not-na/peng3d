@@ -125,6 +125,7 @@ DEFAULT_CONFIG = {
     "graphics.stencil.bits":8,
     "graphics.fogSettings":Config({},defaults=CFG_FOG_DEFAULT),
     "graphics.lightSettings":Config({},defaults=CFG_LIGHT_DEFAULT),
+    "graphics.default_fps": None,
     
     # controls.*
     # Controls

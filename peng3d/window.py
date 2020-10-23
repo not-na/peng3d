@@ -25,6 +25,7 @@
 __all__ = ["PengWindow"]
 
 import math
+import time
 import traceback
 import weakref
 import inspect
@@ -35,7 +36,9 @@ from pyglet.window import key
 
 from . import config, camera
 
-ICON_SIZES = [16,24,32,48,64,128,256,512]
+# TODO: allow for arbitrary icon size discovery
+ICON_SIZES = [16, 24, 32, 48, 64, 128, 256, 512]
+
 
 class PengWindow(pyglet.window.Window):
     """
@@ -60,6 +63,9 @@ class PengWindow(pyglet.window.Window):
         
         self.cfg = config.Config({},defaults=peng.cfg)
         self.eventHandlers = {}
+
+        self.cur_fps = None
+        self._last_render = time.monotonic()
         
         self._setup = False
         def on_key_press(symbol, modifiers):
@@ -151,6 +157,7 @@ class PengWindow(pyglet.window.Window):
         ``evloop`` may optionally be a subclass of :py:class:`pyglet.app.base.EventLoop` to replace the default event loop.
         """
         self.setup()
+        self.cur_fps = self.cfg["graphics.default_fps"]
         if evloop is not None:
             pyglet.app.event_loop = evloop
         pyglet.app.run() # This currently just calls the basic pyglet main loop, maybe implement custom main loop for more control
@@ -245,12 +252,37 @@ class PengWindow(pyglet.window.Window):
         
         if len(ilist)!=0:
             self.set_icon(*ilist)
+
+    def set_fps(self, fps):
+        """
+        Sets the new FPS limit.
+
+        This limit will be used until the application closes or this method is called again.
+
+        A value of ``None`` will cause the FPS limit to be disabled.
+
+        Note that this is only a limit, which may or may not be fulfilled depending on available
+        resources.
+
+        .. note::
+           By default, pyglet only redraws the window when an event arrives. To force a certain
+           redraw rate (which still respects system performance), call :py:meth:`pyglet.clock.schedule_interval()`
+           once during initialization with a dummy function and your desired refresh rate in seconds.
+
+        :param fps:
+        :return:
+        """
+        self.cur_fps = fps
     
     # Event handlers
     def on_draw(self):
         """
         Clears the screen and draws the currently active menu.
         """
+        if self.cur_fps is not None and self._last_render+(1/self.cur_fps) > time.monotonic():
+            self.invalid = False
+            return
+        self._last_render = time.monotonic()
         self.clear()
         self.menu.draw()
 

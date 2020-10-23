@@ -129,6 +129,7 @@ class Peng(object):
         
         ``evloop`` may optionally be a subclass of :py:class:`pyglet.app.base.EventLoop` to replace the default event loop.
         """
+        # TODO: support more than one event loop
         self.sendEvent("peng3d:peng.run",{"peng":self,"window":self.window,"evloop":evloop})
         self.window.run(evloop)
         self.sendEvent("peng3d:peng.exit",{"peng":self})
