@@ -50,6 +50,15 @@ class Peng(object):
         self.window = None
         
         self.pygletEventHandlers = {}
+        self.rlPygletEventHandlers = {}
+        self.rlPygletEventHandlersParams = {
+            "on_mouse_motion": (0, 0, 0, 0),
+            "on_resize": (0, 0),
+        }
+        self.rlPygletEventHandlersTriggered = {
+            "on_mouse_motion": False,
+            "on_resize": False,
+        }
         
         self.eventHandlers = {}
         
@@ -69,6 +78,8 @@ class Peng(object):
         self.tl = lambda *args,**kwargs:self._tl(*args,**kwargs)
         
         self.addEventListener("peng3d:peng.exit",self.handler_exit)
+        self.registerEventHandler("on_mouse_motion", self.on_mouse_motion)
+        self.registerEventHandler("on_resize", self.on_resize)
         
         if not _pyglet_patched and self.cfg["pyglet.patch.patch_float2int"]:
             _pyglet_patched = True
@@ -190,10 +201,39 @@ class Peng(object):
         else:
             handler = weakref.ref(handler)
         self.pygletEventHandlers[event_type].append(handler)
+
+    def addRateLimitedPygletListener(self, event_type, handler):
+        if self.cfg["debug.events.register"]:
+            print("Registered Rate Limited Event: %s Handler: %s" % (event_type, handler))
+        if event_type not in self.rlPygletEventHandlers:
+            self.rlPygletEventHandlers[event_type] = []
+        # Only a weak reference is kept
+        if inspect.ismethod(handler):
+            handler = weakref.WeakMethod(handler)
+        else:
+            handler = weakref.ref(handler)
+        self.rlPygletEventHandlers[event_type].append(handler)
+
+    def _pumpRateLimitedEvents(self):
+        for event_type in self.rlPygletEventHandlers:
+            if self.rlPygletEventHandlersTriggered[event_type]:
+                self.rlPygletEventHandlersTriggered[event_type] = False
+
+                if event_type in self.rlPygletEventHandlers:
+                    args = list(self.rlPygletEventHandlersParams.get(event_type, []))
+
+                    for whandler in self.rlPygletEventHandlers[event_type]:
+                        # This allows for proper collection of deleted handler methods by using weak references
+                        handler = whandler()
+                        if handler is None:
+                            del self.rlPygletEventHandlers[event_type][
+                                self.rlPygletEventHandlers[event_type].index(whandler)]
+                        handler(*args)
     
-    # For compatibility
+    # For compatibility, deprecated
     handleEvent = sendPygletEvent
     registerEventHandler = addPygletListener
+    registerRateLimitedEventHandler = addRateLimitedPygletListener
     
     def sendEvent(self,event,data=None):
         """
@@ -270,6 +310,15 @@ class Peng(object):
             raise NameError("This handler is not registered for event %s"%event)
         if self.eventHandlers[event] == []:
             del self.eventHandlers[event]
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        _, _, odx, ody = self.rlPygletEventHandlersParams["on_mouse_motion"]
+        self.rlPygletEventHandlersParams["on_mouse_motion"] = (x, y, dx+odx, dy+ody)
+        self.rlPygletEventHandlersTriggered["on_mouse_motion"] = True
+
+    def on_resize(self, width, height):
+        self.rlPygletEventHandlersParams["on_resize"] = (width, height)
+        self.rlPygletEventHandlersTriggered["on_resize"] = True
     
     def handler_exit(self,event,data):
         if self.cfg["debug.events.dumpfile"]!="":

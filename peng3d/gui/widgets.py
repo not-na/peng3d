@@ -204,9 +204,9 @@ class BasicWidget(ActionDispatcher):
         self.peng.registerEventHandler("on_mouse_press",self.on_mouse_press)
         self.peng.registerEventHandler("on_mouse_release",self.on_mouse_release)
         self.peng.registerEventHandler("on_mouse_drag",self.on_mouse_drag)
-        self.peng.registerEventHandler("on_mouse_motion",self.on_mouse_motion)
-        self.peng.registerEventHandler("on_resize",self.on_resize)
-    
+        self.peng.registerRateLimitedEventHandler("on_mouse_motion",self.on_mouse_motion)
+        self.peng.registerRateLimitedEventHandler("on_resize",self.on_resize)
+
     @property
     def pos(self):
         """
@@ -285,10 +285,12 @@ class BasicWidget(ActionDispatcher):
         
         The widget may be either disabled by setting this property or the :py:attr:`enabled` attribute.
         """
-        if not isinstance(self.submenu,Container):
-            return self.submenu.name == self.submenu.menu.activeSubMenu and self.submenu.menu.name == self.window.activeMenu and self.enabled
+        if not self.enabled:
+            return False
+        elif not isinstance(self.submenu,Container):
+            return self.submenu.name == self.submenu.menu.activeSubMenu and self.submenu.menu.name == self.window.activeMenu
         else:
-            return self.submenu.clickable and self.enabled
+            return self.submenu.clickable
     @clickable.setter
     def clickable(self,value):
         self._enabled=value
@@ -383,7 +385,8 @@ class BasicWidget(ActionDispatcher):
     def _wlredraw_size(self,wl):
         self._size = wl[:]
         self.redraw()
-    
+
+    # TODO: improve performance by dynamically propagating events only to affected widgets
     def on_mouse_press(self,x,y,button,modifiers):
         if not self.clickable:
             return

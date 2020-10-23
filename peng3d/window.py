@@ -283,6 +283,7 @@ class PengWindow(pyglet.window.Window):
             self.invalid = False
             return
         self._last_render = time.monotonic()
+        self.peng._pumpRateLimitedEvents()
         self.clear()
         self.menu.draw()
 
