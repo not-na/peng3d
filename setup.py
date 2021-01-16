@@ -3,7 +3,7 @@
 #
 #  setup.py
 #  
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2021 notna <notna@apparat.org>
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,42 +22,37 @@
 #  
 #  
 
-# Distribution command:
-# sudo python setup.py install sdist bdist register upload
+# Distribution commands:
+# python setup.py sdist bdist bdist_egg bdist_wheel
+# outside venv:
+# twine upload dist/*
 
 # Test command:
 # tox -- --x-display=$DISPLAY -v -m "'not graphical'"
 
 #import peng3d.version as ver
 
-import imp
+import os
+import sys
+import importlib
 
-def load_module(name):
-    names = name.split(".")
-    path = None
-    for name in names:
-        f, path, info = imp.find_module(name, path)
-        path = [path]
-    return imp.load_module(name, f, path[0], info)    
 
-ver = load_module("peng3d.version")
+spec = importlib.util.spec_from_file_location("peng3d.version",
+                                              os.path.join("peng3d", "version.py")
+                                              )
+module = importlib.util.module_from_spec(spec)
+sys.modules["peng3d.version"] = module
+spec.loader.exec_module(module)
+
+ver = module
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-# Fix for very old python versions from https://docs.python.org/2/distutils/setupscript.html#additional-meta-data
-# patch distutils if it can't cope with the "classifiers" or
-# "download_url" keywords
-from sys import version
-if version < '2.2.3':
-    from distutils.dist import DistributionMetadata
-    DistributionMetadata.classifiers = None
-    DistributionMetadata.download_url = None
-
 try:
-    longdesc = open("README.txt","r").read()
+    longdesc = open("README.txt", "r").read()
 except Exception:
     longdesc = "Python and pyglet based 3D Engine and toolkit"
 
@@ -70,8 +65,8 @@ setup(name='peng3d',
       url="https://github.com/not-na/peng3d",
       packages=['peng3d',"peng3d.actor","peng3d.gui","peng3d.util"],
       install_requires=[
-          "pyglet>=1.3.2",
-          "bidict>=0.14.2",
+          "pyglet>=1.5.3",
+          "bidict>=0.19.0",
       ],
       provides=["peng3d"],
       setup_requires=['pytest-runner'],
@@ -95,7 +90,6 @@ setup(name='peng3d',
         
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
@@ -103,7 +97,9 @@ setup(name='peng3d',
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+
         "Topic :: Games/Entertainment",
         "Topic :: Multimedia :: Graphics :: 3D Rendering",
         "Topic :: Software Development :: Libraries :: Python Modules",

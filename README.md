@@ -30,4 +30,4 @@ This package can also be installed via pip or easy_install::
     
     $ easy_install peng3d
 
-More features coming soon!
+See the docs linked under the badge above for more information!

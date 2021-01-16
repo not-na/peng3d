@@ -9,9 +9,10 @@
 .. image:: https://circleci.com/gh/not-na/peng3d.svg?style=svg
     :target: https://circleci.com/gh/not-na/peng3d
 
-peng3d is an opensource 3d graphics engine written in python and with pyglet.
+peng3d is an open-source 3D graphics engine written in python and with pyglet.
 
-peng3d aims to make creating quick-and-easy visualizations and proof-of-concept projects easier.
+peng3d aims to make creating quick-and-easy visualizations and proof-of-concept projects easier
+while still being powerful enough for larger projects as well.
 
 peng3d is a set of tools and classes extending built-in pyglet and python functionality with easier to use variants that are still compatible with low-level programming and old code.
 
@@ -33,4 +34,4 @@ This package can also be installed via pip or easy_install::
    
    $ easy_install peng3d
 
-More features coming soon!
+See the docs linked under the badge above for more information!
