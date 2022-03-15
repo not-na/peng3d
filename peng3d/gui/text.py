@@ -263,7 +263,7 @@ class TextInput(Widget):
     Note that arguments already used by TextInput are not passed down. This may cause issues
     with ButtonBackground and some other classes.
 
-    ``allow_returnkey`` determines whether pressing the return key inserts a ``\r`` character or not.
+    ``allow_returnkey`` determines whether pressing the return key inserts a ``\\r`` character or not.
     Note that the ``send_form`` action of the submenu may still be sent, even if this is set to true.
     """
 

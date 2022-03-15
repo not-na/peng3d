@@ -22,12 +22,8 @@ See here for Linux:
     
     $ python setup.py install
 
-This package can also be installed via pip or easy_install::
+This package can also be installed via pip::
     
     $ pip install peng3d
-    
-    or
-    
-    $ easy_install peng3d
 
-See the docs linked under the badge above for more information!
+See the docs linked under the badge above for more information, including API documentation and some guides!
