@@ -6,6 +6,9 @@
    :target: http://peng3d.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
+.. image:: https://img.shields.io/pypi/dm/peng3d
+   :alt: PyPI - Downloads
+
 .. image:: https://circleci.com/gh/not-na/peng3d.svg?style=svg
     :target: https://circleci.com/gh/not-na/peng3d
 

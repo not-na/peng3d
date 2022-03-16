@@ -285,7 +285,9 @@ class PengWindow(pyglet.window.Window):
         self._last_render = time.monotonic()
         self.peng._pumpRateLimitedEvents()
         self.clear()
-        self.menu.draw()
+
+        if self.activeMenu in self.menus:
+            self.menu.draw()
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.mouse_pos = x, y
