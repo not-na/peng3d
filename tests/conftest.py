@@ -26,7 +26,7 @@ import os
 
 import pytest
 
-os.environ["DISPLAY"]=":0"
+#os.environ["DISPLAY"]=":0"
 import pyglet
 pyglet.options["shadow_window"]=False
 import peng3d
@@ -37,6 +37,7 @@ import peng3d
 #    os.environ["DISPLAY"]=":0"
 #    for k,v in os.environ.items():print(k,v)
 
+
 def pytest_addoption(parser):
     parser.addoption("--x-display", action="store", default=":0",
         help="X Display to use")
@@ -45,6 +46,7 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="module")
 def xdisplay(request):
     return request.config.getoption("--x-display")
+
 
 @pytest.fixture(scope="module")
 def peng(request,xdisplay):
@@ -60,13 +62,16 @@ def peng(request,xdisplay):
     request.addfinalizer(fin(p))
     return p
 
+
 @pytest.fixture(scope="module")
 def window(peng,xdisplay):
     os.environ["DISPLAY"]=xdisplay
     return peng.createWindow() if peng.window is None else peng.window
 
+
 @pytest.fixture
 def dispatcher():
     return peng3d.util.ActionDispatcher()
+
 
 from graphicalhelpers import *

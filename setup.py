@@ -3,7 +3,7 @@
 #
 #  setup.py
 #  
-#  Copyright 2016-2021 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -89,16 +89,12 @@ setup(name='peng3d',
         "Operating System :: POSIX :: Linux",
         
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
 
         "Topic :: Games/Entertainment",
         "Topic :: Multimedia :: Graphics :: 3D Rendering",
