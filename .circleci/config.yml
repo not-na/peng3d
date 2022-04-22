@@ -42,6 +42,12 @@ jobs:
             . venv/bin/activate
             pip install tox
 
+      - run:
+          name: Show installed packages
+          command: |
+            . venv/bin/activate
+            pip freeze
+
       # Test
       #   This would typically be a build job when using workflows, possibly combined with build
       # This is based on your 1.0 configuration file or project settings
@@ -49,7 +55,7 @@ jobs:
           name: Run tests
           command: | 
             . venv/bin/activate
-            python3 -m tox -- --junitxml=test-reports/junit.xml --x-display=$DISPLAY -v -m "'not graphical'"
+            python3 -m tox -- --junitxml=test-reports/junit.xml --x-display=$DISPLAY -v -m "not graphical"
       - store_test_results:
           path: test-results
   test-3.7:
