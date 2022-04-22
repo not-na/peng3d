@@ -34,17 +34,9 @@
 
 import os
 import sys
-import importlib
+import runpy
 
-
-spec = importlib.util.spec_from_file_location("peng3d.version",
-                                              os.path.join("peng3d", "version.py")
-                                              )
-module = importlib.util.module_from_spec(spec)
-sys.modules["peng3d.version"] = module
-spec.loader.exec_module(module)
-
-ver = module
+ver = runpy.run_path(os.path.join("peng3d", "version.py"))
 
 try:
     from setuptools import setup
@@ -57,7 +49,7 @@ except Exception:
     longdesc = "Python and pyglet based 3D Engine and toolkit"
 
 setup(name='peng3d',
-      version=ver.VERSION,
+      version=ver["VERSION"],
       description="Python and pyglet based 3D Engine and toolkit", # from the github repo
       long_description=longdesc,
       author="notna",
