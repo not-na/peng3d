@@ -41,7 +41,11 @@ jobs:
       # Test
       #   This would typically be a build job when using workflows, possibly combined with build
       # This is based on your 1.0 configuration file or project settings
-      - run: python3 -m tox -- --junitxml=test-reports/junit.xml -v -m "'not graphical'"
+      - run:
+          name: Run tests
+          command: | 
+            . venv/bin/activate
+            python3 -m tox -- --junitxml=test-reports/junit.xml -v -m "'not graphical'"
       - store_test_results:
           path: test-results
   test-3.7:
