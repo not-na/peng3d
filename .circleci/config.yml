@@ -40,11 +40,14 @@ jobs:
             - v1-dep-master-
               # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
             - v1-dep-
-      # TODO: find a better solution without sudo
-      - run: sudo pip install tox
-      # Not needed, since tox should install requirements by itself
-      #- run: pip install -r requirements.txt
-      #- run: python setup.py install
+
+      - run:
+          name: Install pip dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install tox
+
       # Save dependency cache
       - save_cache:
           key: v1-dep-{{ .Branch }}-{{ epoch }}
@@ -53,6 +56,7 @@ jobs:
             # You can probably delete some of these entries
             - vendor/bundle
             - ~/virtualenvs
+            - venv
             - ~/.m2
             - ~/.ivy2
             - ~/.bundle
