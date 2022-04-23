@@ -9,6 +9,9 @@
 .. image:: https://img.shields.io/pypi/dm/peng3d
    :alt: PyPI - Downloads
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+
 .. image:: https://circleci.com/gh/not-na/peng3d.svg?style=svg
     :target: https://circleci.com/gh/not-na/peng3d
 

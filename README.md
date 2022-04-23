@@ -4,6 +4,8 @@
 
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/peng3d)
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 [![CircleCI](https://circleci.com/gh/not-na/peng3d.svg?style=svg)](https://circleci.com/gh/not-na/peng3d)
 
 peng3d is an opensource 3d graphics engine written in python and with pyglet.

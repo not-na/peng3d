@@ -12,6 +12,9 @@ Welcome to Peng3d's documentation!
 .. image:: https://img.shields.io/pypi/v/peng3d.svg
    :target: https://pypi.python.org/pypi/peng3d
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+
 Contents:
 
 .. toctree::
