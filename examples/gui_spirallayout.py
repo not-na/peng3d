@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  gui_spirallayout.py
-#  
+#
 #  Copyright 2020 notna <notna@apparat.org>
-#  
+#
 #  This file is part of peng3d.
 #
 #  peng3d is free software: you can redistribute it and/or modify
@@ -37,32 +37,41 @@ MAX_LEVELS = 8
 
 # Thanks to @gunthobald for help with the formula for swapping buttons and sub-levels
 
+
 def add_horizontal(submenu, parent, level):
     # Parent is vertical, we are horizontal
     x = level % 4
     l = peng3d.gui.layout.GridLayout(peng, parent, [2, 1], [0, 0])
-    btn = peng3d.gui.Button(f"btn_l{level}", submenu, peng.window, peng,
-                             pos=l.get_cell([x<2, 0], [1, 1]),
-                             label=f"L{level}H",
-                             )
+    btn = peng3d.gui.Button(
+        f"btn_l{level}",
+        submenu,
+        peng.window,
+        peng,
+        pos=l.get_cell([x < 2, 0], [1, 1]),
+        label=f"L{level}H",
+    )
     submenu.addWidget(btn)
 
-    if level+1 < MAX_LEVELS:
-        add_vertical(submenu, l.get_cell([x>=2, 0], [1, 1]), level+1)
+    if level + 1 < MAX_LEVELS:
+        add_vertical(submenu, l.get_cell([x >= 2, 0], [1, 1]), level + 1)
 
 
 def add_vertical(submenu, parent, level):
     # Parent is horizontal, we are vertical
     x = level % 4
     l = peng3d.gui.layout.GridLayout(peng, parent, [1, 2], [0, 0])
-    btn = peng3d.gui.Button(f"btn_l{level}", submenu, peng.window, peng,
-                            pos=l.get_cell([0, x<2], [1, 1]),
-                            label=f"L{level}V",
-                            )
+    btn = peng3d.gui.Button(
+        f"btn_l{level}",
+        submenu,
+        peng.window,
+        peng,
+        pos=l.get_cell([0, x < 2], [1, 1]),
+        label=f"L{level}V",
+    )
     submenu.addWidget(btn)
 
-    if level+1 < MAX_LEVELS:
-        add_horizontal(submenu, l.get_cell([0, x>=2], [1, 1]), level+1)
+    if level + 1 < MAX_LEVELS:
+        add_horizontal(submenu, l.get_cell([0, x >= 2], [1, 1]), level + 1)
 
 
 def createGUI():
@@ -72,9 +81,13 @@ def createGUI():
     peng.resourceMgr.addCategory("gui")
 
     # Create GUI SubMenu and register it immediately
-    s_start = peng3d.gui.SubMenu("start", m_main, peng.window, peng,
-                                 borderstyle="oldshadow",
-                                 )
+    s_start = peng3d.gui.SubMenu(
+        "start",
+        m_main,
+        peng.window,
+        peng,
+        borderstyle="oldshadow",
+    )
     m_main.addSubMenu(s_start)
 
     s_start.setBackground([242, 241, 240])
@@ -121,7 +134,8 @@ def main(args):
 
     def f(dt=None):
         pass
-    pyglet.clock.schedule_interval_soft(f, 1/60.)
+
+    pyglet.clock.schedule_interval_soft(f, 1 / 60.0)
 
     # Switch to the main menu and start the main loop
     peng.window.changeMenu("main")
@@ -129,7 +143,7 @@ def main(args):
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     sys.exit(main(sys.argv))

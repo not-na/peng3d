@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  quickstart_widget.py
-#  
+#
 #  Copyright 2022 notna <notna@apparat.org>
-#  
+#
 #  This file is part of peng3d.
 #
 #  peng3d is free software: you can redistribute it and/or modify
@@ -35,12 +35,16 @@ main_menu.setBackground([240, 240, 240])
 main_main = peng3d.SubMenu("main_sub", main_menu, peng.window, peng)
 main_menu.addSubMenu(main_main)
 
-button = peng3d.Button("btn", main_main, peng.window, peng,
-                       pos=[100, 100],
-                       size=[200, 100],
-                       label="Press me!",
-                       borderstyle="oldshadow",
-                       )
+button = peng3d.Button(
+    "btn",
+    main_main,
+    peng.window,
+    peng,
+    pos=[100, 100],
+    size=[200, 100],
+    label="Press me!",
+    borderstyle="oldshadow",
+)
 main_main.addWidget(button)
 
 button.addAction("click", print, "Clicked!")

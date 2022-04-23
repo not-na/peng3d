@@ -136,12 +136,16 @@ and add a single button that prints whenever it is clicked.
 
 To do this, we'll have to first create the button and register it::
 
-   button = peng3d.Button("btn", main_main, peng.window, peng,
-                          pos=[100, 100],
-                          size=[200, 100],
-                          label="Press me!",
-                          borderstyle="oldshadow",
-                          )
+   button = peng3d.Button(
+       "btn",
+       main_main,
+       peng.window,
+       peng,
+       pos=[100, 100],
+       size=[200, 100],
+       label="Press me!",
+       borderstyle="oldshadow",
+   )
    main_main.addWidget(button)
 
 The :py:class:`Button` class takes a lot of arguments, so let's go over them.

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  quickstart_basic.py
-#  
+#
 #  Copyright 2022 notna <notna@apparat.org>
-#  
+#
 #  This file is part of peng3d.
 #
 #  peng3d is free software: you can redistribute it and/or modify

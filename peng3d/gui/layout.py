@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 #
 #  layout.py
-#  
+#
 #  Copyright 2020 notna <notna@apparat.org>
-#  
+#
 #  This file is part of peng3d.
 #
 #  peng3d is free software: you can redistribute it and/or modify
@@ -22,7 +22,8 @@
 #
 
 __all__ = [
-    "Layout", "GridLayout",
+    "Layout",
+    "GridLayout",
     "LayoutCell",
 ]
 
@@ -34,7 +35,7 @@ try:
     import pyglet
     from pyglet.gl import *
 except ImportError:
-    pass # Headless mode
+    pass  # Headless mode
 
 
 class Layout(util.ActionDispatcher):
@@ -47,6 +48,7 @@ class Layout(util.ActionDispatcher):
     Note that layouts can be nested, e.g. usually the first layouts parent is a SubMenu
     and sub-layouts get a LayoutCell of their parent layout as their parent.
     """
+
     def __init__(self, peng, parent):
         self.peng = peng
         self.parent = parent
@@ -68,6 +70,7 @@ class GridLayout(Layout):
     can be defined. Additionally, all widgets using this layout should automatically scale
     with screen size.
     """
+
     def __init__(self, peng, parent, res, border):
         super().__init__(peng, parent)
 
@@ -81,7 +84,7 @@ class GridLayout(Layout):
 
         :return: 2-tuple of float
         """
-        return self.size[0]/self.res[0], self.size[1]/self.res[1]
+        return self.size[0] / self.res[0], self.size[1] / self.res[1]
 
     def get_cell(self, pos, size, anchor_x="left", anchor_y="bottom", border=1):
         """
@@ -110,6 +113,7 @@ class LayoutCell(object):
     Note that manually setting ``size`` will override the size set by the layout cell,
     though the position will be kept.
     """
+
     @property
     def pos(self):
         """
@@ -149,6 +153,7 @@ class DumbLayoutCell(LayoutCell):
     Even though setting the :py:attr:`pos` and :py:attr:`size` attributes is possible,
     sometimes a redraw cannot be triggered correctly if e.g. the parent is not submenu.
     """
+
     def __init__(self, parent, pos, size):
         self.parent = parent
         self._pos = pos
@@ -220,12 +225,12 @@ class DumbLayoutCell(LayoutCell):
         if hasattr(self.parent, "redraw"):
             self.parent.redraw()
 
-    def _wlredraw_pos(self,wl):
+    def _wlredraw_pos(self, wl):
         self._pos = wl[:]
         if hasattr(self.parent, "redraw"):
             self.parent.redraw()
 
-    def _wlredraw_size(self,wl):
+    def _wlredraw_size(self, wl):
         self._size = wl[:]
         if hasattr(self.parent, "redraw"):
             self.parent.redraw()
@@ -248,29 +253,29 @@ class _GridCell(LayoutCell):
         dx *= self.border
         dy *= self.border
 
-        px, py = self.parent.pos            # Parent position in px
-        oxc, oyc = self.offset              # Offset in cells
-        csx, csy = self.parent.cell_size    # Cell size in px
-        ox, oy = oxc*csx, oyc*csy           # Offset in px
+        px, py = self.parent.pos  # Parent position in px
+        oxc, oyc = self.offset  # Offset in cells
+        csx, csy = self.parent.cell_size  # Cell size in px
+        ox, oy = oxc * csx, oyc * csy  # Offset in px
 
-        sxc, sxy = self._size               # Size in cells
-        sx, sy = sxc*csx, sxy*csy           # Size in px
+        sxc, sxy = self._size  # Size in cells
+        sx, sy = sxc * csx, sxy * csy  # Size in px
 
         if self.anchor_x == "left":
-            x = px+ox+dx/2
+            x = px + ox + dx / 2
         elif self.anchor_x == "center":
-            x = px+ox+sx/2
+            x = px + ox + sx / 2
         elif self.anchor_x == "right":
-            x = px+ox+sx-dx/2
+            x = px + ox + sx - dx / 2
         else:
             raise ValueError(f"Invalid anchor_x of {self.anchor_x}")
 
         if self.anchor_y == "bottom":
-            y = py+oy+dy/2
+            y = py + oy + dy / 2
         elif self.anchor_y == "center":
-            y = py+oy+sy/2
+            y = py + oy + sy / 2
         elif self.anchor_y == "top":
-            y = py+oy+sy-dy/2
+            y = py + oy + sy - dy / 2
         else:
             raise ValueError(f"Invalid anchor_y of {self.anchor_y}")
 
@@ -281,6 +286,6 @@ class _GridCell(LayoutCell):
         dx, dy = self.parent.bordersize
         csx, csy = self.parent.cell_size  # Cell size in px
         sxc, sxy = self._size  # Size in cells
-        sx, sy = sxc * csx-dx*self.border, sxy * csy-dy*self.border
+        sx, sy = sxc * csx - dx * self.border, sxy * csy - dy * self.border
 
         return sx, sy
