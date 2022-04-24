@@ -82,7 +82,7 @@ class Layer(object):
         """
         Called whenever the Layer should redraw itself.
 
-        Note that this method should not be called manually, instead call :py:meth:`redraw()`\ .
+        Note that this method should not be called manually, instead call :py:meth:`redraw()`\\ .
 
         :return: None
         """
@@ -188,7 +188,7 @@ class LayerGroup(Layer):
 
     .. seealso::
 
-       For more information about pyglet groups, see `the pyglet docs <http://pyglet.readthedocs.io/en/latest/programming_guide/graphics.html#setting-the-opengl-state>`_\ .
+       For more information about pyglet groups, see `the pyglet docs <http://pyglet.readthedocs.io/en/latest/programming_guide/graphics.html#setting-the-opengl-state>`_\\ .
 
     """
 

@@ -162,7 +162,7 @@ class StaticWorld(World):
         assert _have_pyglet
         self.batch3d = pyglet.graphics.Batch()
         self.terrain = self.batch3d.add(
-            len(quads) / 3,
+            len(quads) // 3,
             GL_QUADS,
             None,
             ("v3f/static", quads),

@@ -299,7 +299,7 @@ class TextInput(Widget):
 
     The optional default text will only be displayed if the text is empty.
 
-    The ``allow_overflow`` flag determines if the text entered can be longer than the size of the :py:class:`TextInput`\ .
+    The ``allow_overflow`` flag determines if the text entered can be longer than the size of the :py:class:`TextInput`\\ .
 
     The ``allow_copypaste`` flag controls whether or not the user can copy and paste the contents of the text box.
     By default, copying and pasting is allowed. This flag can also be set to ``"force"`` to force a crash

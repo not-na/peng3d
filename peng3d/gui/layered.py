@@ -55,9 +55,9 @@ class LayeredWidget(Widget):
 
     A Layered Widget consists of (nearly) any amount of layers in a specific order.
 
-    All Layers should be subclasses of :py:class:`BasicWidgetLayer` or :py:class:`WidgetLayer`\ .
+    All Layers should be subclasses of :py:class:`BasicWidgetLayer` or :py:class:`WidgetLayer`\\ .
 
-    ``layers`` must be a list of 2-tuples of ``(layer,z_index)``\ .
+    ``layers`` must be a list of 2-tuples of ``(layer,z_index)``\\ .
     """
 
     IS_CLICKABLE = True
@@ -146,14 +146,14 @@ class LayeredWidget(Widget):
 
 class BasicWidgetLayer(object):
     """
-    Base class for all Layers to be used with :py:class:`LayeredWidget()`\ .
+    Base class for all Layers to be used with :py:class:`LayeredWidget()`\\ .
 
-    Not to be confused with :py:class:`peng3d.layer.Layer()`\ , these classes are not compatible.
+    Not to be confused with :py:class:`peng3d.layer.Layer()`\\ , these classes are not compatible.
 
     It is recommended to use :py:class:`WidgetLayer()` instead, since functionality is limited in this basic class.
 
     Note that the ``z_index`` will default to a reasonable value for most subclasses and thus is not required to be given explicitly.
-    The ``z_index`` for this Layer defaults to ``0``\ .
+    The ``z_index`` for this Layer defaults to ``0``\\ .
     """
 
     z_index = 0
@@ -226,7 +226,7 @@ class BasicWidgetLayer(object):
         """
         Deletes this Layer.
 
-        Currently only deletes VertexLists registered with :py:meth:`regVList()`\ .
+        Currently only deletes VertexLists registered with :py:meth:`regVList()`\\ .
         """
         for vlist in self._vlists:
             vlist.delete()
@@ -267,7 +267,7 @@ class WidgetLayer(BasicWidgetLayer):
 
     This subclass adds a border and offset system.
 
-    The ``border`` is a 2-tuple of ``(x_border,y_border)``\ . The border is applied to all sides, resulting in the size being decreased by two pixel per pixel border width.
+    The ``border`` is a 2-tuple of ``(x_border,y_border)``\\ . The border is applied to all sides, resulting in the size being decreased by two pixel per pixel border width.
 
     ``offset`` is relative to the bottom left corner of the screen.
     """
@@ -355,7 +355,7 @@ class WidgetLayer(BasicWidgetLayer):
 
         This method is intended for use in vertex position calculation, as the border and offset have already been applied.
 
-        The returned value is a 4-tuple of ``(sx,sy,ex,ey)``\ .
+        The returned value is a 4-tuple of ``(sx,sy,ex,ey)``\\ .
         The two values starting with an s are the "start" position, or the lower-left corner.
         The second pair of values signify the "end" position, or upper-right corner.
         """
@@ -417,11 +417,11 @@ class ImageWidgetLayer(WidgetLayer):
     """
     Subclass of :py:class:`WidgetLayer()` implementing a simple static image view.
 
-    This layer can display any resource representable by the :py:class:`ResourceManager()`\ .
+    This layer can display any resource representable by the :py:class:`ResourceManager()`\\ .
 
-    ``img`` is a 2-tuple of ``(resource_name,category)``\ .
+    ``img`` is a 2-tuple of ``(resource_name,category)``\\ .
 
-    The ``z_index`` for this Layer defaults to ``1``\ .
+    The ``z_index`` for this Layer defaults to ``1``\\ .
     """
 
     z_index = 1
@@ -479,11 +479,11 @@ class DynImageWidgetLayer(WidgetLayer):
     """
     Subclass of :py:class:`WidgetLayer` allowing for dynamic images.
 
-    ``imgs`` is a dictionary of names to 2-tuples of ``(resource_name,category)``\ .
+    ``imgs`` is a dictionary of names to 2-tuples of ``(resource_name,category)``\\ .
 
     If no default image name is given, a semi-random one will be selected.
 
-    The ``z_index`` for this Layer defaults to ``1``\ .
+    The ``z_index`` for this Layer defaults to ``1``\\ .
     """
 
     z_index = 1
@@ -512,7 +512,7 @@ class DynImageWidgetLayer(WidgetLayer):
         """
         Adds an image to the internal registry.
 
-        ``rsrc`` should be a 2-tuple of ``(resource_name,category)``\ .
+        ``rsrc`` should be a 2-tuple of ``(resource_name,category)``\\ .
         """
         self.imgs[name] = self.widget.peng.resourceMgr.normTex(rsrc)
 
@@ -977,9 +977,9 @@ class FramedImageWidgetLayer(DynImageWidgetLayer):
 
 class ImageButtonWidgetLayer(DynImageWidgetLayer):
     """
-    Subclass of :py:class:`DynImageWidgetLayer()` that acts like an :py:class:`ImageButton()`\ .
+    Subclass of :py:class:`DynImageWidgetLayer()` that acts like an :py:class:`ImageButton()`\\ .
 
-    The ``img_*`` arguments are of the same format as in :py:class:`DynImageWidgetLayer()`\ .
+    The ``img_*`` arguments are of the same format as in :py:class:`DynImageWidgetLayer()`\\ .
 
     This class internally uses the :py:meth:`BasicWidget.getState()` method for getting the state of the widget.
     """
@@ -1020,7 +1020,7 @@ class LabelWidgetLayer(WidgetLayer):
 
     Note that this method internally uses a pyglet Label that is centered on the Layer.
 
-    The ``z_index`` for this Layer defaults to ``2``\ .
+    The ``z_index`` for this Layer defaults to ``2``\\ .
     """
 
     z_index = 2
@@ -1103,11 +1103,11 @@ class FormattedLabelWidgetLayer(WidgetLayer):
     """
     Subclass of :py:class:`WidgetLayer()` serving as a base class for other formatted label layers.
 
-    The Label Type can be set via the class attribute ``cls``\ , it should be set to any class that is compatible with :py:class:`pyglet.text.Label`\ .
+    The Label Type can be set via the class attribute ``cls``\\ , it should be set to any class that is compatible with :py:class:`pyglet.text.Label`\\ .
 
     It is recommended to use one of the subclasses of this class instead of this class directly.
 
-    The ``z_index`` for this Layer defaults to ``2``\ .
+    The ``z_index`` for this Layer defaults to ``2``\\ .
     """
 
     z_index = 2
@@ -1220,9 +1220,9 @@ class BaseBorderWidgetLayer(WidgetLayer):
     Subclasses may set the :py:attr:`n_vertices` value to change the number of
     vertices or :py:attr:`change_on_press` to change the default value for the
     argument of the same name.
-    By default, 36 vertices are used and ``changed_on_press`` is set to ``True``\ .
+    By default, 36 vertices are used and ``changed_on_press`` is set to ``True``\\ .
 
-    The ``z_index`` for this Layer defaults to ``0.5``\ .
+    The ``z_index`` for this Layer defaults to ``0.5``\\ .
     """
 
     z_index = 0.5  # between default and image layer
@@ -1291,7 +1291,7 @@ class BaseBorderWidgetLayer(WidgetLayer):
 
         ``name`` is the (string) name of the style.
 
-        ``func`` will be called with its arguments as ``(bg,o,i,s,h)``\ , see :py:meth:`getColors()` for more information.
+        ``func`` will be called with its arguments as ``(bg,o,i,s,h)``\\ , see :py:meth:`getColors()` for more information.
         """
         self.styles[name] = func
 
@@ -1299,7 +1299,7 @@ class BaseBorderWidgetLayer(WidgetLayer):
         """
         Overrideable function that generates the colors to be used by various styles.
 
-        Should return a 5-tuple of ``(bg,o,i,s,h)``\ .
+        Should return a 5-tuple of ``(bg,o,i,s,h)``\\ .
 
         ``bg`` is the base color of the background.
 
@@ -1311,7 +1311,7 @@ class BaseBorderWidgetLayer(WidgetLayer):
 
         ``h`` is the highlight color, it is usually quite a bit lighter than the background.
 
-        The returned values may also be statically overridden by setting the :py:attr:`color_<var>` attribute to anything but ``None``\ .
+        The returned values may also be statically overridden by setting the :py:attr:`color_<var>` attribute to anything but ``None``\\ .
         """
 
         bg = (
@@ -1629,7 +1629,7 @@ class ButtonBorderWidgetLayer(BaseBorderWidgetLayer):
     This means that most styles are also available here and should look identical.
 
     Note that this class uses only 20 vertices and is thus not compatible with styles
-    created for use with :py:class:`BaseBorderWidgetLayer`\ .
+    created for use with :py:class:`BaseBorderWidgetLayer`\\ .
 
     Also note that the ``border`` argument also only receives two values instead of eight.
     """

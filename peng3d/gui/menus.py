@@ -30,7 +30,7 @@ after they are left. Note that this will cuase the :py:meth:`SubMenu.on_enter()`
 method to be called again.
 
 Since these menus are internally implemented as submenus, they are specific to their
-:py:class:`Menu`\ , which must be active to be able to use the dialog.
+:py:class:`Menu`\\ , which must be active to be able to use the dialog.
 
 Customization
 -------------
@@ -88,7 +88,7 @@ class DialogSubMenu(SubMenu):
     the dialog.
 
     Dialog submenus also support the basic actions used by all submenus, e.g.
-    ``enter`` and ``exit``\ . Additionally, many dialogs also add actions for whenever
+    ``enter`` and ``exit``\\ . Additionally, many dialogs also add actions for whenever
     a label is changed or the dialog is exited through a special means, e.g. pressing
     a specific button of multiple presented.
 
@@ -96,8 +96,8 @@ class DialogSubMenu(SubMenu):
     below it. Clicking the button will cause the dialog to exit and also the
     additional ``click_ok`` action to be fired.
 
-    The labels supported by default are ``label_main``\ , which defaults to ``Default Text``
-    and is recommended to always be customized, and ``label_ok``\, which defaults to ``OK``
+    The labels supported by default are ``label_main``\\ , which defaults to ``Default Text``
+    and is recommended to always be customized, and ``label_ok``\\ , which defaults to ``OK``
     and may be left as-is.
 
     Subclasses may override these defaults by setting the keys of the same name in the
@@ -288,7 +288,7 @@ class DialogSubMenu(SubMenu):
 
         Calling this method will simply cause the dialog to become the active submenu.
 
-        Note that is not necessary to call this method over :py:meth:`changeSubMenu()`\ ,
+        Note that is not necessary to call this method over :py:meth:`changeSubMenu()`\\ ,
         as the storing of the previous submenu is done elsewhere.
         """
         # error checking done indirectly by on_enter
@@ -301,7 +301,7 @@ class ConfirmSubMenu(DialogSubMenu):
     Dialog that allows the user to confirm or cancel an action.
 
     By default, the OK button will be hidden and the ``label_main`` will be set
-    to ``Are you sure?``\ .
+    to ``Are you sure?``\\ .
 
     Clicking the confirm button will cause the ``confirm`` action to trigger, while
     the cancel button will cause the ``cancel`` action to trigger.
@@ -746,18 +746,18 @@ class AdvancedProgressSubMenu(ProgressSubMenu):
 
     def addCategory(self, *args, **kwargs):
         """
-        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.addCategory()`\ .
+        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.addCategory()`\\ .
         """
         return self.wprogressbar.addCategory(*args, **kwargs)
 
     def updateCategory(self, *args, **kwargs):
         """
-        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.updateCategory()`\ .
+        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.updateCategory()`\\ .
         """
         return self.wprogressbar.updateCategory(*args, **kwargs)
 
     def deleteCategory(self, *args, **kwargs):
         """
-        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.deleteCategory()`\ .
+        Proxy for :py:meth:`~peng3d.gui.slider.AdvancedProgressbar.deleteCategory()`\\ .
         """
         return self.wprogressbar.deleteCategory(*args, **kwargs)

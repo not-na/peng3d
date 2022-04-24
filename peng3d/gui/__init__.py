@@ -69,7 +69,7 @@ class GUIMenu(Menu):
     """
     :py:class:`peng3d.menu.Menu` subclass adding 2D GUI Support.
 
-    Note that widgets are not managed directly by this class, but rather by each :py:class:`SubMenu`\ .
+    Note that widgets are not managed directly by this class, but rather by each :py:class:`SubMenu`\\ .
     """
 
     def __init__(
@@ -228,7 +228,7 @@ class SubMenu(util.ActionDispatcher):
     """
     Sub Menu of the GUI system.
 
-    Each instance must be registered with their menu to work properly, see :py:meth:`GUIMenu.addSubMenu()`\ .
+    Each instance must be registered with their menu to work properly, see :py:meth:`GUIMenu.addSubMenu()`\\ .
 
     Actions supported by default:
 
@@ -412,7 +412,7 @@ class SubMenu(util.ActionDispatcher):
         Alternatively, a :py:class:`peng3d.layer.Layer` instance or other object with a ``.draw()`` method may be supplied.
         It is also possible to supply any other method or function that will get called.
 
-        Also, the strings ``flat``\ , ``gradient``\ , ``oldshadow`` and ``material`` may be given, resulting in a background that looks similar to buttons.
+        Also, the strings ``flat``\\ , ``gradient``\\ , ``oldshadow`` and ``material`` may be given, resulting in a background that looks similar to buttons.
 
         If the Background is ``None``\\ , the default background of the parent menu will be used.
 
@@ -498,7 +498,7 @@ class SubMenu(util.ActionDispatcher):
 
 class GUILayer(GUIMenu, Layer2D):
     """
-    Hybrid of :py:class:`GUIMenu` and :py:class:`peng3d.layer.Layer2D`\ .
+    Hybrid of :py:class:`GUIMenu` and :py:class:`peng3d.layer.Layer2D`\\ .
 
     This class allows you to create Head-Up Displays and other overlays easily.
     """

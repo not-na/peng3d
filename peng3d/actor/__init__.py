@@ -225,7 +225,7 @@ class RotatableActor(Actor):
         Rotation is a tuple of ``(x,y)`` where y is clamped to -90 and 90.
         x rolls over at 360, resulting in a seamless experience for players.
 
-        This property may also be written to, this calls :py:meth:`on_rotate()`\ .
+        This property may also be written to, this calls :py:meth:`on_rotate()`\\ .
         """
         return self._rot
 

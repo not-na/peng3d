@@ -3,7 +3,7 @@
 #
 #  peng.py
 #
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,6 @@ import inspect
 # from . import window, config, keybind, pyglet_patch
 from . import config, world, resource, i18n
 
-_pyglet_patched = sys.version_info.major == 2 or not world._have_pyglet
-
 
 class Peng(object):
     """
@@ -44,11 +42,9 @@ class Peng(object):
     Be sure to keep your instance accessible, as it will be needed to create most other classes.
     """
 
-    def __init__(self, cfg={}):
-        global _pyglet_patched
+    def __init__(self, cfg=None):
         if world._have_pyglet:
             from . import (
-                pyglet_patch,
                 keybind,
             )  # Local import for compat with headless machines
         self.window = None
@@ -69,8 +65,7 @@ class Peng(object):
         self.events_ignored = {}
         self.event_list = set()
 
-        if cfg == {}:
-            cfg = {}  # To avoid bugs with default arguments
+        cfg = cfg if cfg is not None else {}
         self.cfg = config.Config(cfg, defaults=config.DEFAULT_CONFIG)
         if world._have_pyglet:
             self.keybinds = keybind.KeybindHandler(self)
@@ -84,10 +79,6 @@ class Peng(object):
         self.addEventListener("peng3d:peng.exit", self.handler_exit)
         self.registerEventHandler("on_mouse_motion", self.on_mouse_motion)
         self.registerEventHandler("on_resize", self.on_resize)
-
-        if not _pyglet_patched and self.cfg["pyglet.patch.patch_float2int"]:
-            _pyglet_patched = True
-            pyglet_patch.patch_float2int()
 
     def createWindow(
         self,
@@ -116,25 +107,32 @@ class Peng(object):
             from . import window
 
             cls = window.PengWindow
+
         if self.window is not None:
             raise RuntimeError("Window already created!")
+
         self.sendEvent("peng3d:window.create.pre", {"peng": self, "cls": cls})
+
         if caption_t is not None:
             kwargs["caption"] = "Peng3d Application"
         self.window = cls(self, *args, **kwargs)
+
         self.sendEvent(
             "peng3d:window.create.post", {"peng": self, "window": self.window}
         )
+
+        # Initialize resource manager
         if self.cfg["rsrc.enable"] and self.resourceMgr is None:
             self.sendEvent(
                 "peng3d:rsrc.init.pre",
                 {"peng": self, "basepath": self.cfg["rsrc.basepath"]},
             )
             self.resourceMgr = rsrc_class(self, self.cfg["rsrc.basepath"])
-            self.rsrcMgr = self.resourceMgr
             self.sendEvent(
                 "peng3d:rsrc.init.post", {"peng": self, "rsrcMgr": self.resourceMgr}
             )
+
+        # Initialize i18n / Translation system
         if (
             self.resourceMgr is not None
             and self.cfg["i18n.enable"]
@@ -286,6 +284,10 @@ class Peng(object):
                             ]
                         handler(*args)
 
+    @property
+    def rsrcMgr(self):
+        return self.resourceMgr
+
     # For compatibility, deprecated
     handleEvent = sendPygletEvent
     registerEventHandler = addPygletListener
@@ -350,6 +352,7 @@ class Peng(object):
 
         if event not in self.eventHandlers:
             self.eventHandlers[event] = []
+
         self.eventHandlers[event].append([func, raiseErrors])
 
     def delEventListener(self, event, func):
@@ -362,13 +365,15 @@ class Peng(object):
         """
         if event not in self.eventHandlers:
             raise NameError("No handlers exist for event %s" % event)
+
         if [func, True] in self.eventHandlers[event]:
             del self.eventHandlers[event][self.eventHandlers[event].index(func)]
-        elif [func, False] in self.eventHandler[event]:
+        elif [func, False] in self.eventHandlers[event]:
             del self.eventHandlers[event][self.eventHandlers[event].index(func)]
         else:
             raise NameError("This handler is not registered for event %s" % event)
-        if self.eventHandlers[event] == []:
+
+        if not self.eventHandlers[event]:
             del self.eventHandlers[event]
 
     def on_mouse_motion(self, x, y, dx, dy):

@@ -957,7 +957,7 @@ class FramedImageButton(ImageButton):
 
     ``frame`` defines the ratio between the borders and the center. The sum of each item must
     be greater than zero, else a ZeroDivisionError may be thrown. Note that up to two items
-    of each frame may be left as ``0``\ . This will cause the appropriate border or center
+    of each frame may be left as ``0``\\ . This will cause the appropriate border or center
     to not be rendered at all.
 
     ``tex_size`` may be left empty if a resource name is passed. It will then be automatically

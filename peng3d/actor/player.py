@@ -45,11 +45,11 @@ class FourDirectionalMoveController(Controller):
     Controller allowing the user to control the actor with the keyboard.
 
     You can configure the used keybinds with the :confval:`controls.controls.forward` etc.
-    The keybinds can also be changed with their ``keybindname``\ , e.g. ``peng3d:actor.<actor uuid>.player.controls.forward`` for forward.
+    The keybinds can also be changed with their ``keybindname``\\ , e.g. ``peng3d:actor.<actor uuid>.player.controls.forward`` for forward.
 
-    The movement speed may also be changed via the :py:attr:`movespeed` instance attribute, which defaults to :confval:`controls.controls.movespeed`\ .
+    The movement speed may also be changed via the :py:attr:`movespeed` instance attribute, which defaults to :confval:`controls.controls.movespeed`\\ .
 
-    You may also access the currently held keys via :py:attr:`move`\ , which is a list with 2 items, forwards/backwards and left/right.
+    You may also access the currently held keys via :py:attr:`move`\\ , which is a list with 2 items, forwards/backwards and left/right.
     """
 
     def __init__(self, *args, **kwargs):
@@ -183,7 +183,7 @@ class BasicFlightController(Controller):
     """
     Controller allowing the user to move up and down with the jump and crouch controls.
 
-    The used keybinds may be configured via :confval:`controls.controls.crouch` and :confval:`controls.controls.jump`\ .
+    The used keybinds may be configured via :confval:`controls.controls.crouch` and :confval:`controls.controls.jump`\\ .
 
     The vertical speed used when flying may be configured via :confval:`controls.controls.verticalspeed` or the :py:attr:`speed` attribute.
     """
@@ -239,9 +239,9 @@ class BasicFlightController(Controller):
 
 class BasicPlayer(RotatableActor):
     """
-    Basic Player class, subclass of :py:class:`RotatableActor()`\ .
+    Basic Player class, subclass of :py:class:`RotatableActor()`\\ .
 
-    This class adds no features currently, it can be used to identify player actors via :py:func:`isinstance()`\ .
+    This class adds no features currently, it can be used to identify player actors via :py:func:`isinstance()`\\ .
     """
 
     pass

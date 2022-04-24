@@ -3,7 +3,7 @@
 #
 #  __init__.py
 #
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,34 +22,9 @@
 #
 #
 
-import sys
-
-import warnings
-
-if sys.version_info.major < 3:
-    # needed for py27 compat
-    import weakref as _weakref
-
-    class _WeakMethod(object):
-        """A callable object. Takes one argument to init: 'object.method'.
-        Once created, call this object -- MyWeakMethod() --
-        and pass args/kwargs as you normally would.
-        """
-
-        def __init__(self, object_dot_method):
-            self.target = _weakref.proxy(object_dot_method.__self__)
-            self.method = _weakref.proxy(object_dot_method.__func__)
-            ###Older versions of Python can use 'im_self' and 'im_func' in place of '__self__' and '__func__' respectively
-
-        def __call__(self):
-            def f(*args, **kwargs):
-                return self.method(self.target, *args, **kwargs)
-
-            return f
-
-    _weakref.WeakMethod = _WeakMethod
-
-# These imports are here for convenience
+# These imports are here for convenience, to allow access to all classes and methods
+# without needing to know the submodule they are in
+# The order matters, since some modules use other modules
 
 from .peng import *
 

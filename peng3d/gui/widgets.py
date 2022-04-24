@@ -102,7 +102,7 @@ class Background(object):
     @property
     def peng(self):
         """
-        Property for accessing the parent widget's instance of :py:class:`peng3d.peng.Peng`\ .
+        Property for accessing the parent widget's instance of :py:class:`peng3d.peng.Peng`\\ .
         """
         return self.widget.peng
 
@@ -111,7 +111,7 @@ class Background(object):
         """
         Read-only helper property for easier access.
 
-        Equivalent to ``widget.pressed``\ .
+        Equivalent to ``widget.pressed``\\ .
         """
         return self.widget.pressed
 
@@ -120,7 +120,7 @@ class Background(object):
         """
         Read-only helper property for easier access.
 
-        Equivalent to ``widget.is_hovering``\ .
+        Equivalent to ``widget.is_hovering``\\ .
         """
         return self.widget.is_hovering
 
@@ -350,7 +350,7 @@ class BasicWidget(ActionDispatcher):
         """
         Returns the current state of the widget.
 
-        One of ``"pressed"``\ , ``"hover"``\ , ``"disabled"`` or ``"idle"``\ .
+        One of ``"pressed"``\\ , ``"hover"``\\ , ``"disabled"`` or ``"idle"``\\ .
         Note that some information may be lost by getting this state,
         for example it is not possible to know if the widget is hovered or not
         if ``"pressed"`` is returned. However, this should not be a problem for
@@ -518,7 +518,7 @@ class BasicWidget(ActionDispatcher):
 
 class Widget(BasicWidget):
     """
-    Subclass of :py:class:`BasicWidget` adding support for changing the :py:class:`Background`\ .
+    Subclass of :py:class:`BasicWidget` adding support for changing the :py:class:`Background`\\ .
 
     If no background is given, an :py:class:`EmptyBackground` will be used instead.
     """

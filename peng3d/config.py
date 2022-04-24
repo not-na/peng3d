@@ -173,8 +173,6 @@ DEFAULT_CONFIG = {
     # Event config
     "events.removeonerror": True,
     "events.maxignore": 3,
-    # Other config options
-    "pyglet.patch.patch_float2int": True,
 }
 """
 Default configuration values.

@@ -45,7 +45,7 @@ class ProgressbarBackground(Background):
     """
     Background for the :py:class:`Progressbar` Widget.
 
-    This background displays a bar with a border similar to :py:class:`ButtonBackground`\ .
+    This background displays a bar with a border similar to :py:class:`ButtonBackground`\\ .
     Note that two colors may be given, one for the left and one for the right.
     """
 
@@ -168,7 +168,7 @@ class Progressbar(Widget):
 
     The two colors given are for left and right, respectively. This may be used to create gradients.
 
-    ``nmin``\ , ``nmax`` and ``n`` represent the minimal value, maximal value and current value, respectively.
+    ``nmin``\\ , ``nmax`` and ``n`` represent the minimal value, maximal value and current value, respectively.
     Unexpected behavior may occur if the minimal value is bigger then the maximum value.
     """
 
@@ -202,7 +202,7 @@ class Progressbar(Widget):
     @property
     def nmin(self):
         """
-        Property representing the minimal value of the progressbar. Typically ``0``\ .
+        Property representing the minimal value of the progressbar. Typically ``0``\\ .
         """
         return self._nmin
 
@@ -260,17 +260,17 @@ class AdvancedProgressbar(Progressbar):
     Visually, this widget is identical to :py:class:`Progressbar` with the only difference
     being the way the progress percentage is calculated.
 
-    The ``offset_nmin``\ , ``offset_n`` and ``offset_nmax`` parameters are equivalent
+    The ``offset_nmin``\\ , ``offset_n`` and ``offset_nmax`` parameters are equivalent
     to the parameters of the same name minus the ``offset_`` prefix.
 
     ``categories`` may be any dictionary mapping category names to 3-tuples of
-    format ``(nmin,n,nmax)``\ .
+    format ``(nmin,n,nmax)``\\ .
 
     It is possible to read, write and delete categories through the ``widget[cat]`` syntax.
-    Note however, that modifying categories in-place, e.g. like ``widget[cat][1]=100``\ ,
-    requires a manual call to :py:meth:`redraw()`\ .
+    Note however, that modifying categories in-place, e.g. like ``widget[cat][1]=100``\\ ,
+    requires a manual call to :py:meth:`redraw()`\\ .
 
-    When setting the :py:attr:`nmin`\ , :py:attr:`n` or :py:attr:`nmax` properties, only
+    When setting the :py:attr:`nmin`\\ , :py:attr:`n` or :py:attr:`nmax` properties, only
     an internal offset value will be modified. This may result in otherwise unexpected behavior
     if setting e.g. ``n`` to ``nmax`` because the categories may influence the total percentage calculation.
     """
@@ -471,7 +471,7 @@ class Slider(Progressbar):
 
     By default, this Widget uses :py:class:`SliderBackground` as its Background class.
 
-    Most options are the same as for :py:class:`Progressbar`\ .
+    Most options are the same as for :py:class:`Progressbar`\\ .
 
     ``handlesize`` simply determines the size of the handle.
 
@@ -526,7 +526,7 @@ class VerticalSliderBackground(SliderBackground):
     """
     Background for the :py:class:`VerticalSlider` Widget.
 
-    This background uses the same technique as :py:class:`SliderBackground`\ , simply turned by 90 Degrees.
+    This background uses the same technique as :py:class:`SliderBackground`\\ , simply turned by 90 Degrees.
     """
 
     def getPosSize(self):
@@ -547,9 +547,9 @@ class VerticalSlider(Slider):
 
     By default, this Widget uses :py:class:`VerticalSliderBackground` as its Background class.
 
-    This widget is essentially the same as :py:class:`Slider`\ , only vertical.
+    This widget is essentially the same as :py:class:`Slider`\\ , only vertical.
 
-    Note that you may need to flip the x and y values of ``size``\ , ``handlesize`` and ``border`` compared to :py:class:`Slider`\ .
+    Note that you may need to flip the x and y values of ``size``\\ , ``handlesize`` and ``border`` compared to :py:class:`Slider`\\ .
     """
 
     def __init__(

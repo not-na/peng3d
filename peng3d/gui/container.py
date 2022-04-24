@@ -79,7 +79,7 @@ class Container(Widget):
 
     The :py:attr:`visible` attribute may be set to control whether or not this container is visible.
 
-    This Class is a subclass of :py:class:`peng3d.gui.widgets.Widget` but also exhibits part of the API of :py:class:`peng3d.gui.SubMenu`\ .
+    This Class is a subclass of :py:class:`peng3d.gui.widgets.Widget` but also exhibits part of the API of :py:class:`peng3d.gui.SubMenu`\\ .
     """
 
     IS_CLICKABLE = True
@@ -135,7 +135,7 @@ class Container(Widget):
         """
         Sets the background of the Container.
 
-        Similar to :py:meth:`peng3d.gui.SubMenu.setBackground()`\ , but only effects the region covered by the Container.
+        Similar to :py:meth:`peng3d.gui.SubMenu.setBackground()`\\ , but only effects the region covered by the Container.
         """
         self.bg = bg
         if isinstance(bg, list) or isinstance(bg, tuple):
@@ -250,7 +250,7 @@ class ScrollableContainer(Container):
     """
     Subclass of :py:class:`Container` allowing for scrolling its content.
 
-    The scrollbar currently is always on the right side and simply consists of a :py:class:`peng3d.gui.slider.VerticalSlider`\ .
+    The scrollbar currently is always on the right side and simply consists of a :py:class:`peng3d.gui.slider.VerticalSlider`\\ .
 
     ``scrollbar_width`` and ``borderstyle`` will be passed to the scrollbar.
 
