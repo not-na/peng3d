@@ -81,13 +81,9 @@ class Config(object):
     There is no limit in stacking configurations, though higher-stacked configs may get slow when defaulting due to propagating through the whole chain.
     """
 
-    def __init__(self, config=None, defaults={}):
-        if config is None:
-            config = (
-                {}
-            )  # To avoid bugs with defaulted arguments being initialized at load time, not object instantiation.
-        self.config = config
-        self.defaults = defaults
+    def __init__(self, config=None, defaults=None):
+        self.config = config if config is not None else {}
+        self.defaults = defaults if defaults is not None else {}
 
     def __getitem__(self, key):
         return self.config[key] if key in self.config else self.defaults[key]

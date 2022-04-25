@@ -24,7 +24,7 @@
 
 __all__ = ["VERSION", "RELEASE"]
 
-VERSION = "1.11.0"
+VERSION: str = "1.11.0"
 """
 Full version number of format ``MAJOR.MINOR.BUGFIX`` where major is increased only on very major feature changes.
 Minor is changed if a new feature is introduced or an API change is made, while bugfix only changes if an important fix for a bug needs to be provided before the next release.
@@ -37,7 +37,7 @@ Used to display the version in the title of the documentation.
 
 """
 
-RELEASE = "1.11.0"
+RELEASE: str = "1.11.0"
 """
 Currently the same as :py:data:`VERSION`\\ .
 

@@ -3,7 +3,7 @@
 #
 #  window.py
 #
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,12 @@ from pyglet.gl import *
 from pyglet.window import key
 
 from . import config, camera
+from .util.gui import Position
+
+from typing import TYPE_CHECKING, Dict, Optional, Union, Tuple
+
+if TYPE_CHECKING:
+    import peng3d
 
 # TODO: allow for arbitrary icon size discovery
 ICON_SIZES = [16, 24, 32, 48, 64, 128, 256, 512]
@@ -47,24 +53,23 @@ class PengWindow(pyglet.window.Window):
     This class should not be instantiated directly, use the :py:meth:`Peng.createWindow()` method.
     """
 
-    def __init__(self, peng, *args, **kwargs):
+    def __init__(self, peng: "peng3d.Peng", *args, **kwargs):
         if peng.cfg["graphics.stencil.enable"]:
             glconfig = pyglet.gl.Config(stencil_size=peng.cfg["graphics.stencil.bits"])
             kwargs["config"] = glconfig
         super(PengWindow, self).__init__(*args, **kwargs)
-        self.peng = peng
+        self.peng: "peng3d.Peng" = peng
 
-        self.exclusive = False
-        self.started = False
-        self.exclusive = False
+        self.exclusive: bool = False
+        self.started: bool = False
 
-        self.menus = {}
-        self.activeMenu = None
+        self.menus: Dict[str, "peng3d.BasicMenu"] = {}
+        self.activeMenu: Optional[str] = None
 
-        self.cfg = config.Config({}, defaults=peng.cfg)
+        self.cfg: config.Config = config.Config({}, defaults=peng.cfg)
         self.eventHandlers = {}
 
-        self.cur_fps = None
+        self.cur_fps: Optional[float] = None
         self._last_render = time.monotonic()
 
         self._setup = False
@@ -75,7 +80,7 @@ class PengWindow(pyglet.window.Window):
 
         self.push_handlers(on_key_press)  # to stop the auto-exit on escape
 
-        self.mouse_pos = [0, 0]
+        self.mouse_pos: Position = [0, 0]
 
         self.peng.sendEvent("peng3d:window.create", {"peng": self.peng, "window": self})
 
@@ -151,7 +156,7 @@ class PengWindow(pyglet.window.Window):
         """
         raise NotImplementedError("Currently not implemented")
 
-    def run(self, evloop=None):
+    def run(self, evloop: Optional[pyglet.app.EventLoop] = None) -> None:
         """
         Runs the application in the current thread.
 
@@ -164,75 +169,39 @@ class PengWindow(pyglet.window.Window):
         """
         self.setup()
         self.cur_fps = self.cfg["graphics.default_fps"]
+
         if evloop is not None:
             pyglet.app.event_loop = evloop
+
         pyglet.app.run()  # This currently just calls the basic pyglet main loop, maybe implement custom main loop for more control
 
-    """def cleanConfig(self):
-        ########## Reset quotation marks if uncommenting
-        Sets default values for various config values.
-        
-        .. todo::
-           
-           Use an defaultdict or similiar instead.
-        ########## End quotation marks
-        # Various default values are set in this method, this should really be replaced with something more easy to use and robust
-        # A possible replacement could be a defaultdict or similiar
-        # Update: now replaced by :py:class:`Config()`\\ .
-        
-        # OpenGL configs
-        self.cfg["graphics.clearColor"] = self.cfg.get("graphics.clearColor",(0.,0.,0.,1.))
-        self.cfg["graphics.wireframe"] = self.cfg.get("graphics.wireframe",False)
-        self.cfg["graphics.fieldofview"] = self.cfg.get("graphics.fieldofview",65.0)
-        self.cfg["graphics.nearclip"] = self.cfg.get("graphics.nearclip",0.1)
-        self.cfg["graphics.farclip"] = self.cfg.get("graphics.farclip",10000) # It's over 9000!
-        
-        # OpenGL - Fog
-        self.cfg["graphics.fogSettings"] = self.cfg.get("graphics.fogSettings",CFG_FOG_DEFAULT)
-        self.cfg["graphics.fogSettings"]["enable"] = self.cfg["graphics.fogSettings"].get("enable",False)
-        if self.cfg["graphics.fogSettings"]["enable"]:
-            pass
-        
-        # OpenGL - Light
-        self.cfg["graphics.lightSettings"] = self.cfg.get("graphics.lightSettings",CFG_LIGHT_DEFAULT)
-        self.cfg["graphics.lightSettings"]["enable"] = self.cfg["graphics.lightSettings"].get("enable",False)
-        if self.cfg["graphics.lightSettings"]["enable"]:
-            pass
-        
-        # Other configs
-        
-        return
-    """
     # Various methods
-    def changeMenu(self, menu):
+    def changeMenu(self, menu: str) -> None:
         """
         Changes to the given menu.
 
         ``menu`` must be a valid menu name that is currently known.
-
-        .. versionchanged:: 1.2a1
-
-           The push/pop handlers have been deprecated in favor of the new :py:meth:`Menu.on_enter() <peng3d.menu.Menu.on_enter>`\\ , :py:meth:`Menu.on_exit() <peng3d.menu.Menu.on_exit>`\\ , etc. events.
         """
         if menu not in self.menus:
             raise ValueError("Menu %s does not exist!" % menu)
         elif menu == self.activeMenu:
             return  # Ignore double menu activation to prevent bugs in menu initializer
+
         old = self.activeMenu
         self.activeMenu = menu
+
         if old is not None:
             self.menus[old].on_exit(menu)
             self.menus[old].doAction("exit")
-            # self.pop_handlers()
+
         self.menu.on_enter(old)
         self.menu.doAction("enter")
         self.peng.sendEvent(
             "peng3d:window.menu.change",
             {"peng": self.peng, "window": self, "old": old, "menu": menu},
         )
-        # self.push_handlers(self.menu)
 
-    def addMenu(self, menu):
+    def addMenu(self, menu: "peng3d.BasicMenu") -> "peng3d.BasicMenu":
         """
         Adds a menu to the list of menus.
         """
@@ -246,7 +215,9 @@ class PengWindow(pyglet.window.Window):
         #    self.changeMenu(menu.name)
         # currently disabled because of a bug with adding layers
 
-    def setIcons(self, icons):
+        return menu
+
+    def setIcons(self, icons: Union[str, tuple]):
         if isinstance(icons, list) or isinstance(icons, tuple):
             # should be a list of resource names
             rlist = icons
@@ -268,7 +239,7 @@ class PengWindow(pyglet.window.Window):
         if len(ilist) != 0:
             self.set_icon(*ilist)
 
-    def set_fps(self, fps):
+    def set_fps(self, fps: Optional[float]):
         """
         Sets the new FPS limit.
 
@@ -310,7 +281,7 @@ class PengWindow(pyglet.window.Window):
     def on_mouse_motion(self, x, y, dx, dy):
         self.mouse_pos = x, y
 
-    def dispatch_event(self, event_type, *args):
+    def dispatch_event(self, event_type: str, *args):
         """
         Internal event handling method.
 
@@ -334,7 +305,7 @@ class PengWindow(pyglet.window.Window):
         self.handleEvent(event_type, args)
         m.handleEvent(event_type, args)
 
-    def handleEvent(self, event_type, args, window=None):
+    def handleEvent(self, event_type: str, args: Tuple, window=None):
         args = list(args)
         # if window is not None:
         #    args.append(window)
@@ -366,7 +337,7 @@ class PengWindow(pyglet.window.Window):
 
     # Proxy for self.menus[self.activeMenu]
     @property
-    def menu(self):
+    def menu(self) -> "peng3d.BasicMenu":
         """
         Property for accessing the currently active menu.
 

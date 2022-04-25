@@ -30,7 +30,13 @@ import weakref
 import inspect
 
 # from . import window, config, keybind, pyglet_patch
+from typing import Optional, TYPE_CHECKING, Type, List, Callable, Union, Tuple
+
 from . import config, world, resource, i18n
+
+if TYPE_CHECKING:
+    import pyglet
+    from . import keybind, window
 
 
 class Peng(object):
@@ -42,12 +48,12 @@ class Peng(object):
     Be sure to keep your instance accessible, as it will be needed to create most other classes.
     """
 
-    def __init__(self, cfg=None):
+    def __init__(self, cfg: Optional[config.Config] = None):
         if world._have_pyglet:
             from . import (
                 keybind,
             )  # Local import for compat with headless machines
-        self.window = None
+        self.window: Optional["window.PengWindow"] = None
 
         self.pygletEventHandlers = {}
         self.rlPygletEventHandlers = {}
@@ -68,11 +74,17 @@ class Peng(object):
         cfg = cfg if cfg is not None else {}
         self.cfg = config.Config(cfg, defaults=config.DEFAULT_CONFIG)
         if world._have_pyglet:
-            self.keybinds = keybind.KeybindHandler(self)
+            self.keybinds: Optional["keybind.KeybindHandler"] = keybind.KeybindHandler(
+                self
+            )
+        else:
+            self.keybinds = None
 
-        self.resourceMgr = None
-        self.i18n = None
+        self.resourceMgr: Optional[resource.ResourceManager] = None
+        self.i18n: Optional[i18n.TranslationManager] = None
 
+        # We can't do a simple assignment here, since _t and _tl may change and these
+        # changes need to be reflected in external copies
         self.t = lambda *args, **kwargs: self._t(*args, **kwargs)
         self.tl = lambda *args, **kwargs: self._tl(*args, **kwargs)
 
@@ -82,9 +94,9 @@ class Peng(object):
 
     def createWindow(
         self,
-        cls=None,
-        caption_t=None,
-        rsrc_class=resource.ResourceManager,
+        cls: Optional[Type[window.PengWindow]] = None,
+        caption_t: Optional[str] = None,
+        rsrc_class: Type[resource.ResourceManager] = resource.ResourceManager,
         *args,
         **kwargs
     ):
@@ -157,7 +169,7 @@ class Peng(object):
             )
         return self.window
 
-    def run(self, evloop=None):
+    def run(self, evloop: Optional["pyglet.app.EventLoop"] = None):
         """
         Runs the application main loop.
 
@@ -172,7 +184,12 @@ class Peng(object):
         self.window.run(evloop)
         self.sendEvent("peng3d:peng.exit", {"peng": self})
 
-    def sendPygletEvent(self, event_type, args, window=None):
+    def sendPygletEvent(
+        self,
+        event_type: str,
+        args: Tuple,
+        window: Optional["pyglet.window.Window"] = None,
+    ):
         """
         Handles a pyglet event.
 
@@ -227,7 +244,7 @@ class Peng(object):
                     ]
                 handler(*args)
 
-    def addPygletListener(self, event_type, handler):
+    def addPygletListener(self, event_type: str, handler: Callable):
         """
         Registers an event handler.
 
@@ -253,7 +270,7 @@ class Peng(object):
             handler = weakref.ref(handler)
         self.pygletEventHandlers[event_type].append(handler)
 
-    def addRateLimitedPygletListener(self, event_type, handler):
+    def addRateLimitedPygletListener(self, event_type: str, handler: Callable):
         if self.cfg["debug.events.register"]:
             print(
                 "Registered Rate Limited Event: %s Handler: %s" % (event_type, handler)
@@ -293,7 +310,7 @@ class Peng(object):
     registerEventHandler = addPygletListener
     registerRateLimitedEventHandler = addRateLimitedPygletListener
 
-    def sendEvent(self, event, data=None):
+    def sendEvent(self, event: str, data: Optional[dict] = None):
         """
         Sends an event with attached data.
 
@@ -333,7 +350,7 @@ class Peng(object):
                     if self.cfg["events.removeonerror"]:
                         self.delEventListener(event, f)
 
-    def addEventListener(self, event, func, raiseErrors=False):
+    def addEventListener(self, event: str, func: Callable, raiseErrors: bool = False):
         """
         Adds a handler to the given event.
 
@@ -355,7 +372,7 @@ class Peng(object):
 
         self.eventHandlers[event].append([func, raiseErrors])
 
-    def delEventListener(self, event, func):
+    def delEventListener(self, event: str, func: Callable):
         """
         Removes the given handler from the given event.
 
@@ -399,10 +416,12 @@ class HeadlessPeng(object):
 
     This class is intended for use in servers as a drop-in replacement for the normal engine class.
 
-    Note that this class is only in its beginnings and should not be used yet.
+    Note that this class is a work in progress and should not yet be relied upon.
     """
 
-    def __init__(self, cfg={}):
+    def __init__(self, cfg: Optional[Union[dict, config.Config]] = None):
+        cfg = cfg if cfg is not None else {}
+
         if "rsrc.enable" not in cfg:
             cfg["rsrc.enable"] = False
         super(HeadlessPeng, self).__init__(cfg)

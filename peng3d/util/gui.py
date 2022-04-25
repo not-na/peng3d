@@ -3,7 +3,7 @@
 #
 #  gui.py
 #
-#  Copyright 2017 notna <notna@apparat.org>
+#  Copyright 2017-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,11 +29,15 @@ __all__ = [
     "BlitableTexture",
 ]
 
+from typing import Any, List
+
 import pyglet
 from pyglet.gl import *
 
+Position = List[float, float]
 
-def mouse_aabb(mpos, size, pos):
+
+def mouse_aabb(mpos: Position, size: Position, pos: Position) -> bool:
     """
     AABB Collision checker that can be used for most axis-aligned collisions.
 
@@ -44,7 +48,7 @@ def mouse_aabb(mpos, size, pos):
     )
 
 
-def points2htmlfontsize(points):
+def points2htmlfontsize(points: float) -> float:
     """
     Approximate font size converter, converts from Points to HTML ``<font>`` tag font sizes.
 
@@ -91,10 +95,10 @@ class ResourceGroup(pyglet.graphics.Group):
 
     unset_state.__noautodoc__ = True
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.data[0], self.data[1], self.parent))
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         return (
             self.__class__ is other.__class__
             and self.data[0] == other.data[0]
@@ -102,7 +106,7 @@ class ResourceGroup(pyglet.graphics.Group):
             and self.parent == other.parent
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s(id=%d)" % (self.__class__.__name__, self.data[1])
 
 

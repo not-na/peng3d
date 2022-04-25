@@ -3,7 +3,7 @@
 #
 #  resource.py
 #
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,6 +52,17 @@ except ImportError:
 
 from . import model
 
+from typing import TYPE_CHECKING, Dict, Tuple, Any, Optional, Union
+
+if TYPE_CHECKING:
+    import peng3d
+
+
+TexInfo = Tuple[int, int, Tuple]
+"""
+Custom type describing a 3-tuple of ``(target, id, coords)`` describing a texture.
+"""
+
 
 class ResourceManager(object):
     """
@@ -64,34 +75,45 @@ class ResourceManager(object):
     The same caching and lazy-loading principle applies to models loaded via this system.
     """
 
-    missingtexturename = "peng3d:missingtexture"
+    missingtexturename: str = "peng3d:missingtexture"
 
-    def __init__(self, peng, basepath):
-        self.basepath = basepath
-        self.peng = peng
+    def __init__(self, peng: "peng3d.Peng", basepath: str):
+        self.basepath: str = basepath
+        self.peng: "peng3d.Peng" = peng
 
         maxsize = GLint()
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, maxsize)
         maxsize = min(
             maxsize.value, self.peng.cfg["rsrc.maxtexsize"]
         )  # This is here to avoid massive memory overhead when only loading a few textures
-        self.texsize = maxsize
+        self.texsize: int = maxsize
 
-        # name is always [category][name] here
-        self.categories = {}  # Maps from name -> TextureRegion
-        self.categoriesTexCache = {}  # Maps from name -> target,texid,texcoords
-        self.categoriesTexBin = {}  # Maps from name -> TextureBin
-        self.categoriesSettings = {}  # Maps from name -> settings dict
-        self.categoriesSizes = {}  # Maps from name -> size
+        # name is sometimes [category][name] here
+        self.categories: Dict[
+            str, Dict[str, pyglet.image.TextureRegion]
+        ] = {}  # Maps from name -> TextureRegion
+        self.categoriesTexCache: Dict[
+            str,
+            Dict[str, TexInfo],
+        ] = {}  # Maps from name -> target,texid,texcoords
+        self.categoriesTexBin: Dict[
+            str, pyglet.image.atlas.TextureBin
+        ] = {}  # Maps from name -> TextureBin
+        self.categoriesSettings: Dict[
+            str, Dict[str, Any]
+        ] = {}  # Maps from name -> settings dict
+        self.categoriesSizes: Dict[
+            str, Dict[str, Tuple[float, float]]
+        ] = {}  # Maps from name -> size
 
-        self.missingTexture = None
+        self.missingTexture: Optional[pyglet.image.AbstractImage] = None
 
         self.modelcache = {}
         self.modelobjcache = {}
 
         self.peng.sendEvent("peng3d:rsrc.init", {"peng": self.peng, "rsrcMgr": self})
 
-    def resourceNameToPath(self, name, ext=""):
+    def resourceNameToPath(self, name: str, ext: str = "") -> str:
         """
         Converts the given resource name to a file path.
 
@@ -108,7 +130,7 @@ class ResourceManager(object):
         nsplit = name.split(":")[1].split(".")
         return os.path.join(self.basepath, "assets", name.split(":")[0], *nsplit) + ext
 
-    def resourceExists(self, name, ext=""):
+    def resourceExists(self, name: str, ext: str = "") -> bool:
         """
         Returns whether or not the resource with the given name and extension exists.
 
@@ -116,7 +138,7 @@ class ResourceManager(object):
         """
         return os.path.exists(self.resourceNameToPath(name, ext))
 
-    def addCategory(self, name, size=None):
+    def addCategory(self, name: str, size: Optional[int] = None) -> int:
         """
         Adds a new texture category with the given name.
 
@@ -137,7 +159,9 @@ class ResourceManager(object):
             "peng3d:rsrc.category.add", {"peng": self.peng, "category": name}
         )
 
-    def getTex(self, name, category):
+        return size
+
+    def getTex(self, name: str, category: str) -> TexInfo:
         """
         Gets the texture associated with the given name and category.
 
@@ -157,7 +181,7 @@ class ResourceManager(object):
             self.loadTex(name, category)
         return self.categoriesTexCache[category][name]
 
-    def loadTex(self, name, category):
+    def loadTex(self, name: str, category: str) -> TexInfo:
         """
         Loads the texture of the given name and category.
 
@@ -177,13 +201,16 @@ class ResourceManager(object):
             )
             img = self.getMissingTexture()
         texreg = self.categoriesTexBin[category].add(img)
+
         # texreg = texreg.get_transform(True,True) # Mirrors the image due to how pyglets coordinate system works
         # Strange behavior, sometimes needed and sometimes not
         self.categories[category][name] = texreg
         self.categoriesSizes[category][name] = img.width, img.height
+
         target = texreg.target
         texid = texreg.id
         texcoords = texreg.tex_coords
+
         # Prevents texture bleeding with texture sizes that are powers of 2, else weird lines may appear at certain angles.
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
@@ -207,7 +234,7 @@ class ResourceManager(object):
         )
         return out
 
-    def getMissingTexture(self):
+    def getMissingTexture(self) -> pyglet.image.AbstractImage:
         """
         Returns a texture to be used as a placeholder for missing textures.
 
@@ -232,12 +259,14 @@ class ResourceManager(object):
         else:
             return self.missingTexture
 
-    def getMissingTex(self, cat):
+    def getMissingTex(self, cat: str) -> TexInfo:
         if cat not in self.categories:
             self.addCategory(cat)
         return self.loadTex(self.missingtexturename, cat)
 
-    def addFromTex(self, name, img, category):
+    def addFromTex(
+        self, name: str, img: pyglet.image.AbstractImage, category: str
+    ) -> TexInfo:
         """
         Adds a new texture from the given image.
 
@@ -265,28 +294,31 @@ class ResourceManager(object):
         self.categoriesTexCache[category][name] = out
         return out
 
-    def normTex(self, dat, default_cat=None):
+    def normTex(
+        self, dat: Union[str, tuple], default_cat: Optional[str] = None
+    ) -> TexInfo:
         if isinstance(dat, str):
             if default_cat is None:
                 raise ValueError("default_cat cannot be None if a string is given")
+
             return self.getTex(dat, default_cat)
         elif isinstance(dat, list) or isinstance(dat, tuple):
             if len(dat) == 2:
                 # Tuple of name, cat
                 return self.getTex(dat[0], dat[1])
             elif len(dat) == 3:
-                return dat  # Already a texture 3-tupel
-            else:
-                raise TypeError("Invalid length list/tuple")
+                return dat  # Already a texture 3-tuple
+
+            raise TypeError("Invalid length list/tuple")
         else:
             raise TypeError("Invalid type for normTex")
 
-    def getTexSize(self, name, category):
+    def getTexSize(self, name: str, category: str) -> Tuple[float, float]:
         if name not in self.categoriesSizes[category]:
             self.loadTex(name, category)
         return self.categoriesSizes[category][name]
 
-    def getModel(self, name):
+    def getModel(self, name: str) -> model.Model:
         """
         Gets the model object by the given name.
 
@@ -297,7 +329,7 @@ class ResourceManager(object):
             return self.modelobjcache[name]
         return self.loadModel(name)
 
-    def loadModel(self, name):
+    def loadModel(self, name: str) -> model.Model:
         """
         Loads the model of the given name.
 
@@ -308,7 +340,7 @@ class ResourceManager(object):
         self.peng.sendEvent("peng3d:rsrc.model.load", {"peng": self.peng, "name": name})
         return m
 
-    def getModelData(self, name):
+    def getModelData(self, name: str) -> Dict:
         """
         Gets the model data associated with the given name.
 
@@ -319,7 +351,7 @@ class ResourceManager(object):
             return self.modelcache[name]
         return self.loadModelData(name)
 
-    def loadModelData(self, name):
+    def loadModelData(self, name: str) -> Dict:
         """
         Loads the model data of the given name.
 

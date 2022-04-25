@@ -3,7 +3,7 @@
 #
 #  i18n.py
 #
-#  Copyright 2018 notna <notna@apparat.org>
+#  Copyright 2018-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,6 +30,12 @@ import glob
 import re
 
 from .util import ActionDispatcher
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Any, Union
+
+if TYPE_CHECKING:
+    import peng3d
+
 
 # TODO: add test cases for translations
 class TranslationManager(ActionDispatcher):
@@ -58,7 +64,7 @@ class TranslationManager(ActionDispatcher):
     be already initialized.
     """
 
-    def __init__(self, peng):
+    def __init__(self, peng: "peng3d.Peng"):
         if not peng.cfg["rsrc.enable"]:
             raise RuntimeError(
                 "ResourceManager needs to be enabled to use Translations"
@@ -68,16 +74,18 @@ class TranslationManager(ActionDispatcher):
                 "ResourceManager needs to be initialized before TranslationManager"
             )
 
-        self.peng = peng
+        self.peng: "peng3d.Peng" = peng
 
-        self.lang = self.peng.cfg["i18n.lang"]
+        self.lang: str = self.peng.cfg["i18n.lang"]
 
-        self.cache = {}  # dict of dicts, first lang, then domain
+        self.cache: Dict[
+            str, Dict[str, Dict[str, str]]
+        ] = {}  # dict of dicts, first lang, then domain
 
         self.peng.sendEvent("peng3d:i18n.init", {"lang": self.lang, "i18n": self})
         self.setLang(self.peng.cfg["i18n.lang"])
 
-    def setLang(self, lang):
+    def setLang(self, lang: str) -> None:
         """
         Sets the default language for all domains.
 
@@ -106,7 +114,7 @@ class TranslationManager(ActionDispatcher):
         self.doAction("setlang")
         self.peng.sendEvent("peng3d:i18n.set_lang", {"lang": self.lang, "i18n": self})
 
-    def discoverLangs(self, domain="*"):
+    def discoverLangs(self, domain: str = "*") -> List[str]:
         """
         Generates a list of languages based on files found on disk.
 
@@ -134,7 +142,9 @@ class TranslationManager(ActionDispatcher):
 
         return list(langs)
 
-    def translate(self, key, translate=True, lang=None):
+    def translate(
+        self, key: str, translate: bool = True, lang: Optional[str] = None
+    ) -> str:
         if lang is None:
             lang = self.lang
 
@@ -155,12 +165,20 @@ class TranslationManager(ActionDispatcher):
 
     t = translate
 
-    def translate_lazy(self, key, data=None, translate=True, lang=None):
+    def translate_lazy(
+        self,
+        key: str,
+        data: Optional[Dict] = None,
+        translate: bool = True,
+        lang: Optional[str] = None,
+    ):
         return _LazyTranslator(self, key, data, translate, lang)
 
     tl = translate_lazy
 
-    def loadDomain(self, domain, lang=None, encoding="utf-8"):
+    def loadDomain(
+        self, domain: str, lang: Optional[str] = None, encoding: str = "utf-8"
+    ):
         if lang is None:
             lang = self.lang
 
@@ -194,24 +212,31 @@ class TranslationManager(ActionDispatcher):
 
         self.doAction("loaddomain")
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> str:
         return self.translate(key)
 
 
 class _LazyTranslator(object):
     _dynamic = True
 
-    def __init__(self, i18n, key, data=None, translate=True, lang=None):
+    def __init__(
+        self,
+        i18n: TranslationManager,
+        key: str,
+        data: Optional[Dict] = None,
+        translate: bool = True,
+        lang: Optional[str] = None,
+    ):
         self.i18n = i18n
         self.key = key
-        self.data = data if data is not None else {}
+        self.data = data
         self.translate = translate
         self.lang = lang
 
-    def __str__(self):
+    def __str__(self) -> str:
         t = self.i18n.translate(self.key, self.translate, self.lang)
 
-        if self.data != {}:
+        if self.data is not None:
             try:
                 return t.format(**self.data)
             except Exception:
@@ -219,16 +244,16 @@ class _LazyTranslator(object):
         else:
             return t
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __mod__(self, other):
+    def __mod__(self, other: Union[Any, Tuple]) -> str:
         try:
             return str(self) % other
         except Exception:
             return str(self)
 
-    def format(self, *args, **kwargs):
+    def format(self, *args, **kwargs) -> str:
         try:
             return str(self).format(*args, **kwargs)
         except Exception:

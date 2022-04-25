@@ -3,7 +3,7 @@
 #
 #  keybind.py
 #
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@ import pyglet
 from pyglet.window import key
 
 import bidict
+
+from typing import TYPE_CHECKING, Dict, Callable, List, Any
+
+if TYPE_CHECKING:
+    import peng3d
+
 
 MOD_RELEASE = 1 << 15  # Additional fake modifier applied if on_key_release is called
 """
@@ -91,6 +97,14 @@ This may cause no more combos to get through if numlock or capslock are activate
 """
 
 
+KeybindHandlerFunc = Callable[[int, int, bool], Any]
+"""
+Custom type for a keybind handler function.
+
+See :py:meth:`KeybindHandler.add()` for more details regarding the signature.
+"""
+
+
 class KeybindHandler(object):
     """
     Handler class that automatically converts incoming key events to key combo events.
@@ -104,15 +118,17 @@ class KeybindHandler(object):
     Keybindings are matched exactly, and optionally a second time without the modifiers listed in :py:data:`OPTIONAL_MODNAMES` if :confval:`controls.keybinds.strict` is set to False.
     """
 
-    def __init__(self, peng):
-        self.peng = peng
+    def __init__(self, peng: "peng3d.Peng"):
+        self.peng: "peng3d.Peng" = peng
         self.peng.registerEventHandler("on_key_press", self.on_key_press)
         self.peng.registerEventHandler("on_key_release", self.on_key_release)
-        self.keybinds = {}
-        self.keybinds_nm = {}
-        self.kbname = bidict.bidict()
+        self.keybinds: Dict[str, List[str]] = {}
+        self.keybinds_nm: Dict[str, List[str]] = {}
+        self.kbname: bidict.bidict[str, KeybindHandlerFunc] = bidict.bidict()
 
-    def add(self, keybind, kbname, handler, mod=True):
+    def add(
+        self, keybind: str, kbname: str, handler: KeybindHandlerFunc, mod: bool = True
+    ) -> None:
         """
         Adds a keybind to the internal registry.
 
@@ -144,7 +160,7 @@ class KeybindHandler(object):
             },
         )
 
-    def changeKeybind(self, kbname, combo):
+    def changeKeybind(self, kbname: str, combo: str) -> None:
         """
         Changes a keybind of a specific keybindname.
 
@@ -163,7 +179,7 @@ class KeybindHandler(object):
             {"peng": self.peng, "kbname": kbname, "combo": combo},
         )
 
-    def mod_is_held(self, modname, modifiers):
+    def mod_is_held(self, modname: str, modifiers: int) -> bool:
         """
         Helper method to simplify checking if a modifier is held.
 
@@ -194,7 +210,14 @@ class KeybindHandler(object):
             combo = "-".join(newmodnames).lower()
             self.handle_combo(combo, symbol, modifiers, release, True)
 
-    def handle_combo(self, combo, symbol, modifiers, release=False, mod=True):
+    def handle_combo(
+        self,
+        combo: str,
+        symbol: int,
+        modifiers: int,
+        release: bool = False,
+        mod: bool = True,
+    ) -> None:
         """
         Handles a key combination and dispatches associated events.
 

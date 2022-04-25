@@ -3,7 +3,7 @@
 #
 #  __init__.py
 #
-#  Copyright 2017 notna <notna@apparat.org>
+#  Copyright 2017-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ __all__ = [
 import sys
 import weakref
 import threading
+from typing import Callable, Tuple, List, Dict, Optional, Union, Any
 
 try:
     import bidict
@@ -99,7 +100,9 @@ class ActionDispatcher(object):
     a list of callbacks.
     """
 
-    def addAction(self, action, func, *args, **kwargs):
+    actions: Dict[str, List[Tuple[Callable, tuple, dict]]]
+
+    def addAction(self, action: str, func: Callable, *args, **kwargs):
         """
         Adds a callback to the specified action.
 
@@ -111,7 +114,7 @@ class ActionDispatcher(object):
             self.actions[action] = []
         self.actions[action].append((func, args, kwargs))
 
-    def doAction(self, action):
+    def doAction(self, action: str):
         """
         Helper method that calls all callbacks registered for the given action.
         """
@@ -152,23 +155,23 @@ class SmartRegistry(object):
 
     def __init__(
         self,
-        data=None,
-        reuse_ids=False,
-        start_id=0,
-        max_id=float("inf"),
-        default_reg=None,
+        data: Optional[Dict[str, Any]] = None,
+        reuse_ids: bool = False,
+        start_id: int = 0,
+        max_id: Union[float, int] = float("inf"),
+        default_reg: Optional[Dict] = None,
     ):
         # TODO: fix max_id being a float by default
         assert HAVE_BIDICT
 
         self._data = data if data is not None else {}
 
-        self.reuse_ids = reuse_ids
+        self.reuse_ids: bool = reuse_ids
         # if true, new ids will be assigned from lowest available id
         # if false, an internal counter is used
 
-        self.start_id = start_id
-        self.max_id = max_id
+        self.start_id: int = start_id
+        self.max_id: Union[float, int] = max_id
 
         self.id_lock = threading.Lock()
         self.registry_lock = threading.Lock()
@@ -195,7 +198,7 @@ class SmartRegistry(object):
                 # no data there, use start_id
                 self._data["next_id"] = self.start_id
 
-    def genNewID(self):
+    def genNewID(self) -> int:
         """
         Generates a new ID.
 
@@ -223,7 +226,7 @@ class SmartRegistry(object):
                 self._data["next_id"] += 1
             return i
 
-    def register(self, name, force_id=None):
+    def register(self, name: str, force_id: Optional[int] = None) -> int:
         """
         Registers a name to the registry.
 
@@ -242,7 +245,7 @@ class SmartRegistry(object):
             self._data["reg"][new_id] = name
             return new_id
 
-    def normalizeID(self, in_id):
+    def normalizeID(self, in_id: Union[int, str]) -> int:
         """
         Takes in an object and normalizes it to its ID/integer representation.
 
@@ -258,7 +261,7 @@ class SmartRegistry(object):
         else:
             raise TypeError("Only int and str can be converted to IDs")
 
-    def normalizeName(self, in_name):
+    def normalizeName(self, in_name: Union[int, str]) -> str:
         """
         Takes in an object and normalizes it to its name/string.
 
@@ -275,7 +278,7 @@ class SmartRegistry(object):
             raise TypeError("Only int and str can be converted to names")
 
     @property
-    def data(self):
+    def data(self) -> Dict[str, Any]:
         """
         Read-only property to access the internal data.
 
@@ -289,14 +292,14 @@ class SmartRegistry(object):
         d["reg"] = dict(d["reg"])
         return d
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Union[int, str]) -> str:
         # to access registry as reg[obj] -> name
         return self.normalizeName(key)
 
-    def __setitem(self, key, value):
+    def __setitem__(self, key: str, value: Optional[int]) -> None:
         # None may be used as value for auto generation
         # to access registry as reg[name]=id
         self.register(key, value)
 
-    def __contains__(self, value):
+    def __contains__(self, value: Union[int, str]) -> bool:
         return value in self._data["reg"] or value in self._data["reg"].inv
