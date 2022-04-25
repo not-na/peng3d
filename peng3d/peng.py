@@ -94,7 +94,7 @@ class Peng(object):
 
     def createWindow(
         self,
-        cls: Optional[Type[window.PengWindow]] = None,
+        cls: Optional[Type["window.PengWindow"]] = None,
         caption_t: Optional[str] = None,
         rsrc_class: Type[resource.ResourceManager] = resource.ResourceManager,
         *args,

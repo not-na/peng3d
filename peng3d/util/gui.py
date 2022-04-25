@@ -34,7 +34,7 @@ from typing import Any, List
 import pyglet
 from pyglet.gl import *
 
-Position = List[float, float]
+Position = List[float]
 
 
 def mouse_aabb(mpos: Position, size: Position, pos: Position) -> bool:
