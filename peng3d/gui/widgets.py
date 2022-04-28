@@ -33,8 +33,11 @@ __all__ = [
 import weakref
 import time
 
-# Internal Debug/Performance monitor variable
-_num_saved_redraws = 0
+from typing import TYPE_CHECKING, List, Optional
+
+if TYPE_CHECKING:
+    import peng3d.window
+    from . import SubMenu
 
 try:
     import pyglet
@@ -44,6 +47,11 @@ except ImportError:
 
 from ..util import mouse_aabb, ActionDispatcher, WatchingList as _WatchingList
 from . import layout
+from ..util.types import *
+
+
+# Internal Debug/Performance monitor variable
+_num_saved_redraws = 0
 
 
 class Background(object):
@@ -56,12 +64,12 @@ class Background(object):
     This base class does not do anything.
     """
 
-    def __init__(self, widget):
-        self.widget = widget
-        self.initialized = False
+    def __init__(self, widget: "BasicWidget"):
+        self.widget: "BasicWidget" = widget
+        self.initialized: bool = False
         self._vlists = []
 
-    def init_bg(self):
+    def init_bg(self) -> None:
         """
         Called just before the background will be drawn the first time.
 
@@ -71,13 +79,13 @@ class Background(object):
         """
         pass
 
-    def redraw_bg(self):
+    def redraw_bg(self) -> None:
         """
         Method called by the parent widget every time its :py:meth:`Widget.redraw()` method is called.
         """
         pass
 
-    def reg_vlist(self, vlist):
+    def reg_vlist(self, vlist: pyglet.graphics.vertexdomain.VertexList) -> None:
         """
         Registers a vertex list to the internal list.
 
@@ -86,28 +94,28 @@ class Background(object):
         self._vlists.append(vlist)
 
     @property
-    def submenu(self):
+    def submenu(self) -> "SubMenu":
         """
         Property for accessing the parent widget's submenu.
         """
         return self.widget.submenu
 
     @property
-    def window(self):
+    def window(self) -> "peng3d.window.PengWindow":
         """
         Property for accessing the parent widget's window.
         """
         return self.widget.window
 
     @property
-    def peng(self):
+    def peng(self) -> "peng3d.Peng":
         """
         Property for accessing the parent widget's instance of :py:class:`peng3d.peng.Peng`\\ .
         """
         return self.widget.peng
 
     @property
-    def pressed(self):
+    def pressed(self) -> bool:
         """
         Read-only helper property for easier access.
 
@@ -116,7 +124,7 @@ class Background(object):
         return self.widget.pressed
 
     @property
-    def is_hovering(self):
+    def is_hovering(self) -> bool:
         """
         Read-only helper property for easier access.
 
@@ -170,7 +178,7 @@ class BasicWidget(ActionDispatcher):
 
     """
 
-    IS_CLICKABLE = False
+    IS_CLICKABLE: bool = False
     """
     Class attribute used to signal if widgets of this class are usually clickable.
     
@@ -182,24 +190,30 @@ class BasicWidget(ActionDispatcher):
     this option off.
     """
 
-    def __init__(self, name, submenu, window, peng, pos=None, size=None):
-        self.name = name
-        self.submenu = submenu
-        self.window = window
-        self.peng = peng
+    def __init__(
+        self,
+        name: str,
+        submenu: "SubMenu",
+        window: "peng3d.window.PengWindow",
+        peng: "peng3d.Peng",
+        pos: DynPosition = None,
+        size: DynSize = None,
+    ):
+        self.name: str = name
+        self.submenu: "SubMenu" = submenu
+        self.window: "peng3d.window.PengWindow" = window
+        self.peng: "peng3d.Peng" = peng
 
-        self.actions = {}
+        self._pos: DynPosition = pos
+        self._size: DynSize = size
 
-        self._pos = pos
-        self._size = size
-
-        self.is_hovering = False
-        self.pressed = False
-        self._enabled = self.IS_CLICKABLE
-        self._is_scrollbar = False
-        self.do_redraw = True
-        self.stay_pressed = False
-        self._visible = True
+        self.is_hovering: bool = False
+        self.pressed: bool = False
+        self._enabled: bool = self.IS_CLICKABLE
+        self._is_scrollbar: bool = False
+        self.do_redraw: bool = True
+        self.stay_pressed: bool = False
+        self._visible: bool = True
 
         self.registerEventHandlers()
 
@@ -218,7 +232,7 @@ class BasicWidget(ActionDispatcher):
         self.peng.registerRateLimitedEventHandler("on_resize", self.on_resize)
 
     @property
-    def pos(self):
+    def pos(self) -> List[float]:
         """
         Property that will always be a 2-tuple representing the position of the widget.
 
@@ -255,12 +269,12 @@ class BasicWidget(ActionDispatcher):
         return _WatchingList(r, self._wlredraw_pos)
 
     @pos.setter
-    def pos(self, value):
+    def pos(self, value: List[float]):
         self._pos = value
         self.redraw()
 
     @property
-    def size(self):
+    def size(self) -> List[float]:
         """
         Similar to :py:attr:`pos` but for the size instead.
         """
@@ -286,12 +300,12 @@ class BasicWidget(ActionDispatcher):
         return _WatchingList(s, self._wlredraw_size)
 
     @size.setter
-    def size(self, value):
+    def size(self, value: List[float]):
         self._size = value
         self.redraw()
 
     @property
-    def clickable(self):
+    def clickable(self) -> bool:
         """
         Property used for determining if the widget should be clickable by the user.
 
@@ -310,12 +324,12 @@ class BasicWidget(ActionDispatcher):
             return self.submenu.clickable
 
     @clickable.setter
-    def clickable(self, value):
+    def clickable(self, value: bool):
         self._enabled = value
         self.redraw()
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         """
         Property used for storing whether or not this widget is enabled.
 
@@ -326,12 +340,12 @@ class BasicWidget(ActionDispatcher):
         return self._enabled
 
     @enabled.setter
-    def enabled(self, value):
+    def enabled(self, value: bool):
         self._enabled = value
         self.redraw()
 
     @property
-    def visible(self):
+    def visible(self) -> bool:
         """
         Property used for storing whether or not this widget is enabled.
 
@@ -342,11 +356,11 @@ class BasicWidget(ActionDispatcher):
         return self._visible
 
     @visible.setter
-    def visible(self, value):
+    def visible(self, value: bool):
         self._visible = value
         self.redraw()
 
-    def getState(self):
+    def getState(self) -> str:
         """
         Returns the current state of the widget.
 
@@ -369,7 +383,7 @@ class BasicWidget(ActionDispatcher):
     def getMinSize(self):
         raise NotImplementedError("%s does not support perfect-size widgets")
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draws all vertex lists associated with this widget.
         """
@@ -377,7 +391,7 @@ class BasicWidget(ActionDispatcher):
             self.on_redraw()
             self.do_redraw = False
 
-    def redraw(self):
+    def redraw(self) -> None:
         """
         Triggers a redraw of the widget.
 
@@ -393,7 +407,7 @@ class BasicWidget(ActionDispatcher):
         #    print("saved redraw #%s"%_num_saved_redraws)
         self.do_redraw = True
 
-    def on_redraw(self):
+    def on_redraw(self) -> None:
         """
         Callback to be overridden by subclasses called if redrawing the widget seems necessary.
 
@@ -525,22 +539,22 @@ class Widget(BasicWidget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
-        bg=None,
-        min_size=None,
+        name: str,
+        submenu: "SubMenu",
+        window: "peng3d.window.PengWindow",
+        peng: "peng3d.Peng",
+        pos: DynPosition = None,
+        size: DynSize = None,
+        bg: Background = None,
+        min_size: Optional[List[float]] = None,
     ):
         if bg is None:
             bg = EmptyBackground(self)
-        self.bg = bg
-        self.min_size = min_size
+        self.bg: Background = bg
+        self.min_size: Optional[List[float]] = min_size
         super(Widget, self).__init__(name, submenu, window, peng, pos, size)
 
-    def setBackground(self, bg):
+    def setBackground(self, bg: Background) -> Background:
         """
         Sets the background of the widget.
 
@@ -549,12 +563,14 @@ class Widget(BasicWidget):
         self.bg = bg
         self.redraw()
 
-    def getMinSize(self):
+        return bg
+
+    def getMinSize(self) -> List[float]:
         c = self.getContentSize()
         m = self.min_size if self.min_size is not None else [0, 0]
         return [max(c[0], m[0]), max(c[1], m[1])]
 
-    def getContentSize(self):
+    def getContentSize(self) -> List[float]:
         return [0, 0]
 
     def on_redraw(self):

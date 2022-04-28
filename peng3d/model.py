@@ -466,7 +466,7 @@ class Region(object):
 
     To use lines as the geometry type, specify either ``lines``\\ , ``line`` or ``GL_LINES`` as its ``geometry_type``\\ .
 
-    To use points as the geometry type, specify either ``points``\\ , ``point``\\ , ``dots``\, ``dot`` or ``GL_POINTS`` as its ``geometry_type``\\ .
+    To use points as the geometry type, specify either ``points``\\ , ``point``\\ , ``dots``\\ , ``dot`` or ``GL_POINTS`` as its ``geometry_type``\\ .
 
     Note that the number of vertices must be divisible by the number of vertices required per primitive, e.g. 4 for quads, 3 for triangles, 2 for lines and 1 for points.
 

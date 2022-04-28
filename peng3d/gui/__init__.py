@@ -30,6 +30,12 @@ __all__ = ["GUIMenu", "SubMenu", "GUILayer", "FakeWidget"]
 # import sys
 import collections
 
+from typing import TYPE_CHECKING, Optional, Dict, List
+
+if TYPE_CHECKING:
+    import peng3d.window
+
+
 try:
     import pyglet
     from pyglet.gl import *
@@ -46,6 +52,7 @@ from .container import *
 from .layered import *
 from .layout import *
 from .. import util
+from ..util.types import *
 
 
 class FakeWidget(object):
@@ -74,27 +81,29 @@ class GUIMenu(Menu):
 
     def __init__(
         self,
-        name,
-        window,
-        peng,
-        font="Arial",
-        font_size=16,
-        font_color=[62, 67, 73, 255],
-        borderstyle="flat",
+        name: str,
+        window: "peng3d.window.PengWindow",
+        peng: "peng3d.Peng",
+        font: str = "Arial",
+        font_size: float = 16,
+        font_color: Optional[ColorRGBA] = None,
+        borderstyle: BorderStyle = "flat",
     ):
         super(GUIMenu, self).__init__(name, window, peng)
         pyglet.clock.schedule_interval(lambda dt: None, 1.0 / 30)
-        self.submenus = {}
-        self.activeSubMenu = None
+        self.submenus: Dict[str, "SubMenu"] = {}
+        self.activeSubMenu: Optional[str] = None
 
-        self.font = font
-        self.font_size = font_size
-        self.font_color = font_color
-        self.borderstyle = borderstyle
+        self.font: str = font
+        self.font_size: float = font_size
+        self.font_color: ColorRGBA = (
+            font_color if font_color is not None else [62, 67, 73, 255]
+        )
+        self.borderstyle: BorderStyle = borderstyle
 
-        self.batch2d = pyglet.graphics.Batch()
+        self.batch2d: pyglet.graphics.Batch = pyglet.graphics.Batch()
 
-        self.bg = [242, 241, 240, 255]
+        self.bg: BackgroundType = [242, 241, 240, 255]
         self.bg_vlist = pyglet.graphics.vertex_list(
             4,
             "v2f",
@@ -102,7 +111,9 @@ class GUIMenu(Menu):
         )
 
         # For compatibility with Background classes
-        self.pressed, self.is_hovering, self.enabled = False, False, True
+        self.pressed: bool = False
+        self.is_hovering: bool = False
+        self.enabled: bool = True
 
         self.peng.keybinds.add(
             "enter", f"peng3d:menu.[{self.name}].send_form", self._on_send_form, False
@@ -111,7 +122,7 @@ class GUIMenu(Menu):
         self.peng.registerEventHandler("on_resize", self.on_resize)
         self.on_resize(*self.size)
 
-    def addSubMenu(self, submenu):
+    def addSubMenu(self, submenu: "SubMenu") -> None:
         """
         Adds a :py:class:`SubMenu` to this Menu.
 
@@ -119,7 +130,7 @@ class GUIMenu(Menu):
         """
         self.submenus[submenu.name] = submenu
 
-    def changeSubMenu(self, submenu):
+    def changeSubMenu(self, submenu: str) -> None:
         """
         Changes the submenu that is displayed.
 
@@ -137,7 +148,7 @@ class GUIMenu(Menu):
         self.submenu.on_enter(old)
         self.submenu.doAction("enter")
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draws each menu layer and the active submenu.
 
@@ -152,7 +163,7 @@ class GUIMenu(Menu):
 
             traceback.print_exc()
 
-    def draw_bg(self):
+    def draw_bg(self) -> None:
         # Draws the background
         if isinstance(self.bg, Layer):
             self.bg._draw()
@@ -177,7 +188,7 @@ class GUIMenu(Menu):
 
         self.batch2d.draw()
 
-    def setBackground(self, bg):
+    def setBackground(self, bg: BackgroundType):
         self.bg = bg
         if isinstance(bg, list) or isinstance(bg, tuple):
             if len(bg) == 3 and isinstance(bg, list):
@@ -188,7 +199,7 @@ class GUIMenu(Menu):
             self.on_resize(self.window.width, self.window.height)
 
     @property
-    def submenu(self):
+    def submenu(self) -> "SubMenu":
         """
         Property containing the :py:class:`SubMenu` instance that is currently active.
         """
@@ -196,11 +207,11 @@ class GUIMenu(Menu):
 
     # The following properties are needed for compatibility with Background classes
     @property
-    def pos(self):
+    def pos(self) -> List[int]:
         return [0, 0]  # As property to prevent bug with accidental manipulation
 
     @property
-    def size(self):
+    def size(self) -> List[int]:
         return self.window.get_size()
 
     def on_resize(self, width, height):
@@ -242,24 +253,28 @@ class SubMenu(util.ActionDispatcher):
 
     def __init__(
         self,
-        name,
-        menu,
-        window,
-        peng,
-        font=None,
-        font_size=None,
-        font_color=None,
-        borderstyle=None,
+        name: str,
+        menu: GUIMenu,
+        window: "peng3d.window.PengWindow",
+        peng: "peng3d.Peng",
+        font: Optional[str] = None,
+        font_size: Optional[float] = None,
+        font_color: Optional[ColorRGBA] = None,
+        borderstyle: Optional[BorderStyle] = None,
     ):
-        self.name = name
-        self.menu = menu
-        self.window = window
-        self.peng = peng
+        self.name: str = name
+        self.menu: GUIMenu = menu
+        self.window: "peng3d.window.PengWindow" = window
+        self.peng: "peng3d.Peng" = peng
 
-        self.font = font if font is not None else self.menu.font
-        self.font_size = font_size if font_size is not None else self.menu.font_size
-        self.font_color = font_color if font_color is not None else self.menu.font_color
-        self.borderstyle = (
+        self.font: str = font if font is not None else self.menu.font
+        self.font_size: float = (
+            font_size if font_size is not None else self.menu.font_size
+        )
+        self.font_color: ColorRGBA = (
+            font_color if font_color is not None else self.menu.font_color
+        )
+        self.borderstyle: BorderStyle = (
             borderstyle if borderstyle is not None else self.menu.borderstyle
         )
 
@@ -267,7 +282,7 @@ class SubMenu(util.ActionDispatcher):
 
         self.widget_order = {}
 
-        self.bg = None
+        self.bg: BackgroundType = None
         self.bg_vlist = pyglet.graphics.vertex_list(
             4,
             "v2f",
@@ -276,14 +291,15 @@ class SubMenu(util.ActionDispatcher):
         self.peng.registerEventHandler("on_resize", self.on_resize)
         self.on_resize(*self.size)
 
-        self.batch2d = pyglet.graphics.Batch()
+        self.batch2d: pyglet.graphics.Batch = pyglet.graphics.Batch()
 
         self.form_ctx = None
 
         # For compatibility with Background classes
-        self.pressed, self.is_hovering = False, False
+        self.pressed: bool = False
+        self.is_hovering: bool = False
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draws the submenu and its background.
 
@@ -333,7 +349,7 @@ class SubMenu(util.ActionDispatcher):
             for w in self.widget_order[order]:
                 w.draw()
 
-    def addWidget(self, widget, order_key=0):
+    def addWidget(self, widget: BasicWidget, order_key: int = 0) -> None:
         """
         Adds a widget to this submenu.
 
@@ -347,13 +363,13 @@ class SubMenu(util.ActionDispatcher):
             self.widget_order[order_key] = []
         self.widget_order[order_key].append(widget)
 
-    def getWidget(self, name):
+    def getWidget(self, name: str) -> BasicWidget:
         """
         Returns the widget with the given name.
         """
         return self.widgets[name]
 
-    def delWidget(self, widget):
+    def delWidget(self, widget: str) -> None:
         """
         Deletes the widget by the given name.
 
@@ -403,7 +419,7 @@ class SubMenu(util.ActionDispatcher):
         # print("Final WRef")
         # print(w_wref())
 
-    def setBackground(self, bg):
+    def setBackground(self, bg: BackgroundType) -> None:
         """
         Sets the background of the submenu.
 
@@ -427,29 +443,29 @@ class SubMenu(util.ActionDispatcher):
             self.bg = ContainerButtonBackground(self, borderstyle=bg)
             self.on_resize(self.window.width, self.window.height)
 
-    def redraw(self):
+    def redraw(self) -> None:
         for widget in self.widgets.values():
             widget.on_mouse_motion(*self.window.mouse_pos, 0, 0)
             widget.redraw()
 
     # The following properties are needed for compatibility with Background classes
     @property
-    def pos(self):
+    def pos(self) -> List[int]:
         return [0, 0]  # As property to prevent bug with accidental manipulation
 
     @property
-    def size(self):
-        return self.window.width, self.window.height
+    def size(self) -> List[int]:
+        return self.window.get_size()
 
     @property
-    def submenu(self):
+    def submenu(self) -> "SubMenu":
         return self
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self.menu.submenu is self and self.window.menu is self.menu
 
-    def send_form(self, ctx=None):
+    def send_form(self, ctx=None) -> bool:
         """
         Triggers whatever form data is entered to be sent.
 
@@ -467,7 +483,7 @@ class SubMenu(util.ActionDispatcher):
             return True
         return False
 
-    def form_valid(self, ctx=None):
+    def form_valid(self, ctx=None) -> bool:
         """
         Called to pre-check if a form is valid.
 
@@ -504,11 +520,17 @@ class GUILayer(GUIMenu, Layer2D):
     """
 
     # TODO: add safety recursion breaker if this is added as a layer to itself
-    def __init__(self, name, menu, window, peng):
+    def __init__(
+        self,
+        name: str,
+        menu: Menu,
+        window: "peng3d.window.PengWindow",
+        peng: "peng3d.Peng",
+    ):
         Layer2D.__init__(self, menu, window, peng)
         GUIMenu.__init__(self, menu.name, window, peng)
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draws the Menu.
         """
