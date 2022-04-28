@@ -156,7 +156,7 @@ class PengWindow(pyglet.window.Window):
         """
         raise NotImplementedError("Currently not implemented")
 
-    def run(self, evloop: Optional[pyglet.app.EventLoop] = None) -> None:
+    def run(self, evloop: Optional["pyglet.app.EventLoop"] = None) -> None:
         """
         Runs the application in the current thread.
 

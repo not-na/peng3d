@@ -39,5 +39,5 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    peng3d.config
    util/index
    util/gui
-   peng3d.pyglet_patch
+   util/types
    peng3d.version
