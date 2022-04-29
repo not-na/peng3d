@@ -145,6 +145,19 @@ class TranslationManager(ActionDispatcher):
     def translate(
         self, key: str, translate: bool = True, lang: Optional[str] = None
     ) -> str:
+        """
+        Translates the given key.
+
+        If no language was given, the language last passed to :py:meth:`setLang()` will
+        be used.
+
+        If the translation key could not be found (e.g. because the language code is invalid),
+        the key itself will be returned.
+
+        Note that this method returns a string and thus does not have any way to modify
+        the returned value if the language is changed by the user. If dynamic translation
+        is required, :py:meth:`translate_lazy()` should be used instead.
+        """
         if lang is None:
             lang = self.lang
 
@@ -171,14 +184,46 @@ class TranslationManager(ActionDispatcher):
         data: Optional[Dict] = None,
         translate: bool = True,
         lang: Optional[str] = None,
-    ):
+    ) -> "_LazyTranslator":
+        """
+        Lazily translates a given translation key.
+
+        This method is similar to :py:meth:`translate()`\\ , but returns a special object
+        rather than a string. This allows for on-the-fly changing of the language without
+        having to re-set all the places where translated strings are used.
+
+        Whenever the returned object is converted to a string by :py:func:`str()` or :py:func:`repr()`
+        or is formatted using either the old ``%``\\ -notation or the newer :py:meth:`str.format()`\\ ,
+        the translation key will be looked up again, in case the language has changed.
+
+        Note that this requires support from the widgets (or other consumers of the returned value),
+        namely that they only convert to string just prior to rendering and re-render either
+        regularly or whenever either the ``setlang`` action or the :peng3d:event:`peng3d:i18n.set_lang` event
+        is called.
+
+        Most built-in widgets support this, but some special cases are not supported yet.
+        For example, setting the window title dynamically requires using the ``caption_t``
+        parameter instead of the raw ``caption`` parameter.
+        """
         return _LazyTranslator(self, key, data, translate, lang)
 
     tl = translate_lazy
 
     def loadDomain(
         self, domain: str, lang: Optional[str] = None, encoding: str = "utf-8"
-    ):
+    ) -> bool:
+        """
+        Loads the translation data of a single domain for a specific language from disk
+        into the cache.
+
+        If no language was given, the current language is used.
+
+        If the translation file could not be found or any errors occur while reading it,
+        these errors will be silently discarded, only recognizable by a return value of ``False``\\ .
+
+        If the load was successful, the action ``loaddomain`` will be executed and this
+        method will return ``True``\\ .
+        """
         if lang is None:
             lang = self.lang
 
@@ -189,7 +234,7 @@ class TranslationManager(ActionDispatcher):
 
         rsrc = self.peng.cfg["i18n.lang.format"].format(domain=domain, lang=lang)
         if not self.peng.rsrcMgr.resourceExists(rsrc, self.peng.cfg["i18n.lang.ext"]):
-            return  # prevents errors
+            return False  # prevents errors
         fname = self.peng.rsrcMgr.resourceNameToPath(
             rsrc, self.peng.cfg["i18n.lang.ext"]
         )
@@ -197,7 +242,7 @@ class TranslationManager(ActionDispatcher):
             with open(fname, "r", encoding=encoding, errors="surrogateescape") as f:
                 data = f.readlines()
         except Exception:
-            return  # prevents errors
+            return False  # prevents errors
 
         d = {}
         for line in data:
@@ -211,6 +256,7 @@ class TranslationManager(ActionDispatcher):
         self.cache[lang][domain] = d
 
         self.doAction("loaddomain")
+        return True
 
     def __getitem__(self, key: str) -> str:
         return self.translate(key)

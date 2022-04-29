@@ -38,6 +38,7 @@ from .world import *
 from .actor.player import *
 from .actor import *
 from .gui import *
+from .gui.style import *
 from .gui.widgets import *
 from .gui.button import *
 from .gui.slider import *

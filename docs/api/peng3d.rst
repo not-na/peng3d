@@ -28,6 +28,7 @@ Note that for compatibility reasons, peng3d.window is not available by default a
    gui/container
    gui/text
    gui/slider
+   gui/style
    peng3d.resource
    peng3d.i18n
    peng3d.model

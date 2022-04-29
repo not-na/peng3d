@@ -50,24 +50,7 @@ class ContainerButtonBackground(ButtonBackground):
 
         return bg, o, i, s, h
 
-    getColors.__noautodoc__ = getColors
-
-    def bs_oldshadow(self, bg, o, i, s, h):
-        if self.change_on_press and self.widget.pressed:
-            i = s
-            s, h = h, s
-        elif self.change_on_press and self.widget.is_hovering:
-            i = [min(i[0] + 6, 255), min(i[1] + 6, 255), min(i[2] + 6, 255)]
-            s = [min(s[0] + 6, 255), min(s[1] + 6, 255), min(s[2] + 6, 255)]
-        cb1 = s + s + s + s
-        cb2 = h + h + h + h
-        cb3 = h + h + h + h
-        cb4 = s + s + s + s
-        cc = i + i + i + i
-
-        return cb1 + cb2 + cb3 + cb4 + cc
-
-    bs_oldshadow.__noautodoc__ = getColors
+    getColors.__noautodoc__ = True
 
 
 class Container(Widget):

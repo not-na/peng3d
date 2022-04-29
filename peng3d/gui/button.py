@@ -3,7 +3,7 @@
 #
 #  button.py
 #
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import pyglet
 from pyglet.gl import *
 
 from .widgets import Background, Widget, mouse_aabb
+from . import style
 
 LABEL_FONT_SIZE = 16
 
@@ -56,7 +57,7 @@ class ButtonBackground(Background):
     def __init__(
         self,
         widget,
-        border=[4, 4],
+        border=None,
         borderstyle="flat",
         batch=None,
         change_on_press=None,
@@ -64,18 +65,12 @@ class ButtonBackground(Background):
 
         super(ButtonBackground, self).__init__(widget)
 
-        self.border = border
-        self.borderstyle = borderstyle
+        self.border = border if border is not None else [4, 4]
+        self.borderstyle = style.norm_borderstyle(borderstyle)
 
         self.change_on_press = (
             change_on_press if change_on_press is not None else self.change_on_press
         )
-
-        self.borderstyles = {}
-        self.addBorderstyle("flat", self.bs_flat)
-        self.addBorderstyle("gradient", self.bs_gradient)
-        self.addBorderstyle("oldshadow", self.bs_oldshadow)
-        self.addBorderstyle("material", self.bs_material)
 
     def init_bg(self):
         # Can only be initialized here due to order of initialization
@@ -118,10 +113,14 @@ class ButtonBackground(Background):
         v = qb1 + qb2 + qb3 + qb4 + qc
         self.vlist.vertices = v
 
-        if self.borderstyle not in self.borderstyles:
-            raise ValueError("Invalid Border style")
-        c = self.borderstyles[self.borderstyle](*self.getColors())
+        c = self.get_cur_colormap()
         self.vlist.colors = c
+
+    def get_cur_colormap(self):
+        ll = self.borderstyle.get_colormap(
+            self.widget, *self.getColors(), state=self.get_state()
+        )
+        return ll[0] + ll[1] + ll[2] + ll[3] + ll[4]
 
     def getPosSize(self):
         """
@@ -168,17 +167,15 @@ class ButtonBackground(Background):
         # Outer,Inner,Shadow,Highlight
         return bg, o, i, s, h
 
-    def addBorderstyle(self, name, func):
-        """
-        Adds a borderstyle to the background object.
-
-        Note that borderstyles must be registered seperately for each background object.
-
-        ``name`` is the (string) name of the borderstyle.
-
-        ``func`` will be called with its arguments as ``(bg,o,i,s,h)``\\ , see :py:meth:`getColors()` for more information.
-        """
-        self.borderstyles[name] = func
+    def get_state(self):
+        if self.pressed:
+            return "pressed"
+        elif self.is_hovering:
+            return "hover"
+        elif not self.widget.enabled:
+            return "disabled"
+        else:
+            return "idle"
 
     @property
     def pressed(self):
@@ -199,65 +196,6 @@ class ButtonBackground(Background):
         Note that this property may not represent the actual hovering state, it will always be False if ``change_on_press`` is disabled.
         """
         return self.change_on_press and self.widget.is_hovering
-
-    def bs_flat(self, bg, o, i, s, h):
-        # Flat style makes no difference between normal,hover and pressed
-        cb1 = i + i + i + i
-        cb2 = i + i + i + i
-        cb3 = i + i + i + i
-        cb4 = i + i + i + i
-        cc = i + i + i + i
-
-        return cb1 + cb2 + cb3 + cb4 + cc
-
-    bs_flat.__noautodoc__ = True
-
-    def bs_gradient(self, bg, o, i, s, h):
-        if self.pressed:
-            i = s
-        elif self.is_hovering:
-            i = [min(i[0] + 6, 255), min(i[1] + 6, 255), min(i[2] + 6, 255)]
-        cb1 = i + i + o + o
-        cb2 = i + o + o + i
-        cb3 = o + o + i + i
-        cb4 = o + i + i + o
-        cc = i + i + i + i
-
-        return cb1 + cb2 + cb3 + cb4 + cc
-
-    bs_gradient.__noautodoc__ = True
-
-    def bs_oldshadow(self, bg, o, i, s, h):
-        if self.pressed:
-            i = s
-            s, h = h, s
-        elif self.is_hovering:
-            i = [min(i[0] + 6, 255), min(i[1] + 6, 255), min(i[2] + 6, 255)]
-            s = [min(s[0] + 6, 255), min(s[1] + 6, 255), min(s[2] + 6, 255)]
-        cb1 = h + h + h + h
-        cb2 = s + s + s + s
-        cb3 = s + s + s + s
-        cb4 = h + h + h + h
-        cc = i + i + i + i
-
-        return cb1 + cb2 + cb3 + cb4 + cc
-
-    bs_oldshadow.__noautodoc__ = True
-
-    def bs_material(self, bg, o, i, s, h):
-        if self.pressed:
-            i = [max(bg[0] - 20, 0), max(bg[1] - 20, 0), max(bg[2] - 20, 0)]
-        elif self.is_hovering:
-            i = [max(bg[0] - 10, 0), max(bg[1] - 10, 0), max(bg[2] - 10, 0)]
-        cb1 = s + s + o + o
-        cb2 = s + o + o + s
-        cb3 = o + o + s + s
-        cb4 = o + s + s + o
-        cc = i + i + i + i
-
-        return cb1 + cb2 + cb3 + cb4 + cc
-
-    bs_material.__noautodoc__ = True
 
 
 class Button(Widget):
