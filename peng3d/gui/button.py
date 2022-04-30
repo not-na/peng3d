@@ -34,11 +34,19 @@ __all__ = [
     "CheckboxBackground",
 ]
 
+from typing import Optional, Any, TYPE_CHECKING, Tuple
+
+if TYPE_CHECKING:
+    from . import SubMenu
+    import peng3d
+
 import pyglet
 from pyglet.gl import *
 
 from .widgets import Background, Widget, mouse_aabb
 from . import style
+from ..util.types import *
+from ..util import default
 
 LABEL_FONT_SIZE = 16
 
@@ -221,30 +229,32 @@ class Button(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
-        bg=None,
-        border=[4, 4],
-        borderstyle=None,
-        label="Button",
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
+        bg: BackgroundType = None,
+        border: Optional[Tuple[float, float]] = None,
+        borderstyle: Optional[BorderStyle] = None,
+        label: DynTranslateable = "Button",
         min_size=None,
-        font_size=None,
+        font_size: Optional[float] = None,
         font=None,
         font_color=None,
         label_layer=1,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
+        font = default(font, submenu.font)
+        font_size = default(font_size, submenu.font_size)
+        font_color = default(font_color, submenu.font_color)
+        borderstyle = default(borderstyle, submenu.borderstyle)
+        border = default(border, (4, 4))
         if bg is None:
             bg = ButtonBackground(self, border, borderstyle)
         super(Button, self).__init__(
-            name, submenu, window, peng, pos, size, bg, min_size
+            name, submenu, window, peng, pos=pos, size=size, bg=bg, min_size=min_size
         )
         self._label = pyglet.text.Label(
             str(label),
@@ -429,12 +439,13 @@ class ImageButton(Button):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         label="Button",
         font_size=None,
@@ -458,9 +469,9 @@ class ImageButton(Button):
             submenu,
             window,
             peng,
-            pos,
-            size,
-            bg,
+            pos=pos,
+            size=size,
+            bg=bg,
             label=label,
             font_size=font_size,
             font_color=font_color,
@@ -907,12 +918,13 @@ class FramedImageButton(ImageButton):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         label="Button",
         font_size=None,
@@ -1166,12 +1178,13 @@ class Checkbox(ToggleButton):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         borderstyle=None,
         label="Checkbox",
@@ -1193,9 +1206,9 @@ class Checkbox(ToggleButton):
             submenu,
             window,
             peng,
-            pos,
-            size,
-            bg,
+            pos=pos,
+            size=size,
+            bg=bg,
             borderstyle=borderstyle,
             label=label,
             font_size=font_size,

@@ -30,10 +30,12 @@ __all__ = [
     "EmptyBackground",
 ]
 
+import warnings
+
 import weakref
 import time
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Any
 
 if TYPE_CHECKING:
     import peng3d.window
@@ -155,8 +157,6 @@ class BasicWidget(ActionDispatcher):
     """
     Basic Widget class.
 
-    Every widget must be registered with their appropriate sub-menus to work properly.
-
     ``pos`` may be either a list or 2-tuple of ``(x,y)`` for static positions or a function with the signature ``window_width,window_height,widget_width,widget_height`` returning a tuple.
 
     ``size`` is similar to ``pos`` but will only get ``window_width,window_height`` as its arguments.
@@ -176,6 +176,9 @@ class BasicWidget(ActionDispatcher):
     - ``hover_end`` is called after the cursor leaves the widget
     - ``statechanged`` is called every time the visual state of the widget should change
 
+    .. deprecated:: 1.12.0
+        The ``window`` and ``peng`` parameters are deprecated and will be removed in peng3d 2.0.
+        They are no longer needed and should be removed from existing code.
     """
 
     IS_CLICKABLE: bool = False
@@ -192,17 +195,41 @@ class BasicWidget(ActionDispatcher):
 
     def __init__(
         self,
-        name: str,
+        name: Optional[str],
         submenu: "SubMenu",
-        window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
-        pos: DynPosition = None,
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
         size: DynSize = None,
+        order_key: Optional[int] = 0,
     ):
+        if window is not None:
+            warnings.warn(
+                "Passing window to a widget is no longer necessary; the window parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                4,  # Needs to be rather high, since we are usually called a bit down the inheritance tree
+            )
+        if peng is not None:
+            warnings.warn(
+                "Passing peng to a widget is no longer necessary; the peng parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                4,
+            )
+
+        if name is None:
+            # Auto-generate name based on class name and a number
+            basename = self.__class__.__name__.lower()
+            i = 0
+            while f"{basename}_{i}" in submenu.widgets:
+                i += 1  # Pick first free name
+
+            name = f"{basename}_{i}"
+
         self.name: str = name
         self.submenu: "SubMenu" = submenu
-        self.window: "peng3d.window.PengWindow" = window
-        self.peng: "peng3d.Peng" = peng
+        self.window: "peng3d.window.PengWindow" = submenu.window
+        self.peng: "peng3d.Peng" = submenu.peng
 
         self._pos: DynPosition = pos
         self._size: DynSize = size
@@ -216,6 +243,9 @@ class BasicWidget(ActionDispatcher):
         self._visible: bool = True
 
         self.registerEventHandlers()
+
+        if order_key is not None:
+            self.submenu.addWidget(self, order_key)
 
     def registerEventHandlers(self):
         """
@@ -539,11 +569,12 @@ class Widget(BasicWidget):
 
     def __init__(
         self,
-        name: str,
+        name: Optional[str],
         submenu: "SubMenu",
-        window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
-        pos: DynPosition = None,
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
         size: DynSize = None,
         bg: Background = None,
         min_size: Optional[List[float]] = None,
@@ -552,7 +583,7 @@ class Widget(BasicWidget):
             bg = EmptyBackground(self)
         self.bg: Background = bg
         self.min_size: Optional[List[float]] = min_size
-        super(Widget, self).__init__(name, submenu, window, peng, pos, size)
+        super(Widget, self).__init__(name, submenu, window, peng, pos=pos, size=size)
 
     def setBackground(self, bg: Background) -> Background:
         """

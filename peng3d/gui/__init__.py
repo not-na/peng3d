@@ -356,7 +356,14 @@ class SubMenu(util.ActionDispatcher):
         ``order_key`` optionally specifies the "layer" this widget will be on. Note that
         this does not work with batched widgets. All batched widgets will be drawn before
         widgets that use a custom draw() method.
+
+        .. deprecated:: 1.12.0
+            This method is no longer needed in most cases, since widgets now register themselves by default.
         """
+        if widget.name in self.widgets:
+            # Just ignore duplicated registrations, since existing code will cause a lot of these
+            return
+
         self.widgets[widget.name] = widget
 
         if order_key not in self.widget_order:

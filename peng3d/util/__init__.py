@@ -27,12 +27,13 @@ __all__ = [
     "register_pyglet_handler",
     "ActionDispatcher",
     "SmartRegistry",
+    "default",
 ]
 
 import sys
 import weakref
 import threading
-from typing import Callable, Tuple, List, Dict, Optional, Union, Any
+from typing import Callable, Tuple, List, Dict, Optional, Union, Any, TypeVar
 
 try:
     import bidict
@@ -42,6 +43,20 @@ else:
     HAVE_BIDICT = True
 
 from .gui import *
+
+
+T = TypeVar("T")
+
+
+def default(arg: Optional[T], _default: T) -> T:
+    """
+    Small helper function that replaces the given argument with a default if the argument
+    is ``None``\\ .
+
+    This can also be written as a ternary expression in-line, but using this function
+    makes the purpose clearer and easier to read.
+    """
+    return arg if arg is not None else _default
 
 
 class WatchingList(list):

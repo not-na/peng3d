@@ -41,12 +41,19 @@ __all__ = [
 ]
 
 import warnings
+from typing import Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import SubMenu
+    import peng3d
+
 
 import pyglet
 from pyglet.gl import *
 
 from .widgets import Background, Widget
 from .. import util
+from ..util.types import *
 
 
 class LayeredWidget(Widget):
@@ -64,16 +71,19 @@ class LayeredWidget(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         layers=[],
     ):
-        super(LayeredWidget, self).__init__(name, submenu, window, peng, pos, size, bg)
+        super(LayeredWidget, self).__init__(
+            name, submenu, window, peng, pos=pos, size=size, bg=bg
+        )
 
         self.layers = []
         self._layers = {}

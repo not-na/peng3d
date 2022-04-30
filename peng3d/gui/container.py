@@ -25,6 +25,11 @@
 __all__ = ["Container", "ScrollableContainer", "ContainerButtonBackground"]
 
 import collections
+from typing import Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import SubMenu
+    import peng3d
 
 import pyglet
 from pyglet.gl import *
@@ -33,6 +38,7 @@ from .widgets import Widget, Background, _WatchingList
 from .slider import VerticalSlider
 from .button import ButtonBackground
 from ..layer import Layer
+from ..util.types import *
 
 
 class ContainerButtonBackground(ButtonBackground):
@@ -69,12 +75,13 @@ class Container(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         _skip_draw=False,
         font=None,
         font_size=None,
@@ -87,7 +94,7 @@ class Container(Widget):
         self.font = font if font is not None else submenu.font
         self.font_size = font_size if font_size is not None else submenu.font_size
         self.font_color = font_color if font_color is not None else submenu.font_color
-        super(Container, self).__init__(name, submenu, window, peng, pos, size)
+        super(Container, self).__init__(name, submenu, window, peng, pos=pos, size=size)
 
         self.menu = submenu
 
@@ -244,12 +251,13 @@ class ScrollableContainer(Container):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         scrollbar_width=12,
         font=None,
         font_size=None,
@@ -264,8 +272,8 @@ class ScrollableContainer(Container):
             submenu,
             window,
             peng,
-            pos,
-            size,
+            pos=pos,
+            size=size,
             borderstyle=borderstyle,
             font=font,
             font_size=font_size,
@@ -275,8 +283,6 @@ class ScrollableContainer(Container):
         self._scrollbar = VerticalSlider(
             "__scrollbar_%s" % name,
             self,
-            self.peng.window,
-            self.peng,
             pos=[0, 0],
             size=[24, 0],
             borderstyle=borderstyle,

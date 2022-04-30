@@ -43,8 +43,16 @@ try:
 except ImportError:
     HAVE_PYPERCLIP = False
 
+from typing import Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import SubMenu
+    import peng3d
+
+
 from .widgets import Background, Widget, mouse_aabb
 from .button import ButtonBackground
+from ..util.types import *
 
 
 class Label(Widget):
@@ -58,12 +66,13 @@ class Label(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         label="Label",
         font_size=None,
@@ -78,7 +87,9 @@ class Label(Widget):
         font = font if font is not None else submenu.font
         font_size = font_size if font_size is not None else submenu.font_size
         font_color = font_color if font_color is not None else submenu.font_color
-        super(Label, self).__init__(name, submenu, window, peng, pos, size, bg)
+        super(Label, self).__init__(
+            name, submenu, window, peng, pos=pos, size=size, bg=bg
+        )
 
         self.font_name = font
         self.font_size = font_size
@@ -321,12 +332,13 @@ class TextInput(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *args,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         text="",
         default="",
@@ -341,7 +353,6 @@ class TextInput(Widget):
         min_size=None,
         parent_bgcls=None,
         allow_returnkey=False,
-        *args,
         **kwargs,
     ):
         font = font if font is not None else submenu.font
@@ -366,7 +377,7 @@ class TextInput(Widget):
             bg = CustomTextInputBackground(self, cls=parent_bgcls, *args, **kwargs)
 
         super(TextInput, self).__init__(
-            name, submenu, window, peng, pos, size, bg, min_size
+            name, submenu, window, peng, pos=pos, size=size, bg=bg, min_size=min_size
         )
 
         self.allow_returnkey = allow_returnkey
