@@ -2,6 +2,7 @@ bidict>=0.19.0
 pyglet>=1.5.23
 tox==3.14.6
 virtualenv==20.0.16
-pytest==6.2.5
+pytest~=6.2.5
+pytest-cov~=3.0.0
 py>=1.8.1
 black~=22.3.0

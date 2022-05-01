@@ -28,6 +28,7 @@ __all__ = [
     "ActionDispatcher",
     "SmartRegistry",
     "default",
+    "default_property",
 ]
 
 import sys
@@ -57,6 +58,100 @@ def default(arg: Optional[T], _default: T) -> T:
     makes the purpose clearer and easier to read.
     """
     return arg if arg is not None else _default
+
+
+class default_property(object):
+    """
+    Special property decorator/class that allows for easy defaulting of attributes to
+    the parents' attributes.
+
+    This class can either be used as a decorator or as a class attribute.
+
+    For decorator usage, simply decorate an empty method with the name of the attribute to
+    default, passing the name of the attribute the parent is stored in::
+
+        class A:
+            @default_property("parent")
+            def my_attr(self): ...
+
+    Accessing ``my_attr`` will then return the value of the ``my_attr`` attribute of the
+    ``parent`` attribute of the class instance. Setting ``my_attr`` will not touch the
+    attribute of the same name of the parent, but rather set an internal attribute, causing
+    all subsequent accesses to return this local attribute.
+
+    Setting the property to ``None`` will reset the whole mechanism, causing all accesses
+    until the next write to return the defaulted value.
+
+    Internally, all this is handled by a shadow attribute with the same name as the
+    actual property, but prefixed by an underscore. This internal attribute may also
+    be written to directly, which is especially useful in constructors.
+
+    Deleting the property will also just reset it, until it is next written.
+
+    Alternatively, this class can also be used as a class attribute, for the same effect
+    as described above::
+
+        class A:
+            my_attr = default_property("parent", "my_attr")
+
+    Note that here it is required to pass the name of the attribute as a second argument,
+    as it is otherwise impossible to find out what the attribute is called.
+
+    The ``parent_attr`` keyword-only argument may be passed to override what attribute
+    of the parent is used as a default.
+    """
+
+    def __init__(
+        self,
+        parent: str,
+        name: Optional[str] = None,
+        *,
+        parent_attr: Optional[str] = None
+    ):
+        if callable(parent):  # Catch common error
+            raise TypeError(
+                "parent argument is callable, but should be a string. "
+                "Likely due to incorrect usage as a decorator"
+            )
+        self.name = name
+        self.parent = parent
+        self.parent_attr = default(parent_attr, name)
+
+    def __call__(self, func):
+        if self.name is None:
+            self.name = func.__name__
+
+            if self.parent_attr is None:
+                self.parent_attr = self.name
+
+        self.__doc__ = func.__doc__
+        return self
+
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+
+        if self.name is None:
+            raise TypeError(
+                "Missing required argument 'name' if not used as a decorator"
+            )
+
+        if getattr(instance, "_" + self.name, None) is not None:
+            return getattr(instance, "_" + self.name)
+
+        if not hasattr(instance, self.parent):
+            raise AttributeError("Couldn't find parent to default to")
+        elif not hasattr(getattr(instance, self.parent), self.parent_attr):
+            raise AttributeError("Couldn't find attribute within parent to default to")
+
+        return getattr(getattr(instance, self.parent), self.parent_attr)
+
+    def __set__(self, instance, value):
+        setattr(instance, "_" + self.name, value)
+
+    def __delete__(self, instance):
+        if hasattr(instance, "_" + self.name):
+            delattr(instance, "_" + self.name)
 
 
 class WatchingList(list):
