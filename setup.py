@@ -54,11 +54,11 @@ setup(
     description="Python and pyglet based 3D Engine and toolkit",  # from the github repo
     long_description=longdesc,
     author="notna",
-    author_email="notna@apparat.org",
+    author_email="notna+gh@apparat.org",
     url="https://github.com/not-na/peng3d",
     packages=["peng3d", "peng3d.actor", "peng3d.gui", "peng3d.util"],
     install_requires=[
-        "pyglet>=1.5.3",
+        "pyglet>=1.5.23",
         "bidict>=0.19.0",
     ],
     provides=["peng3d"],

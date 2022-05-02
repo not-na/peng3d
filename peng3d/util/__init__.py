@@ -166,7 +166,7 @@ class WatchingList(list):
 
     def __init__(self, l, callback=None):
         if callback is not None:
-            self.callback = weakref.WeakMethod(callback)
+            self.callback = weakref.proxy(callback)
         else:
             self.callback = None
         super(WatchingList, self).__init__(l)
@@ -174,7 +174,7 @@ class WatchingList(list):
     def __setitem__(self, *args):
         super(WatchingList, self).__setitem__(*args)
         if self.callback is not None:
-            c = self.callback()(self)
+            c = self.callback(self)
 
 
 def register_pyglet_handler(peng, func, event, raiseErrors=False):
@@ -268,13 +268,13 @@ class SmartRegistry(object):
         data: Optional[Dict[str, Any]] = None,
         reuse_ids: bool = False,
         start_id: int = 0,
-        max_id: Union[float, int] = float("inf"),
+        max_id: Optional[int] = None,
         default_reg: Optional[Dict] = None,
     ):
         # TODO: fix max_id being a float by default
         assert HAVE_BIDICT
 
-        self._data = data if data is not None else {}
+        self._data = default(data, {})
 
         self.reuse_ids: bool = reuse_ids
         # if true, new ids will be assigned from lowest available id
@@ -287,19 +287,24 @@ class SmartRegistry(object):
         self.registry_lock = threading.Lock()
 
         if "reg" not in self._data:
-            default_reg = default_reg if default_reg is not None else {}
+            default_reg = default(default_reg, {})
             if not isinstance(default_reg, dict):
                 raise TypeError("Default Registry must be a dictionary")
             # no reg yet, create a new one
             # ID->NAME mapping
             self._data["reg"] = default_reg
+
         for k in self._data["reg"].keys():
             if not isinstance(k, int):
                 raise TypeError("All keys must be integers")
+
         for v in self._data["reg"].values():
             if not isinstance(v, str):
                 raise TypeError("All values must be strings")
+
         self._data["reg"] = bidict.bidict(self._data["reg"])
+        print(self._data["reg"])
+
         if not self.reuse_ids and "next_id" not in self._data:
             if self._data.get("reg", {}) != {}:
                 # already data there, find highest id +1
@@ -307,6 +312,8 @@ class SmartRegistry(object):
             else:
                 # no data there, use start_id
                 self._data["next_id"] = self.start_id
+
+        print(self._data)
 
     def genNewID(self) -> int:
         """
@@ -325,14 +332,14 @@ class SmartRegistry(object):
             i = self.start_id
             while True:
                 if i not in self._data["reg"]:
-                    assert i <= self.max_id
+                    assert self.max_id is None or i <= self.max_id
                     return i  # no need to change any variables
                 i += 1
         else:
             with self.id_lock:
                 # new id creation in lock, to avoid issues with multiple threads
                 i = self._data["next_id"]
-                assert i <= self.max_id
+                assert self.max_id is None or i <= self.max_id
                 self._data["next_id"] += 1
             return i
 
@@ -354,6 +361,9 @@ class SmartRegistry(object):
                 new_id = force_id
             self._data["reg"][new_id] = name
             return new_id
+
+    def deregister(self, key: Union[int, str]) -> None:
+        del self._data["reg"][self.normalizeID(key)]
 
     def normalizeID(self, in_id: Union[int, str]) -> int:
         """
@@ -398,7 +408,7 @@ class SmartRegistry(object):
         The returned object is fully JSON/YAML/MessagePack serializable, as it only contains
         basic python data types.
         """
-        d = self._data
+        d = dict(self._data)
         d["reg"] = dict(d["reg"])
         return d
 
@@ -410,6 +420,9 @@ class SmartRegistry(object):
         # None may be used as value for auto generation
         # to access registry as reg[name]=id
         self.register(key, value)
+
+    def __delitem__(self, key: Union[int, str]):
+        self.deregister(key)
 
     def __contains__(self, value: Union[int, str]) -> bool:
         return value in self._data["reg"] or value in self._data["reg"].inv
