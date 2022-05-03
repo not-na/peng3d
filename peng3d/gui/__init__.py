@@ -29,8 +29,9 @@ __all__ = ["GUIMenu", "SubMenu", "GUILayer", "FakeWidget"]
 # import weakref
 # import sys
 import collections
+import warnings
 
-from typing import TYPE_CHECKING, Optional, Dict, List
+from typing import TYPE_CHECKING, Optional, Dict, List, Any
 
 if TYPE_CHECKING:
     import peng3d.window
@@ -53,6 +54,7 @@ from .layered import *
 from .layout import *
 from .. import util
 from ..util.types import *
+from .style import Style
 
 
 class FakeWidget(object):
@@ -84,22 +86,22 @@ class GUIMenu(Menu):
         name: str,
         window: "peng3d.window.PengWindow",
         peng: "peng3d.Peng",
-        font: str = "Arial",
-        font_size: float = 16,
+        font: Optional[str] = None,
+        font_size: Optional[float] = None,
         font_color: Optional[ColorRGBA] = None,
-        borderstyle: BorderStyle = "flat",
+        borderstyle: Optional[BorderStyle] = None,
+        style: Optional[Dict[str, StyleValue]] = None,
     ):
         super(GUIMenu, self).__init__(name, window, peng)
         pyglet.clock.schedule_interval(lambda dt: None, 1.0 / 30)
         self.submenus: Dict[str, "SubMenu"] = {}
         self.activeSubMenu: Optional[str] = None
 
-        self.font: str = font
-        self.font_size: float = font_size
-        self.font_color: ColorRGBA = (
-            font_color if font_color is not None else [62, 67, 73, 255]
-        )
-        self.borderstyle: BorderStyle = borderstyle
+        self.style: Style = Style(parent=self.peng.style, overrides=style)
+        self.style.override_if_not_none("font", font)
+        self.style.override_if_not_none("font_size", font_size)
+        self.style.override_if_not_none("font_color", font_color)
+        self.style.override_if_not_none("borderstyle", borderstyle)
 
         self.batch2d: pyglet.graphics.Batch = pyglet.graphics.Batch()
 
@@ -214,6 +216,11 @@ class GUIMenu(Menu):
     def size(self) -> List[int]:
         return self.window.get_size()
 
+    font = util.default_property("style")
+    font_size = util.default_property("style")
+    font_color = util.default_property("style")
+    borderstyle = util.default_property("style")
+
     def on_resize(self, width, height):
         sx, sy = width, height
         self.bg_vlist.vertices = [0, 0, sx, 0, sx, sy, 0, sy]
@@ -255,28 +262,37 @@ class SubMenu(util.ActionDispatcher):
         self,
         name: str,
         menu: GUIMenu,
-        window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
+        window: Any = None,
+        peng: Any = None,
         font: Optional[str] = None,
         font_size: Optional[float] = None,
         font_color: Optional[ColorRGBA] = None,
         borderstyle: Optional[BorderStyle] = None,
+        style: Optional[Dict[str, StyleValue]] = None,
     ):
+        if window is not None:
+            warnings.warn(
+                "Passing window to a submenu is no longer necessary; the window parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,  # Needs to be rather high, since we are usually called a bit down the inheritance tree
+            )
+        if peng is not None:
+            warnings.warn(
+                "Passing peng to a submenu is no longer necessary; the peng parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,
+            )
+
         self.name: str = name
         self.menu: GUIMenu = menu
-        self.window: "peng3d.window.PengWindow" = window
-        self.peng: "peng3d.Peng" = peng
+        self.window: "peng3d.window.PengWindow" = menu.window
+        self.peng: "peng3d.Peng" = menu.peng
 
-        self.font: str = font if font is not None else self.menu.font
-        self.font_size: float = (
-            font_size if font_size is not None else self.menu.font_size
-        )
-        self.font_color: ColorRGBA = (
-            font_color if font_color is not None else self.menu.font_color
-        )
-        self.borderstyle: BorderStyle = (
-            borderstyle if borderstyle is not None else self.menu.borderstyle
-        )
+        self.style: Style = Style(parent=self.peng.style, overrides=style)
+        self.style.override_if_not_none("font", font)
+        self.style.override_if_not_none("font_size", font_size)
+        self.style.override_if_not_none("font_color", font_color)
+        self.style.override_if_not_none("borderstyle", borderstyle)
 
         self.widgets = collections.OrderedDict()
 
@@ -471,6 +487,11 @@ class SubMenu(util.ActionDispatcher):
     @property
     def enabled(self) -> bool:
         return self.menu.submenu is self and self.window.menu is self.menu
+
+    font = util.default_property("style")
+    font_size = util.default_property("style")
+    font_color = util.default_property("style")
+    borderstyle = util.default_property("style")
 
     def send_form(self, ctx=None) -> bool:
         """

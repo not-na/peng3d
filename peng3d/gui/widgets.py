@@ -26,6 +26,7 @@ import inspect
 __all__ = [
     "BasicWidget",
     "Background",
+    "DEFER_BG",
     "Widget",
     "EmptyBackground",
 ]
@@ -33,9 +34,8 @@ __all__ = [
 import warnings
 
 import weakref
-import time
 
-from typing import TYPE_CHECKING, List, Optional, Any
+from typing import TYPE_CHECKING, List, Optional, Any, Dict
 
 if TYPE_CHECKING:
     import peng3d.window
@@ -47,9 +47,15 @@ try:
 except ImportError:
     pass  # Headless mode
 
-from ..util import mouse_aabb, ActionDispatcher, WatchingList as _WatchingList
+from ..util import (
+    mouse_aabb,
+    ActionDispatcher,
+    WatchingList as _WatchingList,
+    default_property,
+)
 from . import layout
 from ..util.types import *
+from .style import Style
 
 
 # Internal Debug/Performance monitor variable
@@ -143,6 +149,31 @@ class Background(object):
         self._vlists = []
 
 
+class _DeferBackgroundSentinel(Background):
+    def init_bg(self) -> None:
+        raise TypeError(
+            "DEFER_BG cannot be initialized, please replace before first render"
+        )
+
+    def redraw_bg(self) -> None:
+        raise TypeError(
+            "DEFER_BG cannot be redrawn, please replace before first render"
+        )
+
+
+DEFER_BG = _DeferBackgroundSentinel(None)
+"""
+Sentinel object that may be passed instead of an actual background to signify
+that the background will be set later.
+
+Differs from passing ``None``\\ , since ``None`` will cause an :py:class:`EmptyBackground`
+to be unnecessarily created, while :py:data:`DEFER_BG` simply does nothing.
+
+Note that if the actual background is not set before the first render, a :py:exc:`TypeError`
+will be raised.
+"""
+
+
 class EmptyBackground(Background):
     """
     Background that draws simply nothing.
@@ -203,6 +234,7 @@ class BasicWidget(ActionDispatcher):
         pos: DynPosition,
         size: DynSize = None,
         order_key: Optional[int] = 0,
+        style: Optional[Dict[str, StyleValue]] = None,
     ):
         if window is not None:
             warnings.warn(
@@ -230,6 +262,8 @@ class BasicWidget(ActionDispatcher):
         self.submenu: "SubMenu" = submenu
         self.window: "peng3d.window.PengWindow" = submenu.window
         self.peng: "peng3d.Peng" = submenu.peng
+
+        self.style: Style = Style(parent=self.submenu.style, overrides=style)
 
         self._pos: DynPosition = pos
         self._size: DynSize = size
@@ -389,6 +423,11 @@ class BasicWidget(ActionDispatcher):
     def visible(self, value: bool):
         self._visible = value
         self.redraw()
+
+    font = default_property("style")
+    font_size = default_property("style")
+    font_color = default_property("style")
+    borderstyle = default_property("style")
 
     def getState(self) -> str:
         """

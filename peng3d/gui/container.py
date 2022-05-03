@@ -91,10 +91,11 @@ class Container(Widget):
         self.borderstyle = (
             borderstyle if borderstyle is not None else submenu.borderstyle
         )
-        self.font = font if font is not None else submenu.font
-        self.font_size = font_size if font_size is not None else submenu.font_size
-        self.font_color = font_color if font_color is not None else submenu.font_color
         super(Container, self).__init__(name, submenu, window, peng, pos=pos, size=size)
+
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
 
         self.menu = submenu
 

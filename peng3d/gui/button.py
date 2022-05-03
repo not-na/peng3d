@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 import pyglet
 from pyglet.gl import *
 
-from .widgets import Background, Widget, mouse_aabb
+from .widgets import Background, Widget, mouse_aabb, DEFER_BG
 from . import style
 from ..util.types import *
 from ..util import default
@@ -236,7 +236,7 @@ class Button(Widget):
         *,
         pos: DynPosition,
         size: DynSize = None,
-        bg: BackgroundType = None,
+        bg: Background = None,
         border: Optional[Tuple[float, float]] = None,
         borderstyle: Optional[BorderStyle] = None,
         label: DynTranslateable = "Button",
@@ -246,21 +246,33 @@ class Button(Widget):
         font_color=None,
         label_layer=1,
     ):
-        font = default(font, submenu.font)
-        font_size = default(font_size, submenu.font_size)
-        font_color = default(font_color, submenu.font_color)
-        borderstyle = default(borderstyle, submenu.borderstyle)
-        border = default(border, (4, 4))
-        if bg is None:
-            bg = ButtonBackground(self, border, borderstyle)
         super(Button, self).__init__(
-            name, submenu, window, peng, pos=pos, size=size, bg=bg, min_size=min_size
+            name,
+            submenu,
+            window,
+            peng,
+            pos=pos,
+            size=size,
+            bg=default(bg, DEFER_BG),
+            min_size=min_size,
         )
+
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
+        self.borderstyle = borderstyle
+        self.style.override_if_not_none("border", border)
+
+        if bg is None:
+            self.setBackground(
+                ButtonBackground(self, self.style.border, self.borderstyle)
+            )
+
         self._label = pyglet.text.Label(
             str(label),
-            font_name=font,
-            font_size=font_size,
-            color=font_color,
+            font_name=self.font,
+            font_size=self.font_size,
+            color=self.font_color,
             x=0,
             y=0,
             batch=self.submenu.batch2d,
@@ -457,13 +469,6 @@ class ImageButton(Button):
         bg_pressed=None,
         label_layer=1,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
-
-        if bg is None:
-            self.peng = peng
-            bg = ImageBackground(self, bg_idle, bg_hover, bg_disabled, bg_pressed)
         super(ImageButton, self).__init__(
             name,
             submenu,
@@ -471,13 +476,18 @@ class ImageButton(Button):
             peng,
             pos=pos,
             size=size,
-            bg=bg,
+            bg=default(bg, DEFER_BG),
             label=label,
             font_size=font_size,
             font_color=font_color,
             font=font,
             label_layer=label_layer,
         )
+
+        if bg is None:
+            self.setBackground(
+                ImageBackground(self, bg_idle, bg_hover, bg_disabled, bg_pressed)
+            )
 
 
 class FramedImageBackground(ImageBackground):
@@ -941,24 +951,6 @@ class FramedImageButton(ImageButton):
         tex_size=None,
         label_layer=1,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
-
-        if bg is None:
-            self.peng = peng
-            bg = FramedImageBackground(
-                self,
-                bg_idle,
-                bg_hover,
-                bg_disabled,
-                bg_pressed,
-                frame,
-                scale,
-                repeat_edge,
-                repeat_center,
-                tex_size,
-            )
         super(FramedImageButton, self).__init__(
             name,
             submenu,
@@ -966,13 +958,29 @@ class FramedImageButton(ImageButton):
             peng,
             pos=pos,
             size=size,
-            bg=bg,
+            bg=default(bg, DEFER_BG),
             label=label,
             font_size=font_size,
             font_color=font_color,
             font=font,
             label_layer=label_layer,
         )
+
+        if bg is None:
+            self.setBackground(
+                FramedImageBackground(
+                    self,
+                    bg_idle,
+                    bg_hover,
+                    bg_disabled,
+                    bg_pressed,
+                    frame,
+                    scale,
+                    repeat_edge,
+                    repeat_center,
+                    tex_size,
+                )
+            )
 
 
 class ToggleButton(Button):
@@ -1194,13 +1202,6 @@ class Checkbox(ToggleButton):
         font_color=None,
         label_layer=1,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
-
-        if bg is None:
-            bg = CheckboxBackground(self, borderstyle, checkcolor)
         super(Checkbox, self).__init__(
             name,
             submenu,
@@ -1208,7 +1209,7 @@ class Checkbox(ToggleButton):
             peng,
             pos=pos,
             size=size,
-            bg=bg,
+            bg=default(bg, DEFER_BG),
             borderstyle=borderstyle,
             label=label,
             font_size=font_size,
@@ -1216,6 +1217,9 @@ class Checkbox(ToggleButton):
             font=font,
             label_layer=label_layer,
         )
+
+        if bg is None:
+            self.setBackground(CheckboxBackground(self, borderstyle, checkcolor))
 
     def redraw_label(self):
         """

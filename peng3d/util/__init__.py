@@ -92,10 +92,16 @@ class default_property(object):
     as described above::
 
         class A:
-            my_attr = default_property("parent", "my_attr")
+            my_attr = default_property("parent")
 
-    Note that here it is required to pass the name of the attribute as a second argument,
-    as it is otherwise impossible to find out what the attribute is called.
+    Note that this only works if the property is defined in the class body. Later
+    assignment to the class object is possible, but requires providing the ``name`` argument,
+    since auto-detecting the attribute name is then not possible.
+
+    To simplify creation, it is possible to set the ``PARENT_ATTR`` class attribute to
+    provide a default first argument to :py:class:`default_property`\\ . This is usually
+    worthwhile if multiple ``default_properties`` are used within the same class hierarchy,
+    especially since the class attribute value can be inherited.
 
     The ``parent_attr`` keyword-only argument may be passed to override what attribute
     of the parent is used as a default.
@@ -103,7 +109,7 @@ class default_property(object):
 
     def __init__(
         self,
-        parent: str,
+        parent: Optional[str] = None,
         name: Optional[str] = None,
         *,
         parent_attr: Optional[str] = None
@@ -113,6 +119,7 @@ class default_property(object):
                 "parent argument is callable, but should be a string. "
                 "Likely due to incorrect usage as a decorator"
             )
+
         self.name = name
         self.parent = parent
         self.parent_attr = default(parent_attr, name)
@@ -136,6 +143,17 @@ class default_property(object):
                 "Missing required argument 'name' if not used as a decorator"
             )
 
+        if (self.parent is None and not hasattr(instance, "PARENT_ATTR")) or (
+            self.parent is None
+            and hasattr(instance, "PARENT_ATTR")
+            and not isinstance(instance.PARENT_ATTR, str)
+        ):
+            raise TypeError(
+                "Missing required argument 'parent' if object has no 'PARENT_ATTR' string attribute"
+            )
+        if self.parent is None:
+            self.parent = instance.PARENT_ATTR
+
         if getattr(instance, "_" + self.name, None) is not None:
             return getattr(instance, "_" + self.name)
 
@@ -153,6 +171,12 @@ class default_property(object):
         if hasattr(instance, "_" + self.name):
             delattr(instance, "_" + self.name)
 
+    def __set_name__(self, owner, name):
+        self.name = name
+
+        if self.parent_attr is None:
+            self.parent_attr = self.name
+
 
 class WatchingList(list):
     """
@@ -166,7 +190,10 @@ class WatchingList(list):
 
     def __init__(self, l, callback=None):
         if callback is not None:
-            self.callback = weakref.proxy(callback)
+            if hasattr(callback, "__self__"):
+                self.callback = weakref.WeakMethod(callback)
+            else:
+                self.callback = weakref.ref(callback)
         else:
             self.callback = None
         super(WatchingList, self).__init__(l)
@@ -174,7 +201,7 @@ class WatchingList(list):
     def __setitem__(self, *args):
         super(WatchingList, self).__setitem__(*args)
         if self.callback is not None:
-            c = self.callback(self)
+            self.callback()(self)
 
 
 def register_pyglet_handler(peng, func, event, raiseErrors=False):

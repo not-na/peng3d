@@ -34,6 +34,7 @@ __all__ = [
     "ColorRGBAFloat",
     "BorderStyle",
     "BackgroundType",
+    "StyleValue",
     "DynPosition",
     "DynSize",
     "DynTranslateable",
@@ -66,13 +67,17 @@ Border style identifier.
 Either a subclass of :py:class:`~peng3d.gui.style.Borderstyle()` or a string identifier.
 """
 
-BackgroundType = Union["Layer", Callable, list, tuple, "Background", str]
+BackgroundType = Union[
+    "Layer", Callable, list, tuple, "Background", str, Type["DEFER_BG"]
+]
 """
 Type encompassing all allowed types for backgrounds of menus and submenus.
 
 .. seealso::
     See :py:meth:`~peng3d.gui.SubMenu.setBackground()` for further details.
 """
+
+StyleValue = Union[float, str, BorderStyle]
 
 DynPosition = Union[
     List[float],

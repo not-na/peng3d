@@ -158,16 +158,20 @@ def test_defprop_noname():
 
     a = A()
 
-    with pytest.raises(TypeError) as excinfo:
+    with pytest.raises(AttributeError) as excinfo:
         a.attr
 
-    assert "required argument" in str(excinfo.value)
+    assert "Couldn't find parent" in str(excinfo.value)
 
 
 def test_defprop_parenterr():
     class A:
         @default_property("parent")
         def attr(self):
+            ...
+
+        @default_property()
+        def attr2(self):
             ...
 
     a = A()
@@ -184,3 +188,28 @@ def test_defprop_parenterr():
         a.attr
 
     assert "attribute within parent" in str(excinfo.value)
+
+    with pytest.raises(TypeError) as excinfo:
+        a.attr2
+
+    assert "PARENT_ATTR" in str(excinfo.value)
+
+
+def test_defprop_autoparent():
+    class A:
+        PARENT_ATTR = "parent"
+
+        @default_property()
+        def attr(self):
+            ...
+
+    class B:
+        attr = "B"
+
+    a = A()
+    b = B()
+
+    a.parent = b
+
+    assert a.attr == "B"
+    assert a.attr == b.attr

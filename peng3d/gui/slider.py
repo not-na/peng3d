@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     import peng3d
 
 
-from .widgets import Background, Widget
+from .widgets import Background, Widget, DEFER_BG
 from .button import ButtonBackground
 from ..util import default
 from ..util.types import *
@@ -194,19 +194,25 @@ class Progressbar(Widget):
         nmin=0,
         nmax=100,
         n=0,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
         colors=[[240, 119, 70], [240, 119, 70]],
     ):
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
+        super(Progressbar, self).__init__(
+            name, submenu, window, peng, pos=pos, size=size, bg=default(bg, DEFER_BG)
+        )
+
+        self.borderstyle = borderstyle
+        self.style.override_if_not_none("border", border)
+
         self._nmin = nmin
         self._nmax = nmax
         self._n = n
         if bg is None:
-            bg = ProgressbarBackground(self, border, borderstyle, colors)
-        super(Progressbar, self).__init__(
-            name, submenu, window, peng, pos=pos, size=size, bg=bg
-        )
+            self.setBackground(
+                ProgressbarBackground(self, self.style.border, self.borderstyle, colors)
+            )
+
         self.redraw()
 
     @property
@@ -295,11 +301,11 @@ class AdvancedProgressbar(Progressbar):
         pos: DynPosition,
         size: DynSize = None,
         bg=None,
-        categories={},
+        categories=None,
         offset_nmin=0,
         offset_nmax=0,
         offset_n=0,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
         colors=[[240, 119, 70], [240, 119, 70]],
     ):
@@ -308,18 +314,18 @@ class AdvancedProgressbar(Progressbar):
             submenu,
             window,
             peng,
-            pos,
-            size,
-            bg,
-            offset_nmin,
-            offset_nmax,
-            offset_n,
-            border,
-            borderstyle,
-            colors,
+            pos=pos,
+            size=size,
+            bg=bg,
+            nmin=offset_nmin,
+            nmax=offset_nmax,
+            n=offset_n,
+            border=border,
+            borderstyle=borderstyle,
+            colors=colors,
         )
 
-        self.categories = categories
+        self.categories = default(categories, {})
         for cname, cdat in self.categories.items():
             assert len(cdat) == 3  # nmin,n,nmax
 
@@ -374,7 +380,7 @@ class AdvancedProgressbar(Progressbar):
 
     def __delitem__(self, key):
         if key not in self.categories:
-            raise KeyError("No Category with name '%s'" % name)
+            raise KeyError("No Category with name '%s'" % key)
         del self.categories[key]
         self.redraw()
 
@@ -499,30 +505,31 @@ class Slider(Progressbar):
         pos: DynPosition,
         size: DynSize = None,
         bg=None,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
         nmin=0,
         nmax=100,
         n=0,
-        handlesize=[16, 24],
+        handlesize=None,
     ):
-        size = default(size, [100, 24])
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
-        self.handlesize = handlesize
-        if bg is None:
-            bg = SliderBackground(self, border, borderstyle)
         super(Slider, self).__init__(
             name,
             submenu,
             window,
             peng,
             pos=pos,
-            size=size,
-            bg=bg,
+            size=default(size, [100, 24]),
+            bg=default(bg, DEFER_BG),
             nmin=nmin,
             nmax=nmax,
             n=n,
         )
+
+        self.borderstyle = borderstyle
+        self.style.override_if_not_none("border", border)
+        self.handlesize = default(handlesize, [16, 24])
+        if bg is None:
+            self.setBackground(SliderBackground(self, self.style.border, borderstyle))
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
         if not self.pressed:
@@ -584,17 +591,28 @@ class VerticalSlider(Slider):
         pos: DynPosition,
         size: DynSize = None,
         bg=None,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
         **kwargs,
     ):
-        size = default(size, [24, 100])
-        borderstyle = default(borderstyle, submenu.borderstyle)
-        if bg is None:
-            bg = VerticalSliderBackground(self, border, borderstyle)
         super(VerticalSlider, self).__init__(
-            name, submenu, window, peng, pos=pos, size=size, bg=bg, **kwargs
+            name,
+            submenu,
+            window,
+            peng,
+            pos=pos,
+            size=default(size, [24, 100]),
+            bg=default(bg, DEFER_BG),
+            **kwargs,
         )
+
+        self.borderstyle = borderstyle
+        self.style.override_if_not_none("border", border)
+
+        if bg is None:
+            self.setBackground(
+                VerticalSliderBackground(self, self.style.border, self.borderstyle)
+            )
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
         if not self.pressed:

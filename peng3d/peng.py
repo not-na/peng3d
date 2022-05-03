@@ -30,9 +30,11 @@ import weakref
 import inspect
 
 # from . import window, config, keybind, pyglet_patch
-from typing import Optional, TYPE_CHECKING, Type, List, Callable, Union, Tuple
+from typing import Optional, TYPE_CHECKING, Type, List, Callable, Union, Tuple, Dict
 
 from . import config, world, resource, i18n
+from .gui.style import Style, DEFAULT_STYLE
+from .util.types import *
 
 if TYPE_CHECKING:
     import pyglet
@@ -48,7 +50,12 @@ class Peng(object):
     Be sure to keep your instance accessible, as it will be needed to create most other classes.
     """
 
-    def __init__(self, cfg: Optional[config.Config] = None):
+    def __init__(
+        self,
+        cfg: Optional[config.Config] = None,
+        *,
+        style: Optional[Dict[str, StyleValue]] = None,
+    ):
         if world._have_pyglet:
             from . import (
                 keybind,
@@ -80,6 +87,8 @@ class Peng(object):
         else:
             self.keybinds = None
 
+        self.style: Style = Style(parent=DEFAULT_STYLE, overrides=style)
+
         self.resourceMgr: Optional[resource.ResourceManager] = None
         self.i18n: Optional[i18n.TranslationManager] = None
 
@@ -98,7 +107,7 @@ class Peng(object):
         caption_t: Optional[str] = None,
         rsrc_class: Type[resource.ResourceManager] = resource.ResourceManager,
         *args,
-        **kwargs
+        **kwargs,
     ):
         """
         createWindow(cls=window.PengWindow, *args, **kwargs)

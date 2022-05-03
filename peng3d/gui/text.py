@@ -53,6 +53,7 @@ if TYPE_CHECKING:
 from .widgets import Background, Widget, mouse_aabb
 from .button import ButtonBackground
 from ..util.types import *
+from .. import util
 
 
 class Label(Widget):
@@ -84,14 +85,11 @@ class Label(Widget):
         anchor_y="center",
         label_layer=1,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
         super(Label, self).__init__(
             name, submenu, window, peng, pos=pos, size=size, bg=bg
         )
 
-        self.font_name = font
+        self.font = font
         self.font_size = font_size
         self.font_color = font_color
 
@@ -109,15 +107,15 @@ class Label(Widget):
                 height=self.size[1],
                 multiline=multiline,
             )
-            self._label.font_name = font
-            self._label.font_size = font_size
-            self._label.font_color = font_color
+            self._label.font_name = self.font
+            self._label.font_size = self.font_size
+            self._label.font_color = self.font_color
         else:
             self._label = label_cls(
                 str(label),
-                font_name=font,
-                font_size=font_size,
-                color=font_color,
+                font_name=self.font,
+                font_size=self.font_size,
+                color=self.font_color,
                 x=0,
                 y=0,
                 batch=self.submenu.batch2d,
@@ -152,7 +150,7 @@ class Label(Widget):
         x, y = self.pos
 
         # Label position
-        self._label.font_name = self.font_name
+        self._label.font_name = self.font
         self._label.font_size = self.font_size
         self._label.font_color = self.font_color
 
@@ -355,11 +353,6 @@ class TextInput(Widget):
         allow_returnkey=False,
         **kwargs,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
-
         self.peng = peng
 
         if allow_copypaste == "force" and not HAVE_PYPERCLIP:
@@ -380,6 +373,11 @@ class TextInput(Widget):
             name, submenu, window, peng, pos=pos, size=size, bg=bg, min_size=min_size
         )
 
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
+        self.borderstyle = borderstyle
+
         self.allow_returnkey = allow_returnkey
 
         self.focussed = False
@@ -391,9 +389,9 @@ class TextInput(Widget):
 
         self._text = pyglet.text.Label(
             str(text),
-            font_name=font,
-            font_size=font_size,
-            color=font_color,
+            font_name=self.font,
+            font_size=self.font_size,
+            color=self.font_color,
             x=0,
             y=0,
             batch=None,  # self.submenu.batch2d,
@@ -404,8 +402,8 @@ class TextInput(Widget):
         )
         self._default = pyglet.text.Label(
             str(default),
-            font_name=font,
-            font_size=font_size,
+            font_name=self.font,
+            font_size=self.font_size,
             color=font_color_default,
             x=0,
             y=0,
