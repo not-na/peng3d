@@ -44,7 +44,7 @@ def main(args):
     t, tl = peng.t, peng.tl
 
     peng.createWindow(caption_t="i18n:basic.caption", resizable=True, vsync=True)
-    peng.window.addMenu(peng3d.Menu("main", peng.window, peng))
+    # peng.window.addMenu(peng3d.Menu("main", peng.window))
     peng.window.toggle_exclusivity()
     # Keybinds
     def esc_toggle(symbol, modifiers, release):
@@ -61,34 +61,41 @@ def main(args):
         peng.keybinds.changeKeybind("peng3d:actor.player.controls.forward", "space")
 
     peng.keybinds.add("f3", "testpy:handler.test", test_handler)
+
     # Fog and clear color config
     peng.cfg["graphics.clearColor"] = [0.5, 0.69, 1.0, 1.0]
     peng.cfg["graphics.fogSettings"]["enable"] = True
     peng.cfg["graphics.fogSettings"]["start"] = 4
     peng.cfg["graphics.fogSettings"]["end"] = 8
+
     # Creates world/cam/view/player
     world = peng3d.StaticWorld(peng, TERRAIN, COLORS)
     # player = peng3d.actor.player.FirstPersonPlayer(peng,world)
     player = peng3d.actor.player.BasicPlayer(peng, world)
+
     # Player controllers
     player.addController(peng3d.actor.player.FourDirectionalMoveController(player))
     player.addController(peng3d.actor.player.EgoMouseRotationalController(player))
     player.addController(peng3d.actor.player.BasicFlightController(player))
+
     # Player view/camera
     world.addActor(player)
     c = peng3d.CameraActorFollower(world, "cam1", player)
     world.addCamera(c)
     v = peng3d.WorldView(world, "view1", "cam1")
     world.addView(v)
+
     # Creates menu/layer
-    m = peng3d.Menu("main", peng.window, peng)
+    m = peng3d.Menu("main", peng.window)
     m.addWorld(world)
     peng.window.addMenu(m)
     l = peng3d.LayerWorld(m, peng.window, peng, world, "view1")
     m.addLayer(l)
+
     # Switch to the main menu
     peng.window.changeMenu("main")
     # Done!
+
     if CONSOLE:
         # Starts a console in seperate Thread, allows interactive debugging and testing stuff easily
         t = threading.Thread(
@@ -96,6 +103,7 @@ def main(args):
         )
         t.daemon = True
         t.start()
+
     # Starts the main loop
     peng.run()
     return 0

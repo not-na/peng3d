@@ -43,8 +43,6 @@ def createGUI():
     s_start = peng3d.gui.SubMenu(
         "start",
         m_main,
-        peng.window,
-        peng,
         borderstyle="oldshadow",
     )
     m_main.addSubMenu(s_start)
@@ -61,8 +59,6 @@ def createGUI():
     btn0 = peng3d.gui.Button(
         "btn0",
         s_start,
-        peng.window,
-        peng,
         pos=layout.get_cell([1, 4], [2, 1]),
         label="Send",
     )
@@ -73,8 +69,6 @@ def createGUI():
     btn1 = peng3d.gui.Button(
         "btn1",
         s_start,
-        peng.window,
-        peng,
         pos=layout.get_cell([1, 3], [2, 1]),
         label="Button 1",
     )
@@ -83,8 +77,6 @@ def createGUI():
     btn2 = peng3d.gui.Button(
         "btn2",
         s_start,
-        peng.window,
-        peng,
         pos=layout.get_cell([1, 2], [2, 1]),
         label="Button 2",
     )
@@ -93,8 +85,6 @@ def createGUI():
     btn3 = peng3d.gui.FramedImageButton(
         "btn3",
         s_start,
-        peng.window,
-        peng,
         pos=layout.get_cell([1, 1], [1, 1]),
         label="Button 3",
         bg_idle=["test_gui:gui.testbtn", "gui"],
@@ -117,8 +107,6 @@ def createGUI():
     pwdin = peng3d.gui.PasswordInput(
         "pwdin",
         s_start,
-        peng.window,
-        peng,
         pos=layout.get_cell([2, 1], [1, 1]),
         default="Password Field",
     )
@@ -147,7 +135,7 @@ def main(args):
     # Create Window with caption
     peng.createWindow(caption="Peng3d Example", resizable=True, vsync=True)
     # Create main GUI Menu and register it immediately
-    m_main = peng3d.GUIMenu("main", peng.window, peng)
+    m_main = peng3d.GUIMenu("main", peng.window)
     peng.window.addMenu(m_main)
 
     def test_handler(symbol, modifiers, release):

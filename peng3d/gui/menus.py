@@ -121,8 +121,8 @@ class DialogSubMenu(SubMenu):
         self,
         name,
         menu,
-        window,
-        peng,
+        window=None,
+        peng=None,
         borderstyle=None,
         font_size=None,
         font=None,
@@ -182,8 +182,6 @@ class DialogSubMenu(SubMenu):
         self.wlabel_main = text.Label(
             "label_main",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (sw / 2 - bw / 2, sh / 2 - bh / 2),
             size=[0, 0],
             label=label_main,
@@ -193,7 +191,6 @@ class DialogSubMenu(SubMenu):
             multiline=self.multiline,
         )
         self.wlabel_main.size = lambda sw, sh: (sw, self.wlabel_main._label.font_size)
-        self.addWidget(self.wlabel_main)
 
     def add_btn_ok(self, label_ok):
         """
@@ -208,8 +205,6 @@ class DialogSubMenu(SubMenu):
         self.wbtn_ok = button.Button(
             "btn_ok",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (sw / 2 - bw / 2, sh / 2 - bh / 2 - bh * 2),
             size=[0, 0],
             label=label_ok,
@@ -222,7 +217,6 @@ class DialogSubMenu(SubMenu):
             self.wbtn_ok._label.font_size * 8,
             self.wbtn_ok._label.font_size * 2,
         )
-        self.addWidget(self.wbtn_ok)
 
         def f():
             self.doAction("click_ok")
@@ -331,8 +325,6 @@ class ConfirmSubMenu(DialogSubMenu):
         self.wbtn_confirm = button.Button(
             "btn_confirm",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (sw / 2 - bw - 4, sh / 2 - bh / 2 - bh * 2),
             size=[0, 0],
             label=label_confirm,
@@ -345,7 +337,6 @@ class ConfirmSubMenu(DialogSubMenu):
             self.wbtn_confirm._label.font_size * 8,
             self.wbtn_confirm._label.font_size * 2,
         )
-        self.addWidget(self.wbtn_confirm)
 
         def f():
             self.doAction("confirm")
@@ -366,8 +357,6 @@ class ConfirmSubMenu(DialogSubMenu):
         self.wbtn_cancel = button.Button(
             "btn_cancel",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (sw / 2 + 4, sh / 2 - bh / 2 - bh * 2),
             size=[0, 0],
             label=label_cancel,
@@ -380,7 +369,6 @@ class ConfirmSubMenu(DialogSubMenu):
             self.wbtn_cancel._label.font_size * 8,
             self.wbtn_cancel._label.font_size * 2,
         )
-        self.addWidget(self.wbtn_cancel)
 
         def f():
             self.doAction("cancel")
@@ -515,8 +503,6 @@ class ProgressSubMenu(DialogSubMenu):
         self.wprogressbar = slider.Progressbar(
             "progressbar",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (
                 sw / 2 - bw / 2,
                 self.wlabel_main.pos[1] - bh * 1.5,
@@ -525,14 +511,11 @@ class ProgressSubMenu(DialogSubMenu):
             # label=label_progressbar # TODO: add label
             borderstyle=self.borderstyle,
         )
-        self.addWidget(self.wprogressbar)
 
         # Progress Label
         self.wprogresslabel = text.Label(
             "progresslabel",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (sw / 2 - bw / 2, self.wprogressbar.pos[1] + 8),
             size=[0, 0],
             label="",  # set by update_progressbar()
@@ -544,7 +527,6 @@ class ProgressSubMenu(DialogSubMenu):
             sw,
             self.wprogresslabel._label.font_size,
         )
-        self.addWidget(self.wprogresslabel)
 
         self.wprogressbar.size = lambda sw, sh: (
             sw * 0.8,
@@ -695,8 +677,6 @@ class AdvancedProgressSubMenu(ProgressSubMenu):
         self.wprogressbar = slider.AdvancedProgressbar(
             "progressbar",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (
                 sw / 2 - bw / 2,
                 self.wlabel_main.pos[1] - bh * 1.5,
@@ -705,14 +685,11 @@ class AdvancedProgressSubMenu(ProgressSubMenu):
             # label=label_progressbar # TODO: add label
             borderstyle=self.borderstyle,
         )
-        self.addWidget(self.wprogressbar)
 
         # Progress Label
         self.wprogresslabel = text.Label(
             "progresslabel",
             self,
-            self.window,
-            self.peng,
             pos=lambda sw, sh, bw, bh: (sw / 2 - bw / 2, self.wprogressbar.pos[1] + 8),
             size=[0, 0],
             label="",  # set by update_progressbar()
@@ -724,7 +701,6 @@ class AdvancedProgressSubMenu(ProgressSubMenu):
             sw,
             self.wprogresslabel._label.font_size,
         )
-        self.addWidget(self.wprogresslabel)
 
         self.wprogressbar.size = lambda sw, sh: (
             sw * 0.8,

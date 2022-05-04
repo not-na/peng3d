@@ -34,11 +34,13 @@ __all__ = [
     "ColorRGBAFloat",
     "BorderStyle",
     "BackgroundType",
+    "StyleValue",
     "DynPosition",
     "DynSize",
+    "DynTranslateable",
 ]
 
-from typing import List, NewType, Union, Callable, Tuple
+from typing import List, NewType, Union, Callable, Tuple, Type
 
 ColorRGB = List[int]
 """
@@ -58,21 +60,24 @@ ColorRGBAFloat = List[float]
 RGBA Color represented as four floats from zero to one.
 """
 
-BorderStyle = str  # NewType("BorderStyle", str)
+BorderStyle = Union[Type["Borderstyle"], str]
 """
 Border style identifier.
 
-Currently an alias of ``str``\\ , but may be changed to either an enum or custom type at
-a later time.
+Either a subclass of :py:class:`~peng3d.gui.style.Borderstyle()` or a string identifier.
 """
 
-BackgroundType = Union["Layer", Callable, list, tuple, "Background", str]
+BackgroundType = Union[
+    "Layer", Callable, list, tuple, "Background", str, Type["DEFER_BG"]
+]
 """
 Type encompassing all allowed types for backgrounds of menus and submenus.
 
 .. seealso::
     See :py:meth:`~peng3d.gui.SubMenu.setBackground()` for further details.
 """
+
+StyleValue = Union[float, str, BorderStyle]
 
 DynPosition = Union[
     List[float],
@@ -91,4 +96,12 @@ Dynamic size of a widget or container.
 
 Can be either a static size as a list or a callback function. May be ``None`` if the position
 is a :py:class:`~peng3d.layout.LayoutCell`\\ .
+"""
+
+DynTranslateable = Union[str, "_LazyTranslator"]
+"""
+A string that may be either fixed, translated or even dynamically translated.
+
+If a method or class accepts this type, it means that it supports dynamic translation
+of this attribute, unless indicated otherwise in its documentation.
 """

@@ -41,12 +41,20 @@ __all__ = [
 ]
 
 import warnings
+from typing import Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import SubMenu
+    import peng3d
+
 
 import pyglet
 from pyglet.gl import *
 
 from .widgets import Background, Widget
 from .. import util
+from ..util.types import *
+from .style import Style
 
 
 class LayeredWidget(Widget):
@@ -64,16 +72,19 @@ class LayeredWidget(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         layers=[],
     ):
-        super(LayeredWidget, self).__init__(name, submenu, window, peng, pos, size, bg)
+        super(LayeredWidget, self).__init__(
+            name, submenu, window, peng, pos=pos, size=size, bg=bg
+        )
 
         self.layers = []
         self._layers = {}
@@ -1037,17 +1048,20 @@ class LabelWidgetLayer(WidgetLayer):
         font=None,
         font_color=None,
         multiline=False,
+        style=None,
     ):
-        font = font if font is not None else widget.submenu.font
-        font_size = font_size if font_size is not None else widget.submenu.font_size
-        font_color = font_color if font_color is not None else widget.submenu.font_color
         super(LabelWidgetLayer, self).__init__(name, widget, z_index, border, offset)
+
+        self.style: Style = Style(parent=self.widget.style, overrides=style)
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
 
         self._label = pyglet.text.Label(
             str(label),
-            font_name=font,
-            font_size=font_size,
-            color=font_color,
+            font_name=self.font,
+            font_size=self.font_size,
+            color=self.font_color,
             x=0,
             y=0,
             batch=self.widget.submenu.batch2d,
@@ -1098,6 +1112,10 @@ class LabelWidgetLayer(WidgetLayer):
     def label(self, label):
         self._label.text = str(label)
 
+    font = util.default_property("style")
+    font_size = util.default_property("style")
+    font_color = util.default_property("style")
+
 
 class FormattedLabelWidgetLayer(WidgetLayer):
     """
@@ -1122,14 +1140,16 @@ class FormattedLabelWidgetLayer(WidgetLayer):
         offset=[0, 0],
         label="",
         font_size=None,
-        font="Arial",
+        font=None,
         font_color=None,
         multiline=False,
+        style=None,
     ):
         super(FormattedLabelWidgetLayer, self).__init__(
             name, widget, z_index, border, offset
         )
 
+        self.style: Style = Style(parent=self.widget.style, overrides=style)
         self.font_size = font_size
         self.font_name = font
         self.font_color = font_color
@@ -1150,7 +1170,7 @@ class FormattedLabelWidgetLayer(WidgetLayer):
             def f():
                 self.label = str(label)
 
-            self.peng.i18n.addAction("setlang", f)
+            self.widget.peng.i18n.addAction("setlang", f)
 
         self.on_redraw()
 
@@ -1194,6 +1214,10 @@ class FormattedLabelWidgetLayer(WidgetLayer):
     @label.setter
     def label(self, label):
         self._label.text = label
+
+    font = util.default_property("style")
+    font_size = util.default_property("style")
+    font_color = util.default_property("style")
 
 
 class HTMLLabelWidgetLayer(FormattedLabelWidgetLayer):

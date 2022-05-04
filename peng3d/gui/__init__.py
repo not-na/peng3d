@@ -29,8 +29,9 @@ __all__ = ["GUIMenu", "SubMenu", "GUILayer", "FakeWidget"]
 # import weakref
 # import sys
 import collections
+import warnings
 
-from typing import TYPE_CHECKING, Optional, Dict, List
+from typing import TYPE_CHECKING, Optional, Dict, List, Any
 
 if TYPE_CHECKING:
     import peng3d.window
@@ -53,6 +54,7 @@ from .layered import *
 from .layout import *
 from .. import util
 from ..util.types import *
+from .style import Style
 
 
 class FakeWidget(object):
@@ -83,23 +85,23 @@ class GUIMenu(Menu):
         self,
         name: str,
         window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
-        font: str = "Arial",
-        font_size: float = 16,
+        peng: Any = None,
+        font: Optional[str] = None,
+        font_size: Optional[float] = None,
         font_color: Optional[ColorRGBA] = None,
-        borderstyle: BorderStyle = "flat",
+        borderstyle: Optional[BorderStyle] = None,
+        style: Optional[Dict[str, StyleValue]] = None,
     ):
         super(GUIMenu, self).__init__(name, window, peng)
         pyglet.clock.schedule_interval(lambda dt: None, 1.0 / 30)
         self.submenus: Dict[str, "SubMenu"] = {}
         self.activeSubMenu: Optional[str] = None
 
-        self.font: str = font
-        self.font_size: float = font_size
-        self.font_color: ColorRGBA = (
-            font_color if font_color is not None else [62, 67, 73, 255]
-        )
-        self.borderstyle: BorderStyle = borderstyle
+        self.style: Style = Style(parent=self.peng.style, overrides=style)
+        self.style.override_if_not_none("font", font)
+        self.style.override_if_not_none("font_size", font_size)
+        self.style.override_if_not_none("font_color", font_color)
+        self.style.override_if_not_none("borderstyle", borderstyle)
 
         self.batch2d: pyglet.graphics.Batch = pyglet.graphics.Batch()
 
@@ -127,7 +129,16 @@ class GUIMenu(Menu):
         Adds a :py:class:`SubMenu` to this Menu.
 
         Note that nothing will be displayed unless a submenu is activated.
+
+        .. deprecated:: 1.12.0
+            This method is no longer needed in most cases, since submenus now register themselves.
         """
+        if submenu.name in self.submenus:
+            assert (
+                submenu is self.submenus[submenu.name]
+            ), "Tried to register two submenus with the same name"
+            return  # Ignore duplicate registration attempts
+
         self.submenus[submenu.name] = submenu
 
     def changeSubMenu(self, submenu: str) -> None:
@@ -214,6 +225,11 @@ class GUIMenu(Menu):
     def size(self) -> List[int]:
         return self.window.get_size()
 
+    font = util.default_property("style")
+    font_size = util.default_property("style")
+    font_color = util.default_property("style")
+    borderstyle = util.default_property("style")
+
     def on_resize(self, width, height):
         sx, sy = width, height
         self.bg_vlist.vertices = [0, 0, sx, 0, sx, sy, 0, sy]
@@ -239,7 +255,9 @@ class SubMenu(util.ActionDispatcher):
     """
     Sub Menu of the GUI system.
 
-    Each instance must be registered with their menu to work properly, see :py:meth:`GUIMenu.addSubMenu()`\\ .
+    .. versionchanged:: 1.12
+        Sub menus are automatically registered with their parent, using :py:meth:`~peng3d.gui.GUIMenu.addSubMenu()`
+        is no longer necessary.
 
     Actions supported by default:
 
@@ -255,28 +273,37 @@ class SubMenu(util.ActionDispatcher):
         self,
         name: str,
         menu: GUIMenu,
-        window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
+        window: Any = None,
+        peng: Any = None,
         font: Optional[str] = None,
         font_size: Optional[float] = None,
         font_color: Optional[ColorRGBA] = None,
         borderstyle: Optional[BorderStyle] = None,
+        style: Optional[Dict[str, StyleValue]] = None,
     ):
+        if window is not None:
+            warnings.warn(
+                "Passing window to a submenu is no longer necessary; the window parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,  # Needs to be rather high, since we are usually called a bit down the inheritance tree
+            )
+        if peng is not None:
+            warnings.warn(
+                "Passing peng to a submenu is no longer necessary; the peng parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,
+            )
+
         self.name: str = name
         self.menu: GUIMenu = menu
-        self.window: "peng3d.window.PengWindow" = window
-        self.peng: "peng3d.Peng" = peng
+        self.window: "peng3d.window.PengWindow" = menu.window
+        self.peng: "peng3d.Peng" = menu.peng
 
-        self.font: str = font if font is not None else self.menu.font
-        self.font_size: float = (
-            font_size if font_size is not None else self.menu.font_size
-        )
-        self.font_color: ColorRGBA = (
-            font_color if font_color is not None else self.menu.font_color
-        )
-        self.borderstyle: BorderStyle = (
-            borderstyle if borderstyle is not None else self.menu.borderstyle
-        )
+        self.style: Style = Style(parent=self.peng.style, overrides=style)
+        self.style.override_if_not_none("font", font)
+        self.style.override_if_not_none("font_size", font_size)
+        self.style.override_if_not_none("font_color", font_color)
+        self.style.override_if_not_none("borderstyle", borderstyle)
 
         self.widgets = collections.OrderedDict()
 
@@ -298,6 +325,8 @@ class SubMenu(util.ActionDispatcher):
         # For compatibility with Background classes
         self.pressed: bool = False
         self.is_hovering: bool = False
+
+        self.menu.addSubMenu(self)
 
     def draw(self) -> None:
         """
@@ -356,7 +385,21 @@ class SubMenu(util.ActionDispatcher):
         ``order_key`` optionally specifies the "layer" this widget will be on. Note that
         this does not work with batched widgets. All batched widgets will be drawn before
         widgets that use a custom draw() method.
+
+        .. deprecated:: 1.12.0
+            This method is no longer needed in most cases, since widgets now register themselves by default.
         """
+        assert (
+            widget.submenu is self
+        ), "Widget has to be registered with its submenu, not another"
+
+        if widget.name in self.widgets:
+            assert (
+                widget is self.widgets[widget.name]
+            ), "Tried to register widget with duplicate name"
+            # Just ignore duplicated registrations, since existing code will cause a lot of these
+            return
+
         self.widgets[widget.name] = widget
 
         if order_key not in self.widget_order:
@@ -465,6 +508,11 @@ class SubMenu(util.ActionDispatcher):
     def enabled(self) -> bool:
         return self.menu.submenu is self and self.window.menu is self.menu
 
+    font = util.default_property("style")
+    font_size = util.default_property("style")
+    font_color = util.default_property("style")
+    borderstyle = util.default_property("style")
+
     def send_form(self, ctx=None) -> bool:
         """
         Triggers whatever form data is entered to be sent.
@@ -524,11 +572,24 @@ class GUILayer(GUIMenu, Layer2D):
         self,
         name: str,
         menu: Menu,
-        window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
+        window: Optional["peng3d.window.PengWindow"] = None,
+        peng: Optional["peng3d.Peng"] = None,
     ):
-        Layer2D.__init__(self, menu, window, peng)
-        GUIMenu.__init__(self, menu.name, window, peng)
+        if window is not None:
+            warnings.warn(
+                "Passing window to a GUILayer is no longer necessary; the window parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,  # Needs to be rather high, since we are usually called a bit down the inheritance tree
+            )
+        if peng is not None:
+            warnings.warn(
+                "Passing peng to a GUILayer is no longer necessary; the peng parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,
+            )
+
+        Layer2D.__init__(self, menu, menu.window, menu.peng)
+        GUIMenu.__init__(self, name, menu.window, menu.peng)
 
     def draw(self) -> None:
         """

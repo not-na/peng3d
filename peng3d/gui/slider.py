@@ -35,10 +35,17 @@ __all__ = [
 import pyglet
 from pyglet.gl import *
 
-from .widgets import Background, Widget
-from .button import ButtonBackground
+from typing import Optional, Any, TYPE_CHECKING
 
-basestring = str  # for py2 compat, may get dropped at a later release
+if TYPE_CHECKING:
+    from . import SubMenu
+    import peng3d
+
+
+from .widgets import Background, Widget, DEFER_BG
+from .button import ButtonBackground
+from ..util import default
+from ..util.types import *
 
 
 class ProgressbarBackground(Background):
@@ -176,27 +183,36 @@ class Progressbar(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         nmin=0,
         nmax=100,
         n=0,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
         colors=[[240, 119, 70], [240, 119, 70]],
     ):
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
+        super(Progressbar, self).__init__(
+            name, submenu, window, peng, pos=pos, size=size, bg=default(bg, DEFER_BG)
+        )
+
+        self.borderstyle = borderstyle
+        self.style.override_if_not_none("border", border)
+
         self._nmin = nmin
         self._nmax = nmax
         self._n = n
         if bg is None:
-            bg = ProgressbarBackground(self, border, borderstyle, colors)
-        super(Progressbar, self).__init__(name, submenu, window, peng, pos, size, bg)
+            self.setBackground(
+                ProgressbarBackground(self, self.style.border, self.borderstyle, colors)
+            )
+
         self.redraw()
 
     @property
@@ -277,18 +293,19 @@ class AdvancedProgressbar(Progressbar):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
-        categories={},
+        categories=None,
         offset_nmin=0,
         offset_nmax=0,
         offset_n=0,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
         colors=[[240, 119, 70], [240, 119, 70]],
     ):
@@ -297,18 +314,18 @@ class AdvancedProgressbar(Progressbar):
             submenu,
             window,
             peng,
-            pos,
-            size,
-            bg,
-            offset_nmin,
-            offset_nmax,
-            offset_n,
-            border,
-            borderstyle,
-            colors,
+            pos=pos,
+            size=size,
+            bg=bg,
+            nmin=offset_nmin,
+            nmax=offset_nmax,
+            n=offset_n,
+            border=border,
+            borderstyle=borderstyle,
+            colors=colors,
         )
 
-        self.categories = categories
+        self.categories = default(categories, {})
         for cname, cdat in self.categories.items():
             assert len(cdat) == 3  # nmin,n,nmax
 
@@ -354,7 +371,7 @@ class AdvancedProgressbar(Progressbar):
         # sets the 3-tuple associated with the category
         # mostly used for category creation, since expressions of the form
         # widget[category][0]=1 will only use __getitem__ and modify data in-place
-        assert isinstance(key, basestring)  # py2 compat is done at the top
+        assert isinstance(key, str)
         assert len(value) == 3  # nmin,n,nmax
         self.categories[key] = list(
             value
@@ -363,7 +380,7 @@ class AdvancedProgressbar(Progressbar):
 
     def __delitem__(self, key):
         if key not in self.categories:
-            raise KeyError("No Category with name '%s'" % name)
+            raise KeyError("No Category with name '%s'" % key)
         del self.categories[key]
         self.redraw()
 
@@ -374,7 +391,7 @@ class AdvancedProgressbar(Progressbar):
         If the category already exists, a :py:exc:`KeyError` will be thrown. Use
         :py:meth:`updateCategory()` instead if you want to update a category.
         """
-        assert isinstance(name, basestring)  # py2 compat is done at the top
+        assert isinstance(name, str)
         if name in self.categories:
             raise KeyError("Category with name '%s' already exists" % name)
         self.categories[name] = [nmin, n, nmax]
@@ -480,27 +497,39 @@ class Slider(Progressbar):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=[100, 24],
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
         nmin=0,
         nmax=100,
         n=0,
-        handlesize=[16, 24],
+        handlesize=None,
     ):
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
-        self.handlesize = handlesize
-        if bg is None:
-            bg = SliderBackground(self, border, borderstyle)
         super(Slider, self).__init__(
-            name, submenu, window, peng, pos, size, bg, nmin, nmax, n
+            name,
+            submenu,
+            window,
+            peng,
+            pos=pos,
+            size=default(size, [100, 24]),
+            bg=default(bg, DEFER_BG),
+            nmin=nmin,
+            nmax=nmax,
+            n=n,
         )
+
+        self.borderstyle = borderstyle
+        self.style.override_if_not_none("border", border)
+        self.handlesize = default(handlesize, [16, 24])
+        if bg is None:
+            self.setBackground(SliderBackground(self, self.style.border, borderstyle))
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
         if not self.pressed:
@@ -554,38 +583,36 @@ class VerticalSlider(Slider):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=[24, 100],
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
-        border=[4, 4],
+        border=None,
         borderstyle=None,
-        nmin=0,
-        nmax=100,
-        n=0,
-        handlesize=[24, 16],
+        **kwargs,
     ):
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
-        if bg is None:
-            bg = VerticalSliderBackground(self, border, borderstyle)
         super(VerticalSlider, self).__init__(
             name,
             submenu,
             window,
             peng,
-            pos,
-            size,
-            bg,
-            border,
-            borderstyle,
-            nmin,
-            nmax,
-            n,
-            handlesize,
+            pos=pos,
+            size=default(size, [24, 100]),
+            bg=default(bg, DEFER_BG),
+            **kwargs,
         )
+
+        self.borderstyle = borderstyle
+        self.style.override_if_not_none("border", border)
+
+        if bg is None:
+            self.setBackground(
+                VerticalSliderBackground(self, self.style.border, self.borderstyle)
+            )
 
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
         if not self.pressed:

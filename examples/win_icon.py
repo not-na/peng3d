@@ -40,7 +40,7 @@ def createGUI():
     peng.resourceMgr.addCategory("gui")
 
     # Create GUI SubMenu and register it immediately
-    s_start = peng3d.gui.SubMenu("start", m_main, peng.window, peng)
+    s_start = peng3d.gui.SubMenu("start", m_main)
     m_main.addSubMenu(s_start)
 
     s_start.setBackground([242, 241, 240])
@@ -67,7 +67,7 @@ def main(args):
         caption_t="i18n:common.window.caption", resizable=True, vsync=True
     )
     # Create main GUI Menu and register it immediately
-    m_main = peng3d.GUIMenu("main", peng.window, peng)
+    m_main = peng3d.GUIMenu("main", peng.window)
     peng.window.addMenu(m_main)
 
     peng.cfg["graphics.min_size"] = [640, 480]

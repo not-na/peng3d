@@ -49,6 +49,8 @@ jobs:
             python3 -m tox -- --junitxml=test-results/junit.xml --x-display=$DISPLAY -v -m "not graphical"
       - store_test_results:
           path: test-results
+      - store_artifacts:
+          path: htmlcov
   test-3.7:
     <<: *test-template
     docker:

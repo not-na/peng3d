@@ -48,7 +48,7 @@ def createGUI():
     peng.resourceMgr.addCategory("gui")
 
     # Create GUI SubMenu and register it immediately
-    s_start = peng3d.gui.SubMenu("start", m_main, peng.window, peng)
+    s_start = peng3d.gui.SubMenu("start", m_main)
     m_main.addSubMenu(s_start)
 
     s_start.setBackground([242, 241, 240])
@@ -57,8 +57,6 @@ def createGUI():
     sm_advprog = peng3d.gui.AdvancedProgressSubMenu(
         "sm_advprog",
         m_main,
-        peng.window,
-        peng,
         label_progressbar=tl("i18n:gui_adv.progress.label"),
     )
     sm_advprog.setBackground([242, 241, 240])
@@ -73,8 +71,6 @@ def createGUI():
     ss_btn_advprog = peng3d.gui.Button(
         "btn_advprog",
         s_start,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (
             sw / 2.0 - bw / 2.0,
             sh / 2.0 - bh / 2.0 + bh * 1.2,
@@ -84,8 +80,6 @@ def createGUI():
         borderstyle="oldshadow",
     )
     ss_btn_advprog.addAction("click", sm_advprog.activate)
-
-    s_start.addWidget(ss_btn_advprog)
 
     # Set SubMenu as selected at the end, to avoid premature rendering with widgets missing
     # Should not happen normally, but still a good practice
@@ -107,7 +101,7 @@ def main(args):
         caption_t="i18n:common.window.caption", resizable=True, vsync=True
     )
     # Create main GUI Menu and register it immediately
-    m_main = peng3d.GUIMenu("main", peng.window, peng)
+    m_main = peng3d.GUIMenu("main", peng.window)
     peng.window.addMenu(m_main)
 
     def test_handler(symbol, modifiers, release):

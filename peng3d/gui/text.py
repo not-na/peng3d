@@ -43,8 +43,17 @@ try:
 except ImportError:
     HAVE_PYPERCLIP = False
 
-from .widgets import Background, Widget, mouse_aabb
+from typing import Optional, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from . import SubMenu
+    import peng3d
+
+
+from .widgets import Background, Widget, mouse_aabb, DEFER_BG
 from .button import ButtonBackground
+from ..util.types import *
+from .. import util
 
 
 class Label(Widget):
@@ -58,12 +67,13 @@ class Label(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         label="Label",
         font_size=None,
@@ -75,12 +85,11 @@ class Label(Widget):
         anchor_y="center",
         label_layer=1,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
-        super(Label, self).__init__(name, submenu, window, peng, pos, size, bg)
+        super(Label, self).__init__(
+            name, submenu, window, peng, pos=pos, size=size, bg=bg
+        )
 
-        self.font_name = font
+        self.font = font
         self.font_size = font_size
         self.font_color = font_color
 
@@ -98,15 +107,15 @@ class Label(Widget):
                 height=self.size[1],
                 multiline=multiline,
             )
-            self._label.font_name = font
-            self._label.font_size = font_size
-            self._label.font_color = font_color
+            self._label.font_name = self.font
+            self._label.font_size = self.font_size
+            self._label.font_color = self.font_color
         else:
             self._label = label_cls(
                 str(label),
-                font_name=font,
-                font_size=font_size,
-                color=font_color,
+                font_name=self.font,
+                font_size=self.font_size,
+                color=self.font_color,
                 x=0,
                 y=0,
                 batch=self.submenu.batch2d,
@@ -141,7 +150,7 @@ class Label(Widget):
         x, y = self.pos
 
         # Label position
-        self._label.font_name = self.font_name
+        self._label.font_name = self.font
         self._label.font_size = self.font_size
         self._label.font_color = self.font_color
 
@@ -321,12 +330,13 @@ class TextInput(Widget):
 
     def __init__(
         self,
-        name,
-        submenu,
-        window,
-        peng,
-        pos=None,
-        size=None,
+        name: Optional[str],
+        submenu: "SubMenu",
+        window: Any = None,
+        peng: Any = None,
+        *args,
+        pos: DynPosition,
+        size: DynSize = None,
         bg=None,
         text="",
         default="",
@@ -341,33 +351,39 @@ class TextInput(Widget):
         min_size=None,
         parent_bgcls=None,
         allow_returnkey=False,
-        *args,
         **kwargs,
     ):
-        font = font if font is not None else submenu.font
-        font_size = font_size if font_size is not None else submenu.font_size
-        font_color = font_color if font_color is not None else submenu.font_color
-        borderstyle = borderstyle if borderstyle is not None else submenu.borderstyle
-
-        self.peng = peng
-
         if allow_copypaste == "force" and not HAVE_PYPERCLIP:
             raise ValueError(
                 "%s with name %s requires Clipboard support, but Pyperclip is not installed"
                 % (self.__class__.__name__, name)
             )
 
+        super(TextInput, self).__init__(
+            name,
+            submenu,
+            window,
+            peng,
+            pos=pos,
+            size=size,
+            bg=util.default(bg, DEFER_BG),
+            min_size=min_size,
+        )
+
+        self.font = font
+        self.font_size = font_size
+        self.font_color = font_color
+        self.borderstyle = borderstyle
+
         if parent_bgcls is None and bg is None:
             # Standard background
-            bg = TextInputBackground(self, border, borderstyle)
+            self.setBackground(TextInputBackground(self, border, self.borderstyle))
         elif parent_bgcls is not None and bg is None:
             # Semi-customized background with parent class
             self.border = border
-            bg = CustomTextInputBackground(self, cls=parent_bgcls, *args, **kwargs)
-
-        super(TextInput, self).__init__(
-            name, submenu, window, peng, pos, size, bg, min_size
-        )
+            self.setBackground(
+                CustomTextInputBackground(self, cls=parent_bgcls, *args, **kwargs)
+            )
 
         self.allow_returnkey = allow_returnkey
 
@@ -380,9 +396,9 @@ class TextInput(Widget):
 
         self._text = pyglet.text.Label(
             str(text),
-            font_name=font,
-            font_size=font_size,
-            color=font_color,
+            font_name=self.font,
+            font_size=self.font_size,
+            color=self.font_color,
             x=0,
             y=0,
             batch=None,  # self.submenu.batch2d,
@@ -393,8 +409,8 @@ class TextInput(Widget):
         )
         self._default = pyglet.text.Label(
             str(default),
-            font_name=font,
-            font_size=font_size,
+            font_name=self.font,
+            font_size=self.font_size,
             color=font_color_default,
             x=0,
             y=0,
