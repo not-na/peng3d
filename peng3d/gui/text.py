@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     import peng3d
 
 
-from .widgets import Background, Widget, mouse_aabb
+from .widgets import Background, Widget, mouse_aabb, DEFER_BG
 from .button import ButtonBackground
 from ..util.types import *
 from .. import util
@@ -353,30 +353,37 @@ class TextInput(Widget):
         allow_returnkey=False,
         **kwargs,
     ):
-        self.peng = peng
-
         if allow_copypaste == "force" and not HAVE_PYPERCLIP:
             raise ValueError(
                 "%s with name %s requires Clipboard support, but Pyperclip is not installed"
                 % (self.__class__.__name__, name)
             )
 
-        if parent_bgcls is None and bg is None:
-            # Standard background
-            bg = TextInputBackground(self, border, borderstyle)
-        elif parent_bgcls is not None and bg is None:
-            # Semi-customized background with parent class
-            self.border = border
-            bg = CustomTextInputBackground(self, cls=parent_bgcls, *args, **kwargs)
-
         super(TextInput, self).__init__(
-            name, submenu, window, peng, pos=pos, size=size, bg=bg, min_size=min_size
+            name,
+            submenu,
+            window,
+            peng,
+            pos=pos,
+            size=size,
+            bg=util.default(bg, DEFER_BG),
+            min_size=min_size,
         )
 
         self.font = font
         self.font_size = font_size
         self.font_color = font_color
         self.borderstyle = borderstyle
+
+        if parent_bgcls is None and bg is None:
+            # Standard background
+            self.setBackground(TextInputBackground(self, border, self.borderstyle))
+        elif parent_bgcls is not None and bg is None:
+            # Semi-customized background with parent class
+            self.border = border
+            self.setBackground(
+                CustomTextInputBackground(self, cls=parent_bgcls, *args, **kwargs)
+            )
 
         self.allow_returnkey = allow_returnkey
 

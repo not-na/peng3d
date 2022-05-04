@@ -85,7 +85,7 @@ class GUIMenu(Menu):
         self,
         name: str,
         window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
+        peng: Any = None,
         font: Optional[str] = None,
         font_size: Optional[float] = None,
         font_color: Optional[ColorRGBA] = None,
@@ -129,7 +129,16 @@ class GUIMenu(Menu):
         Adds a :py:class:`SubMenu` to this Menu.
 
         Note that nothing will be displayed unless a submenu is activated.
+
+        .. deprecated:: 1.12.0
+            This method is no longer needed in most cases, since submenus now register themselves.
         """
+        if submenu.name in self.submenus:
+            assert (
+                submenu is self.submenus[submenu.name]
+            ), "Tried to register two submenus with the same name"
+            return  # Ignore duplicate registration attempts
+
         self.submenus[submenu.name] = submenu
 
     def changeSubMenu(self, submenu: str) -> None:
@@ -246,7 +255,9 @@ class SubMenu(util.ActionDispatcher):
     """
     Sub Menu of the GUI system.
 
-    Each instance must be registered with their menu to work properly, see :py:meth:`GUIMenu.addSubMenu()`\\ .
+    .. versionchanged:: 1.12
+        Sub menus are automatically registered with their parent, using :py:meth:`~peng3d.gui.GUIMenu.addSubMenu()`
+        is no longer necessary.
 
     Actions supported by default:
 
@@ -315,6 +326,8 @@ class SubMenu(util.ActionDispatcher):
         self.pressed: bool = False
         self.is_hovering: bool = False
 
+        self.menu.addSubMenu(self)
+
     def draw(self) -> None:
         """
         Draws the submenu and its background.
@@ -376,7 +389,14 @@ class SubMenu(util.ActionDispatcher):
         .. deprecated:: 1.12.0
             This method is no longer needed in most cases, since widgets now register themselves by default.
         """
+        assert (
+            widget.submenu is self
+        ), "Widget has to be registered with its submenu, not another"
+
         if widget.name in self.widgets:
+            assert (
+                widget is self.widgets[widget.name]
+            ), "Tried to register widget with duplicate name"
             # Just ignore duplicated registrations, since existing code will cause a lot of these
             return
 
@@ -552,11 +572,24 @@ class GUILayer(GUIMenu, Layer2D):
         self,
         name: str,
         menu: Menu,
-        window: "peng3d.window.PengWindow",
-        peng: "peng3d.Peng",
+        window: Optional["peng3d.window.PengWindow"] = None,
+        peng: Optional["peng3d.Peng"] = None,
     ):
-        Layer2D.__init__(self, menu, window, peng)
-        GUIMenu.__init__(self, menu.name, window, peng)
+        if window is not None:
+            warnings.warn(
+                "Passing window to a GUILayer is no longer necessary; the window parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,  # Needs to be rather high, since we are usually called a bit down the inheritance tree
+            )
+        if peng is not None:
+            warnings.warn(
+                "Passing peng to a GUILayer is no longer necessary; the peng parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,
+            )
+
+        Layer2D.__init__(self, menu, menu.window, menu.peng)
+        GUIMenu.__init__(self, name, menu.window, menu.peng)
 
     def draw(self) -> None:
         """

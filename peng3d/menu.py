@@ -24,6 +24,7 @@
 
 __all__ = ["BasicMenu", "Menu"]
 
+import warnings
 import weakref
 import inspect
 
@@ -49,10 +50,17 @@ class BasicMenu(ActionDispatcher):
 
     """
 
-    def __init__(self, name, window, peng):
+    def __init__(self, name, window, peng=None):
+        if peng is not None:
+            warnings.warn(
+                "Passing peng to a menu is no longer necessary; the peng parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                4,
+            )
+
         self.name = name
         self.window = window
-        self.peng = peng
+        self.peng = window.peng
 
         self.eventHandlers = {}
 
@@ -126,7 +134,7 @@ class Menu(BasicMenu):
     This subclass overrides the draw and __init__ method, so be sure to call them if you override them.
     """
 
-    def __init__(self, name, window, peng):
+    def __init__(self, name, window, peng=None):
         super(Menu, self).__init__(name, window, peng)
         self.layers = []
 

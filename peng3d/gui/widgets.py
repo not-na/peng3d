@@ -207,9 +207,13 @@ class BasicWidget(ActionDispatcher):
     - ``hover_end`` is called after the cursor leaves the widget
     - ``statechanged`` is called every time the visual state of the widget should change
 
-    .. deprecated:: 1.12.0
+    .. deprecated:: 1.12
         The ``window`` and ``peng`` parameters are deprecated and will be removed in peng3d 2.0.
         They are no longer needed and should be removed from existing code.
+
+    .. versionchanged:: 1.12
+        It is no longer necessary to register widgets using :py:meth:`~peng3d.gui.SubMenu.addWidget()`\\ ,
+        widget registration is now automatically performed by widgets themselves.
     """
 
     IS_CLICKABLE: bool = False
