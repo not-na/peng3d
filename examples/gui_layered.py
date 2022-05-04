@@ -38,7 +38,7 @@ def createGUI():
     peng.resourceMgr.addCategory("gui")
 
     # Create GUI SubMenu and register it immediately
-    s_start = peng3d.gui.SubMenu("start", m_main, peng.window, peng)
+    s_start = peng3d.gui.SubMenu("start", m_main)
     m_main.addSubMenu(s_start)
 
     s_start.setBackground([242, 241, 240])
@@ -47,13 +47,10 @@ def createGUI():
     btn_ex1 = peng3d.gui.LayeredWidget(
         "btn_ex1",
         s_start,
-        peng.window,
-        peng,
         # at the center
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0),
         size=lambda sw, sh: (sw / 2, sh / 2),
     )
-    s_start.addWidget(btn_ex1)
 
     # Dynamic Button-like layer using images for different states
     # btn_ex1.addLayer(peng3d.gui.ImageButtonWidgetLayer("imgbtn",btn_ex1,
@@ -130,7 +127,7 @@ def main(args):
     # Create Window with caption
     peng.createWindow(caption="Peng3d Example", resizable=True, vsync=True)
     # Create main GUI Menu and register it immediately
-    m_main = peng3d.GUIMenu("main", peng.window, peng)
+    m_main = peng3d.GUIMenu("main", peng.window)
     peng.window.addMenu(m_main)
 
     # Actually creates the GUI

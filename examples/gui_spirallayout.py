@@ -45,12 +45,9 @@ def add_horizontal(submenu, parent, level):
     btn = peng3d.gui.Button(
         f"btn_l{level}",
         submenu,
-        peng.window,
-        peng,
         pos=l.get_cell([x < 2, 0], [1, 1]),
         label=f"L{level}H",
     )
-    submenu.addWidget(btn)
 
     if level + 1 < MAX_LEVELS:
         add_vertical(submenu, l.get_cell([x >= 2, 0], [1, 1]), level + 1)
@@ -63,12 +60,9 @@ def add_vertical(submenu, parent, level):
     btn = peng3d.gui.Button(
         f"btn_l{level}",
         submenu,
-        peng.window,
-        peng,
         pos=l.get_cell([0, x < 2], [1, 1]),
         label=f"L{level}V",
     )
-    submenu.addWidget(btn)
 
     if level + 1 < MAX_LEVELS:
         add_horizontal(submenu, l.get_cell([0, x >= 2], [1, 1]), level + 1)
@@ -84,11 +78,8 @@ def createGUI():
     s_start = peng3d.gui.SubMenu(
         "start",
         m_main,
-        peng.window,
-        peng,
         borderstyle="oldshadow",
     )
-    m_main.addSubMenu(s_start)
 
     s_start.setBackground([242, 241, 240])
 
@@ -118,7 +109,7 @@ def main(args):
     # Create Window with caption
     peng.createWindow(caption="Peng3d Example", resizable=True, vsync=True)
     # Create main GUI Menu and register it immediately
-    m_main = peng3d.GUIMenu("main", peng.window, peng)
+    m_main = peng3d.GUIMenu("main", peng.window)
     peng.window.addMenu(m_main)
 
     def test_handler(symbol, modifiers, release):

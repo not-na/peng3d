@@ -45,15 +45,13 @@ def createGUI(main, game):
     peng.resourceMgr.addCategory("gui")
 
     # Titlescreen
-    title = peng3d.gui.SubMenu("titlescreen", main, peng.window, peng)
+    title = peng3d.gui.SubMenu("titlescreen", main)
     title.setBackground([242, 241, 240])
 
     # Playbtn
     playbtn = peng3d.gui.Button(
         "playbtn",
         title,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -68,8 +66,6 @@ def createGUI(main, game):
     optionsbtn = peng3d.gui.Button(
         "optionsbtn",
         title,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0 - 120),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -83,8 +79,6 @@ def createGUI(main, game):
     testbtn = peng3d.gui.ImageButton(
         "testbtn",
         title,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0 + 120),
         size=[100, 100],
         # size=lambda w,h: (w*.10,h*.10),
@@ -113,8 +107,6 @@ def createGUI(main, game):
     testslider = peng3d.gui.Slider(
         "testslider",
         title,
-        peng.window,
-        peng,
         pos=[0, 300],
         size=[255, 24],
         borderstyle="oldshadow",
@@ -132,8 +124,6 @@ def createGUI(main, game):
     vertslider = peng3d.gui.VerticalSlider(
         "vertslider",
         title,
-        peng.window,
-        peng,
         pos=[300, 0],
         size=[24, 255],
         borderstyle="oldshadow",
@@ -152,8 +142,6 @@ def createGUI(main, game):
     testlabel = peng3d.gui.Label(
         "testlabel",
         title,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 + 70, sh / 2.0 - bh / 2.0),
         size=[100, 24],
         label="Test Label",
@@ -165,8 +153,6 @@ def createGUI(main, game):
     testinput = peng3d.gui.TextInput(
         "testinput",
         title,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 + 70, sh / 2.0 - bh / 2.0 + bh + 20),
         size=[100, 32],
         borderstyle="oldshadow",
@@ -181,8 +167,6 @@ def createGUI(main, game):
     testcontainer = peng3d.gui.ScrollableContainer(
         "testcontainer",
         title,
-        peng.window,
-        peng,
         pos=[100, 100],
         size=[300, 300],
         borderstyle="oldshadow",
@@ -195,8 +179,6 @@ def createGUI(main, game):
     tc_label = peng3d.gui.Label(
         "tc_label",
         testcontainer,
-        peng.window,
-        peng,
         pos=[0, 0],
         size=[100, 24],
         label="TC0",
@@ -206,8 +188,6 @@ def createGUI(main, game):
     tc_label2 = peng3d.gui.Label(
         "tc_label2",
         testcontainer,
-        peng.window,
-        peng,
         pos=[0, 100],
         size=[100, 24],
         label="TC100",
@@ -217,8 +197,6 @@ def createGUI(main, game):
     tc_label3 = peng3d.gui.Label(
         "tc_label3",
         testcontainer,
-        peng.window,
-        peng,
         pos=[0, 200],
         size=[100, 24],
         label="TC200",
@@ -228,8 +206,6 @@ def createGUI(main, game):
     tc_label4 = peng3d.gui.Label(
         "tc_label4",
         testcontainer,
-        peng.window,
-        peng,
         pos=[0, 300],
         size=[100, 24],
         label="TC300",
@@ -239,8 +215,6 @@ def createGUI(main, game):
     tc_label5 = peng3d.gui.Label(
         "tc_label5",
         testcontainer,
-        peng.window,
-        peng,
         pos=[0, 400],
         size=[100, 24],
         label="TC400",
@@ -250,15 +224,13 @@ def createGUI(main, game):
     main.addSubMenu(title)
 
     # Options screen
-    options = peng3d.gui.SubMenu("options", main, peng.window, peng)
+    options = peng3d.gui.SubMenu("options", main)
     options.setBackground([242, 241, 240])
 
     # Backbtn
     backbtn = peng3d.gui.Button(
         "backbtn",
         options,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0 - 120),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -274,17 +246,15 @@ def createGUI(main, game):
 
     # In-Game HUD/Pause Menu
 
-    gamel = peng3d.gui.GUILayer("game", game, peng.window, peng)
+    gamel = peng3d.gui.GUILayer("game", game)
 
-    pause = peng3d.gui.SubMenu("pause", gamel, peng.window, peng)
+    pause = peng3d.gui.SubMenu("pause", gamel)
     pause.setBackground([242, 241, 240, 120])
 
     # Continuebtn
     continuebtn = peng3d.gui.Button(
         "continuebtn",
         pause,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -296,7 +266,7 @@ def createGUI(main, game):
 
     gamel.addSubMenu(pause)
 
-    hud = peng3d.gui.SubMenu("hud", gamel, peng.window, peng)
+    hud = peng3d.gui.SubMenu("hud", gamel)
     hud.setBackground("blank")
 
     gamel.addSubMenu(hud)
@@ -334,38 +304,46 @@ def main(args):
         playbtn._label._update()
 
     peng.keybinds.add("f3", "testpy:handler.test", test_handler)
+
     # Fog and clear color config
     peng.cfg["graphics.clearColor"] = [0.5, 0.69, 1.0, 1.0]
     peng.cfg["graphics.fogSettings"]["enable"] = True
     peng.cfg["graphics.fogSettings"]["start"] = 4
     peng.cfg["graphics.fogSettings"]["end"] = 8
+
     # Creates world/cam/view/player
     world = peng3d.StaticWorld(peng, TERRAIN, COLORS)
     # player = peng3d.actor.player.FirstPersonPlayer(peng,world)
     player = peng3d.actor.player.BasicPlayer(peng, world)
+
     # Player controllers
     player.addController(peng3d.actor.player.FourDirectionalMoveController(player))
     player.addController(peng3d.actor.player.EgoMouseRotationalController(player))
     player.addController(peng3d.actor.player.BasicFlightController(player))
+
     # Player view/camera
     world.addActor(player)
     c = peng3d.CameraActorFollower(world, "cam1", player)
     world.addCamera(c)
     v = peng3d.WorldView(world, "view1", "cam1")
     world.addView(v)
+
     # Creates menu/layer
-    mgame = peng3d.Menu("game", peng.window, peng)
+    mgame = peng3d.Menu("game", peng.window)
     mgame.addWorld(world)
     peng.window.addMenu(mgame)
     l = peng3d.LayerWorld(mgame, peng.window, peng, world, "view1")
     mgame.addLayer(l)
+
     # Create Main Menu
-    mmain = peng3d.GUIMenu("main", peng.window, peng)
+    mmain = peng3d.GUIMenu("main", peng.window)
     peng.window.addMenu(mmain)
     createGUI(mmain, mgame)
+
     # Switch to the main menu
     peng.window.changeMenu("main")
     # Done!
+
     if CONSOLE:
         # Starts a console in seperate Thread, allows interactive debugging and testing stuff easily
         t = threading.Thread(
@@ -373,6 +351,7 @@ def main(args):
         )
         t.daemon = True
         t.start()
+
     # Starts the main loop
     peng.run()
     return 0

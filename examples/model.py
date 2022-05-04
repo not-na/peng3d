@@ -50,15 +50,13 @@ def createGUI(main, game):
     peng.resourceMgr.addCategory("gui")
 
     # Titlescreen
-    title = peng3d.gui.SubMenu("titlescreen", main, peng.window, peng)
+    title = peng3d.gui.SubMenu("titlescreen", main)
     title.setBackground([242, 241, 240])
 
     # Playbtn
     playbtn = peng3d.gui.Button(
         "playbtn",
         title,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -70,14 +68,11 @@ def createGUI(main, game):
     playbtn.addAction(
         "click", lambda: player.controlleroptions.__setitem__("enabled", True)
     )
-    title.addWidget(playbtn)
 
     # Optionsbtn
     optionsbtn = peng3d.gui.Button(
         "optionsbtn",
         title,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0 - 120),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -85,20 +80,15 @@ def createGUI(main, game):
     )
     # Changes submenu
     optionsbtn.addAction("click", main.changeSubMenu, "options")
-    title.addWidget(optionsbtn)
-
-    main.addSubMenu(title)
 
     # Options screen
-    options = peng3d.gui.SubMenu("options", main, peng.window, peng)
+    options = peng3d.gui.SubMenu("options", main)
     options.setBackground([242, 241, 240])
 
     # Backbtn
     backbtn = peng3d.gui.Button(
         "backbtn",
         options,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0 - 120),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -106,25 +96,20 @@ def createGUI(main, game):
     )
     # Changes submenu
     backbtn.addAction("click", main.changeSubMenu, "titlescreen")
-    options.addWidget(backbtn)
-
-    main.addSubMenu(options)
 
     main.changeSubMenu("titlescreen")
 
     # In-Game HUD/Pause Menu
 
-    gamel = peng3d.gui.GUILayer("game", game, peng.window, peng)
+    gamel = peng3d.gui.GUILayer("game", game)
 
-    pause = peng3d.gui.SubMenu("pause", gamel, peng.window, peng)
+    pause = peng3d.gui.SubMenu("pause", gamel)
     pause.setBackground([242, 241, 240, 120])
 
     # Continuebtn
     continuebtn = peng3d.gui.Button(
         "continuebtn",
         pause,
-        peng.window,
-        peng,
         pos=lambda sw, sh, bw, bh: (sw / 2.0 - bw / 2.0, sh / 2.0 - bh / 2.0),
         size=[100, 100],
         borderstyle="oldshadow",
@@ -132,14 +117,9 @@ def createGUI(main, game):
     )
     # Returns to the game
     continuebtn.addAction("click", esc_toggle, 0, 0, False)
-    pause.addWidget(continuebtn)
 
-    gamel.addSubMenu(pause)
-
-    hud = peng3d.gui.SubMenu("hud", gamel, peng.window, peng)
+    hud = peng3d.gui.SubMenu("hud", gamel)
     hud.setBackground("blank")
-
-    gamel.addSubMenu(hud)
 
     gamel.changeSubMenu("hud")
     game.addLayer(gamel)
@@ -172,7 +152,7 @@ def main(args):
     # Peng engine instance creation and creating the window
     peng = peng3d.Peng()
     peng.createWindow(caption="Peng3d GUI Test Project", resizable=True, vsync=True)
-    peng.window.addMenu(peng3d.Menu("main", peng.window, peng))
+    # peng.window.addMenu(peng3d.Menu("main", peng.window, peng))
     createTexBin()
     loadModel()
     # peng.window.toggle_exclusivity()
@@ -227,14 +207,14 @@ def main(args):
     createTestEntity()
 
     # Creates menu/layer
-    mgame = peng3d.Menu("game", peng.window, peng)
+    mgame = peng3d.Menu("game", peng.window)
     mgame.addWorld(world)
     peng.window.addMenu(mgame)
     l = peng3d.LayerWorld(mgame, peng.window, peng, world, "view1")
     mgame.addLayer(l)
 
     # Create Main Menu
-    mmain = peng3d.GUIMenu("main", peng.window, peng)
+    mmain = peng3d.GUIMenu("main", peng.window)
     peng.window.addMenu(mmain)
     createGUI(mmain, mgame)
 
