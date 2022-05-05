@@ -36,6 +36,8 @@ import pyglet
 from pyglet.gl import *
 from pyglet.window import key
 
+from ..util import default_property
+
 try:
     import pyperclip
 
@@ -293,7 +295,7 @@ class CustomTextInputBackground(Background):
 
     @property
     def border(self):
-        return self.widget.border
+        return self.widget.style.border
 
     def __del__(self):
         del self.parent
@@ -380,7 +382,7 @@ class TextInput(Widget):
             self.setBackground(TextInputBackground(self, border, self.borderstyle))
         elif parent_bgcls is not None and bg is None:
             # Semi-customized background with parent class
-            self.border = border
+            self.style.border = border
             self.setBackground(
                 CustomTextInputBackground(self, cls=parent_bgcls, *args, **kwargs)
             )
@@ -663,6 +665,8 @@ class TextInput(Widget):
     @default.setter
     def default(self, default):
         self._default.text = str(default)
+
+    borderstyle = default_property("style")
 
 
 class PasswordInput(TextInput):

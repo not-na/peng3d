@@ -46,7 +46,7 @@ from pyglet.gl import *
 from .widgets import Background, Widget, mouse_aabb, DEFER_BG
 from . import style
 from ..util.types import *
-from ..util import default
+from ..util import default, default_property
 
 LABEL_FONT_SIZE = 16
 
@@ -323,6 +323,8 @@ class Button(Widget):
         # TODO: make this work with changing languages if previous label was not dynamic
         self._label.text = str(label)
         self.redraw()  # necessary for size/pos that depends on label size
+
+    borderstyle = default_property("style")
 
     def getContentSize(self):
         l = [self._label.content_width, self._label.content_height]

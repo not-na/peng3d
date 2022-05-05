@@ -39,6 +39,7 @@ from .slider import VerticalSlider
 from .button import ButtonBackground
 from ..layer import Layer
 from ..util.types import *
+from ..util import default_property
 
 
 class ContainerButtonBackground(ButtonBackground):
@@ -159,6 +160,8 @@ class Container(Widget):
     def clickable(self, value):
         self._enabled = value
         self.redraw()
+
+    borderstyle = default_property("style")
 
     def addWidget(self, widget, order_key=0):
         """

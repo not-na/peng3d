@@ -33,8 +33,22 @@ __all__ = [
     "DEFAULT_STYLE",
 ]
 
+import collections
+import inspect
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Type, TYPE_CHECKING, Optional, Union, Any, List
+from typing import (
+    Dict,
+    Type,
+    TYPE_CHECKING,
+    Optional,
+    Union,
+    Any,
+    List,
+    Set,
+    overload,
+    Callable,
+    NamedTuple,
+)
 
 from .. import util
 from ..util.types import *
@@ -255,6 +269,11 @@ def norm_borderstyle(borderstyle: Union[str, Type[Borderstyle]]) -> Type[Borders
         raise TypeError("Invalid border style!")
 
 
+class StyleWatcher(NamedTuple):
+    selector: str
+    callback: Union[Callable[[StyleValue], Any], Callable[[], Any]]
+
+
 class Style(object):
     """
     Core of the hierarchical style system.
@@ -290,8 +309,9 @@ class Style(object):
     of a :py:class:`Style` instance, e.g. ``style.font``\\ . Note that this only allows
     accesses to style attributes whose name is a valid python identifier and that are
     not in the list of reserved attributes, stored in the class attribute
-    :py:attr:`Style.ATTRIBUTES`\\ . This access mode also supports read, write and delete
-    accesses.
+    :py:attr:`Style.ATTRIBUTES`\\ . It is also not possible to access style attributes that
+    start with an underscore or are methods of :py:class:`Style` this way. This access
+    mode also supports read, write and delete accesses.
 
     Note that unlike the helpers :py:class:`~peng3d.util.default_property` and
     :py:class:`~peng3d.util.default`\\ , :py:class:`Style` does not reset an override
@@ -309,10 +329,16 @@ class Style(object):
     support being moved between different submenus or even menus.
     """
 
-    ATTRIBUTES: List[str] = ["parent", "_overrides", "ATTRIBUTES"]
+    ATTRIBUTES: List[str] = [
+        "parent",
+        "ATTRIBUTES",
+    ]
     """
     Internal list of attributes that are reserved and cannot be used for styles via
     attribute access.
+    
+    This list may be extended in the future. Note that all attributes that start with an
+    underscore are also implicitly reserved.
     """
 
     def __init__(
@@ -321,6 +347,13 @@ class Style(object):
         overrides: Optional[Dict[str, StyleValue]] = None,
     ) -> None:
         self.parent = parent
+
+        if isinstance(parent, Style):
+            # Register with parent to be notified of changes
+            parent._children.add(self)
+
+        self._children: Set["Style"] = set()
+        self._watchers: Set[StyleWatcher] = set()
 
         self._overrides: Dict[str, StyleValue] = util.default(overrides, {})
 
@@ -331,12 +364,21 @@ class Style(object):
         return self.parent[item]
 
     def __setitem__(self, key: str, value: StyleValue):
+        oldval = self.get(key)
+        contained = key in self
         self._overrides[key] = value
+
+        if not contained or oldval != value:
+            self._trigger_watchers(key, oldval)
 
     def __delitem__(self, key: str) -> None:
         # Only remove if overridden, reduces user code complexity
         if key in self._overrides:
+            oldval = self._overrides[key]
             del self._overrides[key]
+
+            if oldval != self[key]:
+                self._trigger_watchers(key, oldval)
 
     def __contains__(self, item: str) -> bool:
         return item in self._overrides or item in self.parent
@@ -345,10 +387,12 @@ class Style(object):
         return self[item]
 
     def __setattr__(self, key: str, value) -> None:
-        if key in self.ATTRIBUTES:
+        if (
+            key[0] == "_" or key in self.ATTRIBUTES
+        ):  # We use key[0] == "_" because it much faster (over 3x)
             super().__setattr__(key, value)
         else:
-            self._overrides[key] = value
+            self[key] = value
 
     def update(
         self, _overrides: Optional[Dict[str, StyleValue]] = None, **kwargs
@@ -371,8 +415,20 @@ class Style(object):
         :rtype: None
         """
         if _overrides is not None:
-            self._overrides.update(_overrides)
-        self._overrides.update(kwargs)
+            # self._overrides.update(_overrides)
+            for key, val in _overrides.items():
+                if key not in kwargs:  # To prevent double triggers
+                    oldval = self._overrides[key]
+                    self._overrides[key] = val
+                    if oldval != val:
+                        self._trigger_watchers(key, oldval)
+
+        # self._overrides.update(kwargs)
+        for key, val in kwargs.items():
+            oldval = self._overrides[key]
+            self._overrides[key] = val
+            if oldval != val:
+                self._trigger_watchers(key, oldval)
 
     def is_overridden(self, key: str) -> bool:
         """
@@ -411,6 +467,103 @@ class Style(object):
         """
         if value is not None:
             self[key] = value
+
+    def get(
+        self, key: str, default: Optional[StyleValue] = None
+    ) -> Optional[StyleValue]:
+        """
+        Returns the effective value of the given key or the given default if it couldn't
+        be found.
+        """
+        if key in self._overrides:
+            return self._overrides[key]
+        return self.parent.get(key, default)
+
+    @overload
+    def add_watcher(self, watcher: StyleWatcher) -> None:
+        pass
+
+    @overload
+    def add_watcher(
+        self,
+        selector: str,
+        callback: Union[Callable[[StyleValue], Any], Callable[[], Any]],
+    ) -> None:
+        pass
+
+    def add_watcher(self, watch_sel, callback=None):
+        """
+        Adds a watcher for specific changes in local styles.
+
+        Watchers can be used to automatically update widgets or other visual elements
+        whenever the effective value of a style attribute changes. This includes scenarios
+        where the (not locally overridden) style attribute of the parent changes, causing
+        a change in the effective local value.
+
+        The watcher system tries its best to remove unnecessary triggers and double-triggers,
+        but they may still occur under some circumstances. Thus, it is recommended to
+        only use (semi-)idempotent functions as callbacks. A popular example for a suitable
+        callback would be the `redraw()` method of widgets, since it will only queue
+        the actual redraw and thus prevents extraneous redraws.
+
+        This method accepts either an instance of :py:class:`StyleWatcher` or a selector
+        string followed by a callback function.
+
+        Selectors are strings that describe what changes to listen to. Currently, selectors
+        are quite rudimentary, but it is planned to add a more sophisticated system later.
+
+        The special ``*`` selector matches all changes and will thus be triggered on any
+        change of any local attribute.
+
+        Alternatively, all other strings will trigger on the change of a style attribute
+        with their exact name.
+
+        Callback functions can either take no arguments or the old value of the style
+        attribute as a single argument.
+        """
+        if isinstance(watch_sel, StyleWatcher):
+            sw = watch_sel
+        elif isinstance(watch_sel, str) and callback is not None:
+            sw = StyleWatcher(watch_sel, callback)
+        else:
+            raise TypeError("Invalid argument combination to add_watcher()")
+
+        sig = inspect.signature(sw.callback)
+        if len(sig.parameters) > 1:
+            raise TypeError(
+                f"Callback function must have exactly zero or one parameters, not {len(sig.parameters)}!"
+            )
+        # Does not cover the case of a single keyword-only argument, which would pass the
+        # check, but cause an error at callback-time. Such functions are relatively unusual
+        # and thus not checked for
+
+        self._watchers.add(sw)
+
+    def _trigger_watchers(
+        self, key: str, oldval: StyleValue, from_parent: Optional[bool] = False
+    ):
+        if from_parent and (oldval == self.get(key) or key not in self):
+            # Skip if parent change is irrelevant for us
+            # Could be either due to a local override or override in some intermediary
+            return
+
+        for selector, callback in self._watchers:
+            match = (selector == key) or (selector == "*")
+
+            # TODO: extend selector features
+
+            if match:
+                sig = inspect.signature(callback)
+                if len(sig.parameters) == 1:
+                    callback(oldval)
+                elif len(sig.parameters) == 0:
+                    callback()
+                else:
+                    # Should have been caught earlier already, but just in case
+                    raise TypeError("Invalid callback")
+
+        for child in self._children:
+            child._trigger_watchers(key, oldval, from_parent=True)
 
 
 DEFAULT_STYLE: Dict[str, StyleValue] = {

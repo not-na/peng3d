@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 
 from .widgets import Background, Widget, DEFER_BG
 from .button import ButtonBackground
-from ..util import default
+from ..util import default, default_property
 from ..util.types import *
 
 
@@ -267,6 +267,8 @@ class Progressbar(Widget):
     def value(self, value):
         # May be a tiny bit slower, but safer if n is changed
         self.n = value
+
+    borderstyle = default_property("style")
 
 
 class AdvancedProgressbar(Progressbar):
@@ -523,10 +525,10 @@ class Slider(Progressbar):
             nmin=nmin,
             nmax=nmax,
             n=n,
+            border=border,
+            borderstyle=borderstyle,
         )
 
-        self.borderstyle = borderstyle
-        self.style.override_if_not_none("border", border)
         self.handlesize = default(handlesize, [16, 24])
         if bg is None:
             self.setBackground(SliderBackground(self, self.style.border, borderstyle))
@@ -603,11 +605,10 @@ class VerticalSlider(Slider):
             pos=pos,
             size=default(size, [24, 100]),
             bg=default(bg, DEFER_BG),
+            border=border,
+            borderstyle=borderstyle,
             **kwargs,
         )
-
-        self.borderstyle = borderstyle
-        self.style.override_if_not_none("border", border)
 
         if bg is None:
             self.setBackground(

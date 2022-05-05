@@ -132,12 +132,10 @@ class DialogSubMenu(SubMenu):
     ):
         super(DialogSubMenu, self).__init__(name, menu, window, peng)
 
-        self.font = font if font is not None else self.menu.font
-        self.font_size = font_size if font_size is not None else self.menu.font_size
-        self.font_color = font_color if font_color is not None else self.menu.font_color
-        self.borderstyle = (
-            borderstyle if borderstyle is not None else self.menu.borderstyle
-        )
+        self.style.override_if_not_none("font", font)
+        self.style.override_if_not_none("font_size", font_size)
+        self.style.override_if_not_none("font_color", font_color)
+        self.style.override_if_not_none("borderstyle", borderstyle)
 
         self.multiline = multiline
 
@@ -429,12 +427,8 @@ class TextSubMenu(DialogSubMenu):
         # no button needed, timer does the rest
     }
 
-    def __init__(
-        self, name, menu, window, peng, borderstyle=None, timeout=10, **kwargs
-    ):
-        super(TextSubMenu, self).__init__(
-            name, menu, window, peng, borderstyle, **kwargs
-        )
+    def __init__(self, name, menu, window, peng, timeout=10, **kwargs):
+        super(TextSubMenu, self).__init__(name, menu, window, peng, **kwargs)
         self.timeout = timeout
 
     def on_enter(self, old):

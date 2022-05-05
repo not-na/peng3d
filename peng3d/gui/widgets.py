@@ -431,7 +431,6 @@ class BasicWidget(ActionDispatcher):
     font = default_property("style")
     font_size = default_property("style")
     font_color = default_property("style")
-    borderstyle = default_property("style")
 
     def getState(self) -> str:
         """
