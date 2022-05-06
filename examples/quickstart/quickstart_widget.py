@@ -27,19 +27,16 @@ peng = peng3d.Peng()
 
 peng.createWindow(caption="Hello World!", resizable=True)
 
-main_menu = peng3d.GUIMenu("main", peng.window, peng)
+main_menu = peng3d.GUIMenu("main", peng.window)
 peng.window.addMenu(main_menu)
 
 main_menu.setBackground([240, 240, 240])
 
-main_main = peng3d.SubMenu("main_sub", main_menu, peng.window, peng)
-main_menu.addSubMenu(main_main)
+main_main = peng3d.SubMenu("main_sub", main_menu)
 
 button = peng3d.Button(
     "btn",
     main_main,
-    peng.window,
-    peng,
     pos=[100, 100],
     size=[200, 100],
     label="Press me!",

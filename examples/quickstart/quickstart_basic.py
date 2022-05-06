@@ -27,7 +27,7 @@ peng = peng3d.Peng()
 
 peng.createWindow(caption="Hello World!", resizable=True)
 
-main_menu = peng3d.Menu("main", peng.window, peng)
+main_menu = peng3d.Menu("main", peng.window)
 peng.window.addMenu(main_menu)
 
 peng.window.changeMenu("main")

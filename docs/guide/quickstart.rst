@@ -1,7 +1,7 @@
 Quickstart
 ==========
 
-In this guide, we will learn how to create a simple GUI using ``peng3d``\ .
+In this guide, we'll learn how to create a simple GUI using ``peng3d``\ .
 
 .. seealso::
    For a more complex example, see :doc:`3d-app/index`\ .
@@ -21,7 +21,7 @@ First, here's the minimum example required to show anything with ``peng3d``::
 
    peng.createWindow(caption="Hello World!", resizable=True)
 
-   main_menu = peng3d.Menu("main", peng.window, peng)
+   main_menu = peng3d.Menu("main", peng.window)
    peng.window.addMenu(main_menu)
 
    peng.window.changeMenu("main")
@@ -57,14 +57,14 @@ arguments. Any arguments not recognized by ``peng3d`` are passed through to the 
 
 Now that we have created our window, we'll create our first menu and register it::
 
-   main_menu = peng3d.Menu("main", peng.window, peng)
+   main_menu = peng3d.Menu("main", peng.window)
    peng.window.addMenu(main_menu)
 
 The basic :py:class:`Menu` class is designed for layer-based rendering. We will later change
 this, since we want to create a GUI with widgets.
 
-Also, we always need to register menus (and later also submenus and widgets), so it is a
-good practice to always register a menu right after creating it.
+Also, we always need to register menus, so it is a good practice to always register a
+menu right after creating it.
 
 Lastly, we'll switch to our main menu and start the application::
 
@@ -95,7 +95,7 @@ First, lets switch to a more advanced :py:class:`GUIMenu` instead of the simple 
 
 To do this, we'll first change the class name::
 
-   main_menu = peng3d.GUIMenu("main", peng.window, peng)
+   main_menu = peng3d.GUIMenu("main", peng.window)
 
 Then, let's set the background to a more appealing color. For now, we'll use a light grey,
 although many more variants are possible. You could even use an image or a custom callback
@@ -109,10 +109,9 @@ will automatically inherit the background unless they overwrite it. This makes i
 to e.g. swap themes.
 
 If you try to run the app now, you'll notice that it won't start. This is because :py:class:`GUIMenu` menus
-require an active submenu at all times that they are active. So, let's add a submenu and register it::
+require an active submenu at all times that they are active. So, let's add a submenu::
 
    main_main = peng3d.SubMenu("main_sub", main_menu, peng.window, peng)
-   main_menu.addSubMenu(main_main)
 
 While it may not matter much in this simple app, we have chosen a name for this submenu
 that is different from the main menu. Any string can be used as a name, so feel free to
@@ -139,8 +138,6 @@ To do this, we'll have to first create the button and register it::
    button = peng3d.Button(
        "btn",
        main_main,
-       peng.window,
-       peng,
        pos=[100, 100],
        size=[200, 100],
        label="Press me!",
@@ -151,8 +148,8 @@ To do this, we'll have to first create the button and register it::
 The :py:class:`Button` class takes a lot of arguments, so let's go over them.
 
 In the first line, we pass the name of the button. Here, the same caveats apply as with submenu
-and menu names. We also pass the submenu this widget belongs to, as well as a reference
-to the window and :py:class:`Peng` singleton.
+and menu names. We also pass the submenu this widget belongs to, from which the window
+and :py:class:`Peng` singleton references are gathered.
 
 In the next two lines, we pass the position and size of the widget.
 
@@ -178,7 +175,7 @@ something whenever it is called::
 The :py:meth:`addAction()` method is quite flexible. It takes the name of the action
 as the first parameter, a function to call as the second parameter and passes all other arguments
 to each call of the function. So while we could write a one-line function to print out our
-message, we can just pass the argument to print. Obviously, you'll still have to write
+message, we can just pass the argument to ``print``. Obviously, you'll still have to write
 proper functions or methods for more complicated handlers.
 
 Now, let's take a look at our current app:
