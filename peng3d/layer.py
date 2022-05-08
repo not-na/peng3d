@@ -24,12 +24,22 @@
 
 __all__ = ["Layer", "Layer2D", "Layer3D", "LayerGroup", "LayerWorld"]
 
+import warnings
+
 try:
     import pyglet
 except ImportError:
     pass
 
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import peng3d
+    import peng3d.menu, peng3d.window
+
+
 from . import camera
+from .util.types import *
 
 
 class Layer(object):
@@ -41,16 +51,34 @@ class Layer(object):
     This class by itself does nothing, you will need to subclass it and override the :py:meth:`draw()` method.
     """
 
-    def __init__(self, menu, window, peng):
-        self.window = window
-        self.menu = menu
-        self.peng = peng
-        self.enabled = True
+    def __init__(
+        self,
+        menu: "peng3d.menu.BasicMenu",
+        window: Any = None,
+        peng: Any = None,
+    ):
+        if window is not None:
+            warnings.warn(
+                "Passing window to a layer is no longer necessary; the window parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,
+            )
+        if peng is not None:
+            warnings.warn(
+                "Passing peng to a layer is no longer necessary; the peng parameter will be removed in peng3d 2.0",
+                DeprecationWarning,
+                3,
+            )
 
-        self.should_redraw = True
+        self.window: "peng3d.window.PengWindow" = menu.window
+        self.menu: "peng3d.menu.BasicMenu" = menu
+        self.peng: "peng3d.peng.Peng" = menu.peng
+        self.enabled: bool = True
+
+        self.should_redraw: bool = True
 
     # Subclass overrides
-    def draw(self):
+    def draw(self) -> None:
         """
         Called when this layer needs to be drawn.
 
@@ -58,7 +86,7 @@ class Layer(object):
         """
         pass
 
-    def predraw(self):
+    def predraw(self) -> None:
         """
         Called before the :py:meth:`draw()` method is called.
 
@@ -68,7 +96,7 @@ class Layer(object):
         """
         pass
 
-    def postdraw(self):
+    def postdraw(self) -> None:
         """
         Called after the :py:meth:`draw()` method is called.
 
@@ -78,7 +106,7 @@ class Layer(object):
         """
         pass
 
-    def on_redraw(self):
+    def on_redraw(self) -> None:
         """
         Called whenever the Layer should redraw itself.
 
@@ -90,7 +118,7 @@ class Layer(object):
 
     # End subclass overrides
 
-    def redraw(self):
+    def redraw(self) -> None:
         """
         Call this to redraw the layer.
 
@@ -165,7 +193,13 @@ class Layer3D(Layer):
     This allows for easy building of Games using First-Person-Perspectives.
     """
 
-    def __init__(self, menu, window, peng, cam):
+    def __init__(
+        self,
+        menu: "peng3d.menu.BasicMenu",
+        window: Any = None,
+        peng: Any = None,
+        cam: camera.Camera = None,
+    ):
         super(Layer3D, self).__init__(menu, window, peng)
         if not isinstance(cam, camera.Camera):
             raise TypeError("cam must be of type Camera!")
@@ -192,7 +226,13 @@ class LayerGroup(Layer):
 
     """
 
-    def __init__(self, menu, window, peng, group):
+    def __init__(
+        self,
+        menu: "peng3d.menu.BasicMenu",
+        window: Any = None,
+        peng: Any = None,
+        group: pyglet.graphics.Group = None,
+    ):
         super(LayerGroup, self).__init__(menu, window, peng)
         if not isinstance(group, pyglet.graphics.Group):
             raise TypeError("group must be an instance of pyglet.graphics.Group")
@@ -220,7 +260,14 @@ class LayerWorld(Layer3D):
     Note that you may not set any of the attributes directly, or crashes and bugs may appear indirectly within a certain during future re-drawing of the screen.
     """
 
-    def __init__(self, menu, window, peng, world, viewname):
+    def __init__(
+        self,
+        menu: "peng3d.menu.BasicMenu",
+        window: Any = None,
+        peng: Any = None,
+        world=None,
+        viewname: str = None,
+    ):
         super(LayerWorld, self).__init__(
             menu, window, peng, world.getView(viewname).cam
         )
@@ -228,7 +275,7 @@ class LayerWorld(Layer3D):
         self.viewname = viewname
         self.view = self.world.getView(self.viewname)
 
-    def setView(self, name):
+    def setView(self, name: str) -> None:
         """
         Sets the view used to the specified ``name``\\ .
 

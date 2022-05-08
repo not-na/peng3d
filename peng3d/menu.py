@@ -28,8 +28,16 @@ import warnings
 import weakref
 import inspect
 
+from typing import TYPE_CHECKING, Any, Callable, List
+
+if TYPE_CHECKING:
+    import peng3d
+    import peng3d.window
+
+
 from .layer import Layer
 from .util import ActionDispatcher
+from .util.types import *
 
 
 class BasicMenu(ActionDispatcher):
@@ -50,7 +58,7 @@ class BasicMenu(ActionDispatcher):
 
     """
 
-    def __init__(self, name, window, peng=None):
+    def __init__(self, name: str, window: "peng3d.window.PengWindow", peng: Any = None):
         if peng is not None:
             warnings.warn(
                 "Passing peng to a menu is no longer necessary; the peng parameter will be removed in peng3d 2.0",
@@ -58,9 +66,9 @@ class BasicMenu(ActionDispatcher):
                 4,
             )
 
-        self.name = name
-        self.window = window
-        self.peng = window.peng
+        self.name: str = name
+        self.window: "peng3d.window.PengWindow" = window
+        self.peng: "peng3d.peng.Peng" = window.peng
 
         self.eventHandlers = {}
 
@@ -85,7 +93,7 @@ class BasicMenu(ActionDispatcher):
         self.worlds.append(world)
 
     # Event handlers
-    def handleEvent(self, event_type, args):
+    def handleEvent(self, event_type: str, args: Any) -> None:
         if event_type in self.eventHandlers:
             for whandler in self.eventHandlers[event_type]:
                 # This allows for proper collection of deleted handler methods by using weak references
@@ -100,7 +108,7 @@ class BasicMenu(ActionDispatcher):
 
     handleEvent.__noautodoc__ = True
 
-    def registerEventHandler(self, event_type, handler):
+    def registerEventHandler(self, event_type: str, handler: Callable):
         if event_type not in self.eventHandlers:
             self.eventHandlers[event_type] = []
         # Only a weak reference is kept
@@ -134,11 +142,11 @@ class Menu(BasicMenu):
     This subclass overrides the draw and __init__ method, so be sure to call them if you override them.
     """
 
-    def __init__(self, name, window, peng=None):
+    def __init__(self, name: str, window: "peng3d.window.PengWindow", peng: Any = None):
         super(Menu, self).__init__(name, window, peng)
-        self.layers = []
+        self.layers: List[Layer] = []
 
-    def addLayer(self, layer, z=-1):
+    def addLayer(self, layer: Layer, z: int = -1) -> None:
         """
         Adds a new layer to the stack, optionally at the specified z-value.
 
@@ -155,7 +163,7 @@ class Menu(BasicMenu):
         else:
             self.layers.insert(z, layer)
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draws the layers in the appropriate order.
 

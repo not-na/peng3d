@@ -3,7 +3,7 @@
 #
 #  version.py
 #
-#  Copyright 2016 notna <notna@apparat.org>
+#  Copyright 2016-2022 notna <notna@apparat.org>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,20 +24,20 @@
 
 __all__ = ["VERSION", "RELEASE"]
 
-VERSION: str = "1.11.0"
+VERSION: str = "1.12.0"
 """
-Full version number of format ``MAJOR.MINOR.BUGFIX`` where major is increased only on very major feature changes.
-Minor is changed if a new feature is introduced or an API change is made, while bugfix only changes if an important fix for a bug needs to be provided before the next release.
+Full version number, compliant with `semantic versioning <https://semver.org/>`_
 
 Used to display the version in the title of the documentation.
 
-.. seealso::
-   
-   See the `Distutils docs on version numbers <https://docs.python.org/2/distutils/setupscript.html#additional-meta-data>`_ for more information.
+Also used for the version in ``setup.py``\\ .
 
+.. versionchanged:: 1.10.0
+    Before 1.10.0, ``peng3d`` did not quite comply with semantic versioning.
+    This is mainly due to the ``a1`` suffix on most version names.
 """
 
-RELEASE: str = "1.11.0"
+RELEASE: str = "1.12.0"
 """
 Currently the same as :py:data:`VERSION`\\ .
 
