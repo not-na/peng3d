@@ -31,10 +31,21 @@ __all__ = [
     "default_property",
 ]
 
-import sys
+import operator
 import weakref
 import threading
-from typing import Callable, Tuple, List, Dict, Optional, Union, Any, TypeVar
+from typing import (
+    Callable,
+    Tuple,
+    List,
+    Dict,
+    Optional,
+    Union,
+    Any,
+    TypeVar,
+    Hashable,
+    Iterable,
+)
 
 try:
     import bidict
@@ -112,7 +123,7 @@ class default_property(object):
         parent: Optional[str] = None,
         name: Optional[str] = None,
         *,
-        parent_attr: Optional[str] = None
+        parent_attr: Optional[str] = None,
     ):
         if callable(parent):  # Catch common error
             raise TypeError(
@@ -176,6 +187,48 @@ class default_property(object):
 
         if self.parent_attr is None:
             self.parent_attr = self.name
+
+
+class calculated_from(object):
+    def __init__(self, *args: str):
+        self.dependencies: Callable[[object], Tuple[Hashable]] = operator.attrgetter(
+            *args
+        )
+        self.multiargs: bool = len(args) != 1
+        self.func: Optional[Callable[[...], T]] = None
+
+        # self.hashcode: Optional[int] = None
+        # self.cached_value: T = None
+
+    def __call__(self, func: Callable[[...], T]) -> Callable[[...], T]:
+        self.func = func
+        return self._call
+
+    def _get_hash(self, instance: object):
+        vals = self.dependencies(instance)
+
+        if self.multiargs:
+            return hash(
+                tuple(((tuple(val) if isinstance(val, list) else val) for val in vals))
+            )
+        else:
+            return hash(vals)
+
+    def _call(self, *args, **kwargs) -> T:
+        obj = args[0]
+        cur_hash = self._get_hash(obj)
+
+        hashcode = getattr(obj, f"__{self.func.__name__}_hashcode", None)
+        if hashcode is None or cur_hash != hashcode:
+            # Cache miss
+            result = self.func(*args, **kwargs)
+            setattr(obj, f"__{self.func.__name__}_hashcode", cur_hash)
+            setattr(obj, f"__{self.func.__name__}_cached", result)
+        else:
+            # Cache hit
+            result = getattr(obj, f"__{self.func.__name__}_cached")
+
+        return result
 
 
 class WatchingList(list):

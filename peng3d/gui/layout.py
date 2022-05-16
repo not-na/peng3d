@@ -27,9 +27,11 @@ __all__ = [
     "LayoutCell",
 ]
 
+from typing import Optional, Dict, Union, OrderedDict
+
 import peng3d
 from peng3d import util
-from peng3d.util import WatchingList
+from peng3d.util import WatchingList, calculated_from
 
 try:
     import pyglet
@@ -78,6 +80,7 @@ class GridLayout(Layout):
         self.bordersize = border
 
     @property
+    @calculated_from("size", "res")
     def cell_size(self):
         """
         Helper property defining the current size of cells in both x and y axis.
