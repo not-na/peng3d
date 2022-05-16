@@ -195,12 +195,12 @@ class calculated_from(object):
             *args
         )
         self.multiargs: bool = len(args) != 1
-        self.func: Optional[Callable[[...], T]] = None
+        self.func: Optional[Callable[[Any], T]] = None
 
         # self.hashcode: Optional[int] = None
         # self.cached_value: T = None
 
-    def __call__(self, func: Callable[[...], T]) -> Callable[[...], T]:
+    def __call__(self, func: Callable[[Any], T]) -> Callable[[Any], T]:
         self.func = func
         return self._call
 
