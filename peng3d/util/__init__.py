@@ -31,6 +31,7 @@ __all__ = [
     "default_property",
 ]
 
+import functools
 import operator
 import weakref
 import threading
@@ -190,6 +191,41 @@ class default_property(object):
 
 
 class calculated_from(object):
+    """
+    Decorator that caches method calls and property accesses based on the inputs they
+    are calculated from.
+
+    This decorator is designed to be used with methods and properties that are computationally
+    expensive to compute but only rarely change their return value.
+
+    Note that it is still necessary to access the input variables that a method uses, even
+    if the actual method call is skipped. This may reduce or even completely negate any caching
+    benefits for relatively quick methods.
+
+    All attributes that a method decorated with this decorator depends on must be hashable.
+    An exception is made for attributes that are lists of hashable values. They are treated
+    like tuples instead of lists.
+
+    This decorator supports both methods and properties. For methods, use as follows::
+
+        class A:
+            @calculated_from("a", "b")
+            def add(self):
+                return self.a + self.b
+
+    For properties, use as follows::
+
+        class A:
+            @property
+            @calculated_from("a", "b")
+            def sum(self):
+                return self.a + self.b
+
+    Note that while this decorator supports passing through arbitrary arguments to methods,
+    the value of those arguments is not considered when checking for cached results. It is
+    thus discouraged to use this decorator with methods that accept arguments (except ``self``\\ ).
+    """
+
     def __init__(self, *args: str):
         self.dependencies: Callable[[object], Tuple[Hashable]] = operator.attrgetter(
             *args
@@ -197,12 +233,14 @@ class calculated_from(object):
         self.multiargs: bool = len(args) != 1
         self.func: Optional[Callable[[Any], T]] = None
 
-        # self.hashcode: Optional[int] = None
-        # self.cached_value: T = None
-
-    def __call__(self, func: Callable[[Any], T]) -> Callable[[Any], T]:
+    def __call__(self, func: Callable[[], T]) -> Callable[[], T]:
         self.func = func
-        return self._call
+
+        @functools.wraps(func)
+        def f(*args, **kwargs):
+            return self._call(*args, **kwargs)
+
+        return f
 
     def _get_hash(self, instance: object):
         vals = self.dependencies(instance)
@@ -229,6 +267,43 @@ class calculated_from(object):
             result = getattr(obj, f"__{self.func.__name__}_cached")
 
         return result
+
+    @staticmethod
+    def clear_cache(obj: object, func_or_name: Union[str, Callable]) -> None:
+        """
+        Static method that can be used to clear the cache of a specific cached method or
+        property.
+
+        Use as follows::
+            class A:
+                @calculated_from("a", "b")
+                def add(self):
+                    return self.a + self.b + self.other_attribute
+
+            a = A()
+            # Some more code that changes a.other_attribute
+
+            # Clear the cache
+            calculated_from.clear_cache(a, "add")
+            # Alternatively (doesn't work with properties):
+            calculated_from.clear_cache(a, a.add)
+
+        :param obj: Instance whose cache for the given method should be cleared
+        :type obj: object
+        :param func_or_name: Name of method/property or method itself
+        :type func_or_name: Union[str, Callable]
+        :return: None
+        :rtype: None
+        """
+        if isinstance(func_or_name, str):
+            name = func_or_name
+        else:
+            name = func_or_name.__name__
+
+        for var in ["hashcode", "cached"]:
+            attrname = f"__{name}_{var}"
+            if hasattr(obj, attrname):
+                delattr(obj, attrname)
 
 
 class WatchingList(list):

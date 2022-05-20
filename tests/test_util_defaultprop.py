@@ -213,3 +213,14 @@ def test_defprop_autoparent():
 
     assert a.attr == "B"
     assert a.attr == b.attr
+
+
+def test_defprop_missingname():
+    class A:
+        attr = default_property()
+
+    a = A()
+    with pytest.raises(TypeError) as excinfo:
+        a.attr
+
+    assert "Missing required argument" in str(excinfo.value)

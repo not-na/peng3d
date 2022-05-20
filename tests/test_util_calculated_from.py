@@ -113,3 +113,48 @@ def test_nested():
     a.b.a = [3, 4]
     assert a.a[0] is a.b.a
     assert a.a[0] == [3, 4]
+
+
+def test_method():
+    class A:
+        @calculated_from("b")
+        def a(self):
+            return self.b
+
+    a = A()
+
+    a.b = "a"
+    assert a.a() == a.b == "a"
+    assert a.a() == "a"
+
+    a.b = "b"
+    assert a.a() == a.b == "b"
+    assert a.a() == "b"
+
+
+def test_clear_cache():
+    class A:
+        @calculated_from("b")
+        def a(self):
+            return self.b + self.c
+
+    a = A()
+
+    a.b = "a"
+    a.c = "a"
+    assert a.a() == a.b + a.c == "aa"
+
+    a.b = "b"
+    assert a.a() == "ba"
+
+    a.c = "b"
+    assert a.a() == "ba"
+
+    calculated_from.clear_cache(a, a.a)
+    assert a.a() == "bb"
+
+    a.c = "c"
+    assert a.a() == "bb"
+
+    calculated_from.clear_cache(a, "a")
+    assert a.a() == "bc"
