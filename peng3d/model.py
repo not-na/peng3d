@@ -220,7 +220,7 @@ class Material(object):
 
         Should be faster than getting each value directly. Useful if all of these values are needed.
         """
-        return self.rsrcMgr.getTex(self, texname, self.texcat)
+        return self.rsrcMgr.getTex(self, self.texname, self.texcat)
 
     def transformTexCoords(self, data, texcoords, dims=2):
         """
@@ -525,7 +525,7 @@ class Region(object):
                 )
         else:
             self.enable_tex = False
-            self.tex_coords = [0] * (self.tex_dims * (len(self.vertices) / self.dims))
+            self.tex_coords = [0] * (self.tex_dims * (len(self.vertices) // self.dims))
 
     def getVertices(self, data):
         """
@@ -860,7 +860,7 @@ class Animation(object):
                 # Should not be possible, but still
                 raise ValueError(
                     "Invalid animation type %s for animation %s during tick"
-                    % (self.atype, name)
+                    % (self.atype, self.name)
                 )
 
 

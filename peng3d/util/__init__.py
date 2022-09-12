@@ -288,6 +288,9 @@ class calculated_from(object):
             # Alternatively (doesn't work with properties):
             calculated_from.clear_cache(a, a.add)
 
+        Note that trying to clear the cache of a method that isn't actually cached simply
+        does nothing.
+
         :param obj: Instance whose cache for the given method should be cleared
         :type obj: object
         :param func_or_name: Name of method/property or method itself
