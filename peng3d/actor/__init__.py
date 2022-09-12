@@ -25,6 +25,7 @@
 __all__ = ["Actor", "RotatableActor", "RotateableActor", "Controller"]
 
 import uuid as uuidm
+import math
 
 
 class Controller(object):
@@ -176,9 +177,10 @@ class RotatableActor(Actor):
     This subclass adds a rotational value to the actor and a method to move the actor along the current rotation.
     """
 
-    def __init__(self, peng, world, uuid=None, pos=[0, 0, 0], rot=[0, 0]):
+    def __init__(self, peng, world, uuid=None, pos=[0, 0, 0], rot=[0, 0], roll=0):
         super(RotatableActor, self).__init__(peng, world, uuid, pos)
         self._rot = rot
+        self._roll = roll
 
     def move(self, dist):
         """
@@ -237,6 +239,15 @@ class RotatableActor(Actor):
         x %= 360
         self._rot = x, y
         self.on_rotate(old)
+
+    @property
+    def roll(self):
+        return self._roll
+
+    @roll.setter
+    def roll(self, value):
+        value %= 360
+        self._roll = value
 
 
 RotateableActor = RotatableActor  # for people that spell it right

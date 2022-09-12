@@ -40,7 +40,8 @@ __all__ = [
 import time
 
 import math
-from math import sqrt, cos, sin
+
+from .actor import RotateableActor
 
 try:
     from itertools import zip_longest
@@ -885,10 +886,26 @@ class JSONModelGroup(pyglet.graphics.Group):
         """
         Sets the state required for this actor.
 
-        Currently translates the matrix to the position of the actor.
+        Currently translates the matrix to the position of the actor and applies yaw,
+        pitch and roll for :py:class:`RotateableActor` instances.
         """
+        glPushMatrix()
         x, y, z = self.obj.pos
         glTranslatef(x, y, z)
+
+        if isinstance(self.obj, RotateableActor):
+            # Apply rotation
+            yaw, pitch = self.obj.rot
+            roll = self.obj.roll
+
+            # First, apply yaw
+            glRotatef(yaw, 0, 1, 0)
+
+            # Next, apply pitch
+            glRotatef(pitch, 0, 0, 1)
+
+            # Last, apply roll
+            glRotatef(roll, 1, 0, 0)
 
     def unset_state(self):
         """
@@ -896,8 +913,7 @@ class JSONModelGroup(pyglet.graphics.Group):
 
         Currently resets the matrix to its previous translation.
         """
-        x, y, z = self.obj.pos
-        glTranslatef(-x, -y, -z)
+        glPopMatrix()
 
     def __hash__(self):
         # Internal method to allow unification of multiple groups of the same actor
