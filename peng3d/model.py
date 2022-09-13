@@ -1013,7 +1013,7 @@ class Model(object):
             # Assume all initialization is missing, simply reinitialize
             self.create(obj, cache=True)
 
-    def create(self, obj, cache=False):
+    def create(self, obj, cache=False, parent_group=None):
         """
         Initializes per-actor data on the given object for this model.
 
@@ -1037,7 +1037,7 @@ class Model(object):
         moddata = data["_modelcache"]
 
         # Model group, for pos of entity
-        moddata["group"] = JSONModelGroup(self, data, obj)
+        moddata["group"] = JSONModelGroup(self, data, obj, parent_group)
         modgroup = moddata["group"]
 
         if not hasattr(obj, "batch3d"):

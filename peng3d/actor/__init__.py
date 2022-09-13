@@ -104,7 +104,7 @@ class Actor(object):
         """
         self.controllers.append(controller)
 
-    def setModel(self, model):
+    def setModel(self, model, *args, **kwargs):
         """
         Sets the model this actor should use when drawing.
 
@@ -113,7 +113,7 @@ class Actor(object):
         if self.model is not None:
             self.model.cleanup(self)
         self.model = model
-        model.create(self)
+        model.create(self, *args, **kwargs)
 
     def setAnimation(self, animation, transition=None, force=False):
         """
