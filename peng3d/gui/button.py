@@ -260,7 +260,7 @@ class Button(Widget):
         self.font = font
         self.font_size = font_size
         self.font_color = font_color
-        self.borderstyle = borderstyle
+        self.style.override_if_not_none("borderstyle", borderstyle)
         self.style.override_if_not_none("border", border)
 
         if bg is None:
@@ -1044,6 +1044,7 @@ class CheckboxBackground(ButtonBackground):
     def redraw_bg(self):
         # Convenience variables
         sx, sy = self.widget.size
+        sx = sy = min(sx, sy)
         x, y = self.widget.pos
         bx, by = self.border
 
@@ -1198,7 +1199,7 @@ class Checkbox(ToggleButton):
         bg=None,
         borderstyle=None,
         label="Checkbox",
-        checkcolor=[240, 119, 70],
+        checkcolor=(240, 119, 70),
         font_size=None,
         font=None,
         font_color=None,
@@ -1221,7 +1222,7 @@ class Checkbox(ToggleButton):
         )
 
         if bg is None:
-            self.setBackground(CheckboxBackground(self, borderstyle, checkcolor))
+            self.setBackground(CheckboxBackground(self, self.borderstyle, checkcolor))
 
     def redraw_label(self):
         """
@@ -1233,6 +1234,7 @@ class Checkbox(ToggleButton):
 
         # Label position
         self._label.anchor_x = "left"
-        self._label.x = x + sx / 2.0 + sx
-        self._label.y = y + sy / 2.0 + sy * 0.15
+        self._label.anchor_y = "center"
+        self._label.x = x + min(sx, sy) * 1.2
+        self._label.y = y + sy / 2.0
         self._label._update()  # Needed to prevent the label from drifting to the top-left after resizing by odd amounts

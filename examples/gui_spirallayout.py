@@ -32,7 +32,7 @@ import peng3d
 langs = ["en", "de", "__"]
 
 
-MAX_LEVELS = 8
+MAX_LEVELS = 12
 # WARNING: a high max level may cause performance issues
 
 # Thanks to @gunthobald for help with the formula for swapping buttons and sub-levels

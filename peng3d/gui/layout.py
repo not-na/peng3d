@@ -21,13 +21,9 @@
 #  along with peng3d.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = [
-    "Layout",
-    "GridLayout",
-    "LayoutCell",
-]
+__all__ = ["Layout", "GridLayout", "LayoutCell", "ResponsiveLayout", "BREAKPOINTS"]
 
-from typing import Optional, Dict, Union, OrderedDict
+from typing import Optional, Dict, Union, OrderedDict, Tuple, List
 
 import peng3d
 from peng3d import util
@@ -292,3 +288,209 @@ class _GridCell(LayoutCell):
         sx, sy = sxc * csx - dx * self.border, sxy * csy - dy * self.border
 
         return sx, sy
+
+
+BREAKPOINTS = {
+    # Bootstrap breakpoints
+    "xs": 0,
+    "sm": 576,
+    "md": 768,
+    "lg": 992,
+    "xl": 1200,
+    "xxl": 1400,
+    # Common screen resolutions
+    "vga": 640,  # AKA 640p
+    "hd": 720,  # AKA 720p
+    "fhd": 1920,  # AKA 1080p
+    "qhd": 2560,  # AKA 1440p
+    "uhd": 3840,  # AKA 4k/2160p
+}
+
+
+class ResponsiveLayout(Layout):
+    def __init__(self, peng, parent, cols: int = 12):
+        super().__init__(peng, parent)
+
+        self.cols: int = cols
+        self.rows: Dict[Union[str, int], "_ResponsiveRow"] = {}
+
+    def row(
+        self, name: Optional[Union[str, int]] = None, height: Optional[float] = None
+    ) -> "_ResponsiveRow":
+        if name is None:
+            name = 0
+            while name in self.rows:
+                name += 1
+
+        if name not in self.rows:
+            self.rows[name] = _ResponsiveRow(self, name, height)
+
+        return self.rows[name]
+
+
+class _ResponsiveRow(object):
+    def __init__(
+        self, layout: ResponsiveLayout, name: Union[str, int], height: Optional[float]
+    ):
+        self.layout: ResponsiveLayout = layout
+        self.name = name
+        self._height = height
+
+        self.cols: Dict[Union[str, int], "_ResponsiveCol"] = {}
+
+    def col(
+        self, name: Optional[Union[str, int]] = None, **kwargs: float
+    ) -> "_ResponsiveCol":
+        if name is None:
+            name = 0
+            while name in self.cols:
+                name += 1
+
+        if name not in self.cols:
+            self.cols[name] = _ResponsiveCol(self.layout, self, name, kwargs)
+
+        # Invalidate layout cache whenever a new col is added
+        calculated_from.clear_cache(self, "col_layout")
+
+        return self.cols[name]
+
+    @property
+    @calculated_from("layout.cols", "layout.size")
+    # NOTE: self.cols is not in dependencies
+    def col_layout(
+        self,
+    ) -> Tuple[
+        Tuple[Tuple[Tuple[float, float, Union[str, int]], ...], ...],
+        Dict[Union[str, int], Tuple[int, float, float]],
+    ]:
+        rows = []
+        cur_row = []
+        cols_in_row = 0
+        cols = {}
+
+        for name, col in self.cols.items():
+            col_width = col.col_width
+            if cols_in_row + col_width <= self.layout.cols:
+                # Fits in the current row, add it
+                cols_in_row += col_width
+                cur_row.append((col_width, name))
+            else:
+                # Doesn't fit, calculate out the current row and start a new one
+                rows.append(self._calc_row(cur_row, cols_in_row, cols, rows))
+
+                cols_in_row = col_width
+                cur_row = [(col_width, name)]
+
+        if len(cur_row) > 0:
+            rows.append(self._calc_row(cur_row, cols_in_row, cols, rows))
+
+        return tuple(rows), cols
+
+    def _calc_row(self, cur_row, cols_in_row, cols, rows):
+        out_row = []
+        cur_perc = 0.0
+        for cw, n in cur_row:
+            perc = cw / cols_in_row
+            out_row.append((cur_perc, cur_perc + perc, n))
+            cols[n] = (len(rows), cur_perc, cur_perc + perc)
+            cur_perc += perc
+
+        return tuple(out_row)
+
+    @property
+    def base_pos(self) -> Tuple[float, float]:
+        bx, by = self.layout.pos
+
+        x = bx
+
+        rows = list(self.layout.rows.values())
+        upper_height = sum(
+            r.height * len(r.col_layout[0]) for r in rows[: rows.index(self)]
+        )
+        y = self.layout.size[1] + by - upper_height
+
+        return x, y
+
+    @property
+    def height(self) -> float:
+        if self._height is not None:
+            return self._height
+
+        # TODO: auto-determine height
+        raise NotImplementedError("Auto-height is not yet supported")
+
+
+class _ResponsiveCol(LayoutCell):
+    def __init__(
+        self,
+        layout: ResponsiveLayout,
+        row: _ResponsiveRow,
+        name: Union[str, int],
+        sizes: Dict[str, float],
+    ):
+        self.layout = layout
+        self.row: _ResponsiveRow = row
+        self.name = name
+        self.sizes = sizes
+
+    @property
+    def sizes(self) -> Dict[str, float]:
+        return self._sizes
+
+    @sizes.setter
+    def sizes(self, val):
+        # Validate given breakpoints and their sizes
+        for bp, size in val.items():
+            if bp not in BREAKPOINTS:
+                raise ValueError(
+                    f"Invalid breakpoint, '{bp}' is not a known breakpoint!"
+                )
+            if size > self.layout.cols:
+                raise ValueError(
+                    "A responsive column cannot have a size larger than the total amount of columns"
+                )
+
+        # Clear col_width cache and update internal copy
+        self._sizes = val
+        calculated_from.clear_cache(self, "col_width")
+
+    @property
+    @calculated_from("layout.size")
+    # NOTE: _sizes not in dependencies, since sizes invalidates the cache of this property whenever it is changed
+    def col_width(self) -> float:
+        width = self.layout.size[0]
+
+        out = None
+        # Find the largest breakpoint that is still larger or equal to the width
+        for bp in self._sizes.keys():
+            if width >= BREAKPOINTS[bp] and (
+                out is None or BREAKPOINTS[bp] >= BREAKPOINTS[out]
+            ):
+                out = bp
+
+        if out is None:
+            return 1
+        return self._sizes[out]
+
+    @property
+    # @calculated_from("row.col_layout", "row.base_pos", "row.height", "layout.size")
+    def pos(self) -> Tuple[float, float]:
+        rows, cols = self.row.col_layout
+        row, start, end = cols[self.name]
+
+        bx, by = self.row.base_pos
+
+        x = bx + start * self.layout.size[0]
+        y = (
+            by - (row + 1) * self.row.height
+        )  # TODO: add support for per-subrow dynamic height
+
+        return x, y
+
+    @property
+    # @calculated_from("row.col_layout", "row.height", "layout.size")
+    def size(self) -> Tuple[float, float]:
+        rows, cols = self.row.col_layout
+        row, start, end = cols[self.name]
+
+        return self.layout.size[0] * (end - start), self.row.height

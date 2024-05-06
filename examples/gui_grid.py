@@ -77,10 +77,18 @@ def createGUI():
     btn2 = peng3d.gui.Button(
         "btn2",
         s_start,
-        pos=layout.get_cell([1, 2], [2, 1]),
+        pos=layout.get_cell([1, 2], [1, 1]),
         label="Button 2",
     )
     s_start.addWidget(btn2)
+
+    layout2 = peng3d.gui.layout.GridLayout(
+        peng, layout.get_cell([2, 2], [1, 1]), [1, 2], [10, 10]
+    )
+    check = peng3d.gui.Checkbox(
+        "checkbox", s_start, pos=layout2.get_cell([0, 0], [1, 1]), label="Checkbox"
+    )
+    s_start.addWidget(check)
 
     btn3 = peng3d.gui.FramedImageButton(
         "btn3",

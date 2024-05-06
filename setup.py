@@ -33,7 +33,6 @@
 # import peng3d.version as ver
 
 import os
-import sys
 import runpy
 
 ver = runpy.run_path(os.path.join("peng3d", "version.py"))
@@ -60,6 +59,7 @@ setup(
     install_requires=[
         "pyglet>=1.5.23",
         "bidict>=0.19.0",
+        "typing-extensions~=4.2.0",
     ],
     provides=["peng3d"],
     setup_requires=["pytest-runner"],
@@ -82,6 +82,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Games/Entertainment",
         "Topic :: Multimedia :: Graphics :: 3D Rendering",
         "Topic :: Software Development :: Libraries :: Python Modules",
