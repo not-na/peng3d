@@ -1,7 +1,7 @@
 bidict>=0.19.0
 pyglet<2
 tox==3.14.6
-virtualenv==20.0.16
+virtualenv==20.26.6
 pytest~=6.2.5
 pytest-cov~=3.0.0
 py>=1.8.1
